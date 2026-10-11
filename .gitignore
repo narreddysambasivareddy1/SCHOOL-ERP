@@ -1,0 +1,23 @@
+# Secrets
+.env
+*.env.local
+
+# .NET
+**/bin/
+**/obj/
+**/*.user
+**/.vs/
+**/TestResults/
+
+# Angular / Node
+**/node_modules/
+**/dist/
+**/.angular/
+**/coverage/
+
+# Docker
+nginx/certs/
+
+# OS
+.DS_Store
+Thumbs.db
