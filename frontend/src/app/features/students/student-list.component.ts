@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
@@ -155,9 +155,11 @@ export class StudentListComponent implements OnInit {
     this.searchTimer = setTimeout(() => { this.page = 1; this.load(); }, 400);
   }
 
-  onLazy(event: { first: number; rows: number }) {
-    this.page = Math.floor(event.first / event.rows) + 1;
-    this.pageSize = event.rows;
+  onLazy(event: TableLazyLoadEvent) {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize;
+    this.page = Math.floor(first / rows) + 1;
+    this.pageSize = rows;
     this.load();
   }
 

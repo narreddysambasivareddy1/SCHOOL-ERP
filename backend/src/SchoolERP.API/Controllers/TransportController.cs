@@ -11,7 +11,7 @@ public record CreateRouteRequest(string Name, IEnumerable<RouteStopRequest> Stop
 public record RouteStopRequest(string Name, int StopOrder, TimeOnly? PickupTime, double? Latitude, double? Longitude);
 
 [ApiController]
-[Route("api/schools/{schoolId}/transport")]
+[Microsoft.AspNetCore.Mvc.Route("api/schools/{schoolId}/transport")]
 [Authorize]
 public class TransportController(AppDbContext db) : ControllerBase
 {
@@ -35,7 +35,7 @@ public class TransportController(AppDbContext db) : ControllerBase
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
 
-        var route = new Route
+        var route = new SchoolERP.Domain.Entities.Route
         {
             TenantId = tenantId, SchoolId = schoolId, Name = req.Name, CreatedBy = actor,
             Stops = req.Stops.Select(s => new RouteStop

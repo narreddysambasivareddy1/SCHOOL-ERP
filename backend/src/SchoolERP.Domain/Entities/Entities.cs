@@ -1,3 +1,5 @@
+using SchoolERP.Domain.Enums;
+
 namespace SchoolERP.Domain.Entities;
 
 public abstract class BaseEntity

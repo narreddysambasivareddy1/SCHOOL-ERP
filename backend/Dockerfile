@@ -6,12 +6,13 @@ COPY ["src/SchoolERP.Domain/SchoolERP.Domain.csproj", "src/SchoolERP.Domain/"]
 COPY ["src/SchoolERP.Infrastructure/SchoolERP.Infrastructure.csproj", "src/SchoolERP.Infrastructure/"]
 RUN dotnet restore "src/SchoolERP.API/SchoolERP.API.csproj"
 COPY . .
-RUN dotnet publish "src/SchoolERP.API/SchoolERP.API.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "src/SchoolERP.API/SchoolERP.API.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN groupadd --system appgroup && useradd --system --gid appgroup appuser
 COPY --from=build /app/publish .
+RUN chown -R appuser:appgroup /app
 USER appuser
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080

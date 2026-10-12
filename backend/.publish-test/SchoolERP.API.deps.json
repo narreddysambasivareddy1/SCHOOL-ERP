@@ -1,0 +1,638 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "SchoolERP.API/1.0.0": {
+        "dependencies": {
+          "AspNetCore.HealthChecks.NpgSql": "8.0.2",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.12",
+          "SchoolERP.Application": "1.0.0",
+          "SchoolERP.Infrastructure": "1.0.0",
+          "Serilog.AspNetCore": "9.0.0",
+          "Serilog.Sinks.Console": "6.1.1",
+          "Swashbuckle.AspNetCore": "7.3.2"
+        },
+        "runtime": {
+          "SchoolERP.API.dll": {}
+        }
+      },
+      "AspNetCore.HealthChecks.NpgSql/8.0.2": {
+        "dependencies": {
+          "Npgsql": "10.0.3"
+        },
+        "runtime": {
+          "lib/net8.0/HealthChecks.NpgSql.dll": {
+            "assemblyVersion": "8.0.2.0",
+            "fileVersion": "8.0.2.0"
+          }
+        }
+      },
+      "BCrypt.Net-Next/4.2.1": {
+        "runtime": {
+          "lib/net10.0/BCrypt-Net-Next.dll": {
+            "assemblyVersion": "4.2.1.0",
+            "fileVersion": "4.2.1.0"
+          }
+        }
+      },
+      "FluentValidation/11.12.0": {
+        "runtime": {
+          "lib/net8.0/FluentValidation.dll": {
+            "assemblyVersion": "11.0.0.0",
+            "fileVersion": "11.12.0.0"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.12": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll": {
+            "assemblyVersion": "10.0.12.0",
+            "fileVersion": "10.0.1226.42308"
+          }
+        }
+      },
+      "Microsoft.Bcl.Cryptography/10.0.2": {
+        "runtime": {
+          "lib/net10.0/Microsoft.Bcl.Cryptography.dll": {
+            "assemblyVersion": "10.0.0.2",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "Microsoft.EntityFrameworkCore/10.0.12": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.12"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {
+            "assemblyVersion": "10.0.12.0",
+            "fileVersion": "10.0.1226.42308"
+          }
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Abstractions/10.0.12": {
+        "runtime": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
+            "assemblyVersion": "10.0.12.0",
+            "fileVersion": "10.0.1226.42308"
+          }
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Relational/10.0.4": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.12"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {
+            "assemblyVersion": "10.0.4.0",
+            "fileVersion": "10.0.426.12010"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyModel/9.0.0": {
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.DependencyModel.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52809"
+          }
+        }
+      },
+      "Microsoft.IdentityModel.Abstractions/8.19.2": {
+        "runtime": {
+          "lib/net10.0/Microsoft.IdentityModel.Abstractions.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "Microsoft.IdentityModel.JsonWebTokens/8.19.2": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Tokens": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "Microsoft.IdentityModel.Logging/8.19.2": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Abstractions": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.IdentityModel.Logging.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "Microsoft.IdentityModel.Protocols/8.19.2": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Tokens": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.IdentityModel.Protocols.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "Microsoft.IdentityModel.Protocols.OpenIdConnect/8.19.2": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Protocols": "8.19.2",
+          "System.IdentityModel.Tokens.Jwt": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "Microsoft.IdentityModel.Tokens/8.19.2": {
+        "dependencies": {
+          "Microsoft.Bcl.Cryptography": "10.0.2",
+          "Microsoft.IdentityModel.Logging": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.IdentityModel.Tokens.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "Microsoft.OpenApi/1.6.22": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.OpenApi.dll": {
+            "assemblyVersion": "1.6.22.0",
+            "fileVersion": "1.6.22.0"
+          }
+        }
+      },
+      "Npgsql/10.0.3": {
+        "runtime": {
+          "lib/net10.0/Npgsql.dll": {
+            "assemblyVersion": "10.0.3.0",
+            "fileVersion": "10.0.3.0"
+          }
+        }
+      },
+      "Npgsql.EntityFrameworkCore.PostgreSQL/10.0.3": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.12",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.4",
+          "Npgsql": "10.0.3"
+        },
+        "runtime": {
+          "lib/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "assemblyVersion": "10.0.3.0",
+            "fileVersion": "10.0.3.0"
+          }
+        }
+      },
+      "Serilog/4.2.0": {
+        "runtime": {
+          "lib/net9.0/Serilog.dll": {
+            "assemblyVersion": "4.2.0.0",
+            "fileVersion": "4.2.0.0"
+          }
+        }
+      },
+      "Serilog.AspNetCore/9.0.0": {
+        "dependencies": {
+          "Serilog": "4.2.0",
+          "Serilog.Extensions.Hosting": "9.0.0",
+          "Serilog.Formatting.Compact": "3.0.0",
+          "Serilog.Settings.Configuration": "9.0.0",
+          "Serilog.Sinks.Console": "6.1.1",
+          "Serilog.Sinks.Debug": "3.0.0",
+          "Serilog.Sinks.File": "6.0.0"
+        },
+        "runtime": {
+          "lib/net9.0/Serilog.AspNetCore.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
+          }
+        }
+      },
+      "Serilog.Extensions.Hosting/9.0.0": {
+        "dependencies": {
+          "Serilog": "4.2.0",
+          "Serilog.Extensions.Logging": "9.0.0"
+        },
+        "runtime": {
+          "lib/net9.0/Serilog.Extensions.Hosting.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
+          }
+        }
+      },
+      "Serilog.Extensions.Logging/9.0.0": {
+        "dependencies": {
+          "Serilog": "4.2.0"
+        },
+        "runtime": {
+          "lib/net9.0/Serilog.Extensions.Logging.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
+          }
+        }
+      },
+      "Serilog.Formatting.Compact/3.0.0": {
+        "dependencies": {
+          "Serilog": "4.2.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Formatting.Compact.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.0.0.0"
+          }
+        }
+      },
+      "Serilog.Settings.Configuration/9.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyModel": "9.0.0",
+          "Serilog": "4.2.0"
+        },
+        "runtime": {
+          "lib/net9.0/Serilog.Settings.Configuration.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Console/6.1.1": {
+        "dependencies": {
+          "Serilog": "4.2.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
+            "assemblyVersion": "6.1.1.0",
+            "fileVersion": "6.1.1.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Debug/3.0.0": {
+        "dependencies": {
+          "Serilog": "4.2.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Debug.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.0.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.File/6.0.0": {
+        "dependencies": {
+          "Serilog": "4.2.0"
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.File.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.0.0"
+          }
+        }
+      },
+      "Swashbuckle.AspNetCore/7.3.2": {
+        "dependencies": {
+          "Swashbuckle.AspNetCore.Swagger": "7.3.2",
+          "Swashbuckle.AspNetCore.SwaggerGen": "7.3.2",
+          "Swashbuckle.AspNetCore.SwaggerUI": "7.3.2"
+        }
+      },
+      "Swashbuckle.AspNetCore.Swagger/7.3.2": {
+        "dependencies": {
+          "Microsoft.OpenApi": "1.6.22"
+        },
+        "runtime": {
+          "lib/net9.0/Swashbuckle.AspNetCore.Swagger.dll": {
+            "assemblyVersion": "7.3.2.0",
+            "fileVersion": "7.3.2.1170"
+          }
+        }
+      },
+      "Swashbuckle.AspNetCore.SwaggerGen/7.3.2": {
+        "dependencies": {
+          "Swashbuckle.AspNetCore.Swagger": "7.3.2"
+        },
+        "runtime": {
+          "lib/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll": {
+            "assemblyVersion": "7.3.2.0",
+            "fileVersion": "7.3.2.1170"
+          }
+        }
+      },
+      "Swashbuckle.AspNetCore.SwaggerUI/7.3.2": {
+        "runtime": {
+          "lib/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll": {
+            "assemblyVersion": "7.3.2.0",
+            "fileVersion": "7.3.2.1170"
+          }
+        }
+      },
+      "System.IdentityModel.Tokens.Jwt/8.19.2": {
+        "dependencies": {
+          "Microsoft.IdentityModel.JsonWebTokens": "8.19.2",
+          "Microsoft.IdentityModel.Tokens": "8.19.2"
+        },
+        "runtime": {
+          "lib/net10.0/System.IdentityModel.Tokens.Jwt.dll": {
+            "assemblyVersion": "8.19.2.0",
+            "fileVersion": "8.19.2.26195"
+          }
+        }
+      },
+      "SchoolERP.Application/1.0.0": {
+        "dependencies": {
+          "FluentValidation": "11.12.0",
+          "SchoolERP.Domain": "1.0.0"
+        },
+        "runtime": {
+          "SchoolERP.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SchoolERP.Domain/1.0.0": {
+        "runtime": {
+          "SchoolERP.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SchoolERP.Infrastructure/1.0.0": {
+        "dependencies": {
+          "BCrypt.Net-Next": "4.2.1",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.12",
+          "Microsoft.EntityFrameworkCore": "10.0.12",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.3",
+          "SchoolERP.Application": "1.0.0",
+          "SchoolERP.Domain": "1.0.0"
+        },
+        "runtime": {
+          "SchoolERP.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SchoolERP.API/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AspNetCore.HealthChecks.NpgSql/8.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1R0JGr80PkUd0I2HWaunAFcaMPJDhD1qMLYWEIVBkFRdSXrw7KkI5ooJ1hePqk0p/a2IWaqW3+CuxN3qv+yhQA==",
+      "path": "aspnetcore.healthchecks.npgsql/8.0.2",
+      "hashPath": "aspnetcore.healthchecks.npgsql.8.0.2.nupkg.sha512"
+    },
+    "BCrypt.Net-Next/4.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-cJ1Zaad8sBSQJq3QBSPmFuLq0XDi9ys0Dk5S11gakZ2qdFWC1aaRLZ7sqOLQjGJYhgIK3LW3TixJswM6+CVbyw==",
+      "path": "bcrypt.net-next/4.2.1",
+      "hashPath": "bcrypt.net-next.4.2.1.nupkg.sha512"
+    },
+    "FluentValidation/11.12.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Wim3rI1nGZKO5S/lgJ0ZpD3W/uu1CECoJ8pETzC8av34ejr+jCDr4paKhSJRG0Ltcv8UjdxtYCynG+RUEfEUDA==",
+      "path": "fluentvalidation/11.12.0",
+      "hashPath": "fluentvalidation.11.12.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-DeE+Bq2OqB3FikFkZk+7gFBeLOQhkSolejLrbi+a9zpfvXtW1Ff6Nd6DIvHXIm+pc4aM4+52vDy3jnuau0qoUQ==",
+      "path": "microsoft.aspnetcore.authentication.jwtbearer/10.0.12",
+      "hashPath": "microsoft.aspnetcore.authentication.jwtbearer.10.0.12.nupkg.sha512"
+    },
+    "Microsoft.Bcl.Cryptography/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LG9Yll3B5aNpxv0+D47g6LiOiKBIlodhcHdQwcYzo8VeexFLGqx5ymetmA2aBRyo9cCcWsQWrFsdbsr8LvmWDw==",
+      "path": "microsoft.bcl.cryptography/10.0.2",
+      "hashPath": "microsoft.bcl.cryptography.10.0.2.nupkg.sha512"
+    },
+    "Microsoft.EntityFrameworkCore/10.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-e7OrVN8U5yr4kuwdTHWBHGVQIVsGfMkAr0Ej1/BnrS989Q0XBVANpIzNZ2bc1GvMZ0/XwMt5InTnmKskxGy99Q==",
+      "path": "microsoft.entityframeworkcore/10.0.12",
+      "hashPath": "microsoft.entityframeworkcore.10.0.12.nupkg.sha512"
+    },
+    "Microsoft.EntityFrameworkCore.Abstractions/10.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kDrux7T6C3V/YYYe2LXr7x6AEsVyq5Y2YoTE9er1SwbDtap3z1g8RgxNh5eKQVyB4T+DKvBBJ4Ezd/VZzJQJZg==",
+      "path": "microsoft.entityframeworkcore.abstractions/10.0.12",
+      "hashPath": "microsoft.entityframeworkcore.abstractions.10.0.12.nupkg.sha512"
+    },
+    "Microsoft.EntityFrameworkCore.Relational/10.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-DOTjTHy93W3TwpMLM4SCm0n57Sc0Jj3+m2S6LSTstKyBB34eT1UouaMS19mpWwvtj42+sRiEjA3+rOTNoNzXFQ==",
+      "path": "microsoft.entityframeworkcore.relational/10.0.4",
+      "hashPath": "microsoft.entityframeworkcore.relational.10.0.4.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyModel/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-saxr2XzwgDU77LaQfYFXmddEDRUKHF4DaGMZkNB3qjdVSZlax3//dGJagJkKrGMIPNZs2jVFXITyCCR6UHJNdA==",
+      "path": "microsoft.extensions.dependencymodel/9.0.0",
+      "hashPath": "microsoft.extensions.dependencymodel.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.IdentityModel.Abstractions/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HJbo/lnSfNHUfphPRT910poQc4T2/9+8svFLvzuaYHGAOJ2Tu+oEDqpX0BVP3BJ4OuUM1kylEKyaiX2fCAK3Cw==",
+      "path": "microsoft.identitymodel.abstractions/8.19.2",
+      "hashPath": "microsoft.identitymodel.abstractions.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.IdentityModel.JsonWebTokens/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ui3fuBT4fs8kdKfBthI4NzLYIBIneEVS8UrL1JVBzAn80UiKmngBBi0BEByE7n/9c+EElcfFlCMFFTqpkBSLNA==",
+      "path": "microsoft.identitymodel.jsonwebtokens/8.19.2",
+      "hashPath": "microsoft.identitymodel.jsonwebtokens.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.IdentityModel.Logging/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-r5YLDIxGOnkVJHrqXv/iD1FM1CgGrQOdriXuvuWvTPmKbnGANhEysq9XKmN6IHjf2a+9bAGEpnoRBsAQlvJU5w==",
+      "path": "microsoft.identitymodel.logging/8.19.2",
+      "hashPath": "microsoft.identitymodel.logging.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.IdentityModel.Protocols/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-sGxSsSrZXNmca6D+jHH2rVRyo2nNRd/g4H9CFbPmLLq0xgoH1U0orLWE5minfijw7+zq49tBs7txenbfAErRoQ==",
+      "path": "microsoft.identitymodel.protocols/8.19.2",
+      "hashPath": "microsoft.identitymodel.protocols.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.IdentityModel.Protocols.OpenIdConnect/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1XOcyY36cVymzE3qKdzKaUEZ4Pzt7ZpSa14JZoPPK1NLFUkQDs85TCqpV6XDo0YjFXj6nVK00AfOHppjghjhtw==",
+      "path": "microsoft.identitymodel.protocols.openidconnect/8.19.2",
+      "hashPath": "microsoft.identitymodel.protocols.openidconnect.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.IdentityModel.Tokens/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GtPC1S02uH1gOO4fQ+zRysIicKmEXaYFP8PIkdJYXqMyruYhopre4ozVHp0XiDSA0+GJvOZH9prxCPvgBMg4Ww==",
+      "path": "microsoft.identitymodel.tokens/8.19.2",
+      "hashPath": "microsoft.identitymodel.tokens.8.19.2.nupkg.sha512"
+    },
+    "Microsoft.OpenApi/1.6.22": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-aBvunmrdu/x+4CaA/UP1Jx4xWGwk4kymhoIRnn2Vp+zi5/KOPQJ9EkSXHRUr01WcGKtYl3Au7XfkPJbU1G2sjQ==",
+      "path": "microsoft.openapi/1.6.22",
+      "hashPath": "microsoft.openapi.1.6.22.nupkg.sha512"
+    },
+    "Npgsql/10.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7nb5YzXuvWWJxB0J8DiyL3we+X4FOctZrt0fIBnucOIaIevFEEwGQVZKtiu9olXdlNAK1eNgqSral6r/jlhI4w==",
+      "path": "npgsql/10.0.3",
+      "hashPath": "npgsql.10.0.3.nupkg.sha512"
+    },
+    "Npgsql.EntityFrameworkCore.PostgreSQL/10.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IPGrrZnRkuW7OlHDhUESZz4G5DLkW7Nej/O3Cx+0iTsgyU5XJxBgpsvTHLloo3WWuAKKbDHXBvWPVkX1deRh1Q==",
+      "path": "npgsql.entityframeworkcore.postgresql/10.0.3",
+      "hashPath": "npgsql.entityframeworkcore.postgresql.10.0.3.nupkg.sha512"
+    },
+    "Serilog/4.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gmoWVOvKgbME8TYR+gwMf7osROiWAURterc6Rt2dQyX7wtjZYpqFiA/pY6ztjGQKKV62GGCyOcmtP1UKMHgSmA==",
+      "path": "serilog/4.2.0",
+      "hashPath": "serilog.4.2.0.nupkg.sha512"
+    },
+    "Serilog.AspNetCore/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JslDajPlBsn3Pww1554flJFTqROvK9zz9jONNQgn0D8Lx2Trw8L0A8/n6zEQK1DAZWXrJwiVLw8cnTR3YFuYsg==",
+      "path": "serilog.aspnetcore/9.0.0",
+      "hashPath": "serilog.aspnetcore.9.0.0.nupkg.sha512"
+    },
+    "Serilog.Extensions.Hosting/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-u2TRxuxbjvTAldQn7uaAwePkWxTHIqlgjelekBtilAGL5sYyF3+65NWctN4UrwwGLsDC7c3Vz3HnOlu+PcoxXg==",
+      "path": "serilog.extensions.hosting/9.0.0",
+      "hashPath": "serilog.extensions.hosting.9.0.0.nupkg.sha512"
+    },
+    "Serilog.Extensions.Logging/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NwSSYqPJeKNzl5AuXVHpGbr6PkZJFlNa14CdIebVjK3k/76kYj/mz5kiTRNVSsSaxM8kAIa1kpy/qyT9E4npRQ==",
+      "path": "serilog.extensions.logging/9.0.0",
+      "hashPath": "serilog.extensions.logging.9.0.0.nupkg.sha512"
+    },
+    "Serilog.Formatting.Compact/3.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-wQsv14w9cqlfB5FX2MZpNsTawckN4a8dryuNGbebB/3Nh1pXnROHZov3swtu3Nj5oNG7Ba+xdu7Et/ulAUPanQ==",
+      "path": "serilog.formatting.compact/3.0.0",
+      "hashPath": "serilog.formatting.compact.3.0.0.nupkg.sha512"
+    },
+    "Serilog.Settings.Configuration/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-4/Et4Cqwa+F88l5SeFeNZ4c4Z6dEAIKbu3MaQb2Zz9F/g27T5a3wvfMcmCOaAiACjfUb4A6wrlTVfyYUZk3RRQ==",
+      "path": "serilog.settings.configuration/9.0.0",
+      "hashPath": "serilog.settings.configuration.9.0.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.Console/6.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8jbqgjUyZlfCuSTaJk6lOca465OndqOz3KZP6Cryt/IqZYybyBu7GP0fE/AXBzrrQB3EBmQntBFAvMVz1COvAA==",
+      "path": "serilog.sinks.console/6.1.1",
+      "hashPath": "serilog.sinks.console.6.1.1.nupkg.sha512"
+    },
+    "Serilog.Sinks.Debug/3.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-4BzXcdrgRX7wde9PmHuYd9U6YqycCC28hhpKonK7hx0wb19eiuRj16fPcPSVp0o/Y1ipJuNLYQ00R3q2Zs8FDA==",
+      "path": "serilog.sinks.debug/3.0.0",
+      "hashPath": "serilog.sinks.debug.3.0.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.File/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lxjg89Y8gJMmFxVkbZ+qDgjl+T4yC5F7WSLTvA+5q0R04tfKVLRL/EHpYoJ/MEQd2EeCKDuylBIVnAYMotmh2A==",
+      "path": "serilog.sinks.file/6.0.0",
+      "hashPath": "serilog.sinks.file.6.0.0.nupkg.sha512"
+    },
+    "Swashbuckle.AspNetCore/7.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WEkW7Cl8bexT75eURuqrqM/TQx+ftWKOWlCHzmw3Fl3oAmxiBO/lDVOuuqZsaBCHQIBcZxA6BbyiG5dv2mD2tw==",
+      "path": "swashbuckle.aspnetcore/7.3.2",
+      "hashPath": "swashbuckle.aspnetcore.7.3.2.nupkg.sha512"
+    },
+    "Swashbuckle.AspNetCore.Swagger/7.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-39Z2N3cLHDcDinu2IW5IaQO9wGPKTbc+vKbjIT/6gN3jFYypWY5U3O8i7Y9rmYDgxkm6niICnkcFZ3hEvikIHA==",
+      "path": "swashbuckle.aspnetcore.swagger/7.3.2",
+      "hashPath": "swashbuckle.aspnetcore.swagger.7.3.2.nupkg.sha512"
+    },
+    "Swashbuckle.AspNetCore.SwaggerGen/7.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-x5famjpcgazpT/8eEIlpSYSTZDq6ojMARhuJgj6O67Uk+Yb1DdDM5yikdL7GK1pMk5rYBETUCRWYP6rp+vHnlA==",
+      "path": "swashbuckle.aspnetcore.swaggergen/7.3.2",
+      "hashPath": "swashbuckle.aspnetcore.swaggergen.7.3.2.nupkg.sha512"
+    },
+    "Swashbuckle.AspNetCore.SwaggerUI/7.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SNQuFjYin9KhkoCSVOD5/Y4VEyAjKBDeZkIqqY6x+oI21HMKzzVkeJA9V7tWFXf5df4m/+pTIlbKO7g5W9UroQ==",
+      "path": "swashbuckle.aspnetcore.swaggerui/7.3.2",
+      "hashPath": "swashbuckle.aspnetcore.swaggerui.7.3.2.nupkg.sha512"
+    },
+    "System.IdentityModel.Tokens.Jwt/8.19.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gqhDC/icByKEutygpr+OFgAmjwTVowyzFjWB8K0q1ww8uFj5a1BQNL+QvijUl9uhq4p8OdDwcAIrjVC+eC9FVA==",
+      "path": "system.identitymodel.tokens.jwt/8.19.2",
+      "hashPath": "system.identitymodel.tokens.jwt.8.19.2.nupkg.sha512"
+    },
+    "SchoolERP.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SchoolERP.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SchoolERP.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

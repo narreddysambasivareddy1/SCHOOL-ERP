@@ -47,7 +47,7 @@ import { switchMap } from 'rxjs/operators';
         </form>
         <div class="demo-hint">
           <strong>Default credentials (after seed):</strong><br>
-          Email: admin@school.edu &nbsp;·&nbsp; Password: Admin@1234<br>
+          Email: admin&#64;school.edu &nbsp;·&nbsp; Password: Admin&#64;1234<br>
           <small>Tenant ID and School ID are printed in API logs on first startup.</small>
         </div>
       </div>
