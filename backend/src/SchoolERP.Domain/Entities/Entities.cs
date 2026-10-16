@@ -33,6 +33,8 @@ public class School : TenantEntity
     public string? PrimaryColor { get; set; }
     public string TimeZone { get; set; } = "Asia/Kolkata";
     public string DefaultLanguage { get; set; } = "en";
+    public string Locale { get; set; } = "en-IN";
+    public string Currency { get; set; } = "INR";
     public ICollection<Campus> Campuses { get; set; } = [];
     public ICollection<AcademicYear> AcademicYears { get; set; } = [];
 }

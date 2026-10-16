@@ -73,4 +73,25 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
             })
         });
     }
+
+    [HttpGet("student/{studentId}")]
+    public async Task<IActionResult> GetStudentAttendance(Guid schoolId, Guid studentId,
+        [FromQuery] DateOnly from, [FromQuery] DateOnly to, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var records = await db.StudentAttendances
+            .Include(r => r.Session)
+            .Where(r => r.StudentId == studentId &&
+                r.Session!.SchoolId == schoolId &&
+                r.Session.TenantId == tenantId &&
+                r.Session.Date >= from &&
+                r.Session.Date <= to)
+            .Select(r => new { r.Session!.Date, r.Code })
+            .ToListAsync(ct);
+
+        var total = records.Count;
+        var present = records.Count(r => r.Code == AttendanceCode.Present || r.Code == AttendanceCode.Late);
+        var pct = total > 0 ? Math.Round((double)present / total * 100, 1) : 0;
+        return Ok(new { total, present, percentage = pct, records });
+    }
 }

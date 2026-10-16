@@ -13,9 +13,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- Frontend: http://localhost
-- API: http://localhost/api
-- Swagger: http://localhost/api/swagger (development only)
+- Frontend: http://localhost:8380
+- API: http://localhost:8380/api
+- Swagger: http://localhost:8380/api/swagger (development only)
 
 ---
 
@@ -30,7 +30,7 @@ cd backend
 dotnet restore
 # Set connection string in src/SchoolERP.API/appsettings.Development.json
 dotnet run --project src/SchoolERP.API
-# API runs on http://localhost:5000
+# API runs on http://localhost:8100
 ```
 
 Run migrations:
@@ -53,8 +53,8 @@ Requirements: Node 22+
 cd frontend
 npm install
 npm start
-# Angular dev server on http://localhost:4200
-# Proxies /api → http://localhost:5000
+# Angular dev server on http://localhost:8200
+# Proxies /api → http://localhost:8100
 ```
 
 Run tests:

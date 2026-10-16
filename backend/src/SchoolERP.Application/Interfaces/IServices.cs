@@ -4,7 +4,7 @@ namespace SchoolERP.Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<LoginResponse?> LoginAsync(LoginRequest request, Guid tenantId, CancellationToken ct = default);
+    Task<LoginResponse?> LoginAsync(LoginRequest request, Guid? tenantId = null, CancellationToken ct = default);
 }
 
 public interface IStudentService

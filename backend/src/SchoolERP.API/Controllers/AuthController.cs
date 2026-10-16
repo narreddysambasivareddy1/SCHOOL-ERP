@@ -9,11 +9,16 @@ namespace SchoolERP.API.Controllers;
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, [FromHeader(Name = "X-Tenant-Id")] Guid tenantId, CancellationToken ct)
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request,
+        [FromHeader(Name = "X-Tenant-Id")] Guid? tenantId,
+        CancellationToken ct)
     {
-        if (tenantId == Guid.Empty) return BadRequest(new { error = "X-Tenant-Id header is required" });
+        if (string.IsNullOrWhiteSpace(request.SchoolCode) && (tenantId is null || tenantId == Guid.Empty))
+            return BadRequest(new { error = "School code is required" });
+
         var result = await authService.LoginAsync(request, tenantId, ct);
-        if (result is null) return Unauthorized(new { error = "Invalid credentials" });
+        if (result is null) return Unauthorized(new { error = "Invalid credentials or school code" });
         return Ok(result);
     }
 }

@@ -33,14 +33,14 @@ describe('AuthService', () => {
       user: { id: '1', email: 'a@b.com', firstName: 'A', lastName: 'B', roles: ['SchoolAdmin'] }
     };
 
-    service.login('a@b.com', 'pass', 'tenant-id').subscribe(res => {
+    service.login('a@b.com', 'pass', 'bright-future').subscribe(res => {
       expect(res.accessToken).toBe('test-token');
       expect(service.isLoggedIn).toBeTrue();
       expect(service.user()?.email).toBe('a@b.com');
     });
 
     const req = http.expectOne('/api/auth/login');
-    expect(req.request.headers.get('X-Tenant-Id')).toBe('tenant-id');
+    expect(req.request.body.schoolCode).toBe('bright-future');
     req.flush(mockResponse);
   });
 });

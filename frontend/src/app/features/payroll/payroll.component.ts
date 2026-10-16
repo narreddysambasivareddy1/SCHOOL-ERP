@@ -4,11 +4,12 @@ import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { MessageModule } from 'primeng/message';
+import { MoneyPipe } from '../../shared/money.pipe';
 
 @Component({
   selector: 'app-payroll',
   standalone: true,
-  imports: [CommonModule, TableModule, CardModule, TagModule, MessageModule],
+  imports: [CommonModule, TableModule, CardModule, TagModule, MessageModule, MoneyPipe],
   template: `
     <div class="eyebrow">CONFIDENTIAL · PAYROLL</div>
     <h1 style="color:var(--navy);margin:4px 0 20px">Payroll & Payslips</h1>
@@ -22,8 +23,8 @@ import { MessageModule } from 'primeng/message';
           <tr>
             <td>{{ r.period }}</td>
             <td>{{ r.employees }}</td>
-            <td>{{ r.gross }}</td>
-            <td>{{ r.net }}</td>
+            <td>{{ r.gross == null ? '—' : (r.gross | money) }}</td>
+            <td>{{ r.net == null ? '—' : (r.net | money) }}</td>
             <td><p-tag [value]="r.status" [severity]="r.status === 'Finalized' ? 'success' : 'warn'" /></td>
           </tr>
         </ng-template>
@@ -35,7 +36,7 @@ import { MessageModule } from 'primeng/message';
 })
 export class PayrollComponent {
   runs = [
-    { period: 'September 2026', employees: 128, gross: '₹46,20,000', net: '₹42,80,000', status: 'Finalized' },
-    { period: 'October 2026', employees: 128, gross: '—', net: '—', status: 'Draft' },
+    { period: 'September 2026', employees: 128, gross: 4620000, net: 4280000, status: 'Finalized' },
+    { period: 'October 2026', employees: 128, gross: null, net: null, status: 'Draft' },
   ];
 }

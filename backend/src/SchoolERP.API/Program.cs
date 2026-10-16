@@ -35,6 +35,7 @@ try
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(opts =>
         {
+            opts.MapInboundClaims = false;
             opts.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -43,7 +44,9 @@ try
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub
             };
         });
     builder.Services.AddAuthorization();

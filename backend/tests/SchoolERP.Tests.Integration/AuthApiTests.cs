@@ -13,18 +13,25 @@ public class AuthApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
     {
         var client = factory.CreateClient();
         var response = await client.PostAsJsonAsync("/api/auth/login",
-            new { email = "nobody@test.com", password = "wrong" });
+            new { email = "nobody@test.com", password = "wrong", schoolCode = "bright-future" });
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
-    public async Task Login_Returns400_WithoutTenantHeader()
+    public async Task Login_Returns400_WithoutSchoolCode()
     {
         var client = factory.CreateClient();
         var response = await client.PostAsJsonAsync("/api/auth/login",
             new { email = "admin@test.com", password = "pass" });
-        // No X-Tenant-Id header → 400
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Resolve_Returns404_ForUnknownSchoolCode()
+    {
+        var client = factory.CreateClient();
+        var response = await client.GetAsync("/api/tenants/resolve/does-not-exist");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]

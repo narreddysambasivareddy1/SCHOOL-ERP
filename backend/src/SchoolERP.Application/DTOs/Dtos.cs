@@ -1,8 +1,13 @@
 namespace SchoolERP.Application.DTOs;
 
 // Auth
-public record LoginRequest(string Email, string Password);
-public record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, UserDto User);
+public record LoginRequest(string Email, string Password, string? SchoolCode = null);
+public record SchoolSessionDto(
+    Guid TenantId, Guid SchoolId, string SchoolName, string Slug,
+    Guid? AcademicYearId, string? AcademicYearName,
+    string? LogoUrl, string? PrimaryColor,
+    string Locale, string Currency, string TimeZone);
+public record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, UserDto User, SchoolSessionDto? School);
 public record UserDto(Guid Id, string Email, string FirstName, string LastName, IEnumerable<string> Roles);
 
 // Pagination
@@ -34,5 +39,5 @@ public record TeacherAssignmentDto(Guid Id, string TeacherName, string SubjectNa
 public record CreateTeacherAssignmentRequest(Guid AcademicYearId, Guid EmployeeId, Guid SubjectId, Guid ClassId, Guid SectionId);
 
 // School
-public record SchoolDto(Guid Id, string Name, string? LogoUrl, string? PrimaryColor, string TimeZone, string DefaultLanguage);
+public record SchoolDto(Guid Id, string Name, string? LogoUrl, string? PrimaryColor, string TimeZone, string DefaultLanguage, string Locale, string Currency);
 public record AcademicYearDto(Guid Id, string Name, DateOnly StartDate, DateOnly EndDate, bool IsCurrent);

@@ -9,13 +9,14 @@ import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { environment } from '../../../environments/environment';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { MoneyPipe } from '../../shared/money.pipe';
 
 interface Payment { id: string; amount: number; status: string; method: string; receiptNumber: string; paidAt: string; }
 
 @Component({
   selector: 'app-fees',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule, TagModule, CardModule],
+  imports: [CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule, TagModule, CardModule, MoneyPipe],
   template: `
     <div class="eyebrow">FEES & PAYMENTS</div>
     <h1 style="color:var(--navy);margin:4px 0 20px">Fee Management</h1>
@@ -33,7 +34,7 @@ interface Payment { id: string; amount: number; status: string; method: string; 
         <ng-template pTemplate="body" let-p>
           <tr>
             <td><strong>{{ p.receiptNumber }}</strong></td>
-            <td>₹{{ p.amount | number }}</td>
+            <td>{{ p.amount | money }}</td>
             <td>{{ p.method }}</td>
             <td><p-tag [value]="p.status" [severity]="p.status === 'Successful' ? 'success' : 'warn'" /></td>
             <td>{{ p.paidAt | date:'dd MMM yyyy' }}</td>

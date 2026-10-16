@@ -17,7 +17,7 @@ public class SchoolsController(AppDbContext db) : ControllerBase
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var school = await db.Schools
             .Where(s => s.Id == schoolId && s.TenantId == tenantId)
-            .Select(s => new { s.Id, s.Name, s.LogoUrl, s.PrimaryColor, s.TimeZone, s.DefaultLanguage })
+            .Select(s => new { s.Id, s.Name, s.LogoUrl, s.PrimaryColor, s.TimeZone, s.DefaultLanguage, s.Locale, s.Currency })
             .FirstOrDefaultAsync(ct);
         return school is null ? NotFound() : Ok(school);
     }
