@@ -15,7 +15,7 @@ public record StudentAttendanceEntry(Guid StudentId, AttendanceCode Code, string
 [ApiController]
 [Route("api/schools/{schoolId}/attendance")]
 [Authorize]
-public class AttendanceController(AppDbContext db, Application.Interfaces.IAuditService audit) : ControllerBase
+public class AttendanceController(AppDbContext db, Application.Interfaces.IAuditService audit, Application.Interfaces.INotificationService notifications) : ControllerBase
 {
     [HttpPost]
     [Authorize(Roles = "SchoolAdmin,Teacher,AttendanceOfficer")]
@@ -47,6 +47,22 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         await db.SaveChangesAsync(ct);
         await audit.LogAsync(tenantId, actor, "AttendanceMarked", "AttendanceSession", session.Id.ToString(),
             newValues: new { req.ClassId, req.SectionId, req.Date, Count = session.Records.Count });
+
+        var absentIds = session.Records.Where(r => r.Code == AttendanceCode.Absent).Select(r => r.StudentId).ToList();
+        if (absentIds.Count > 0)
+        {
+            var recipients = await db.StudentGuardians
+                .Where(sg => absentIds.Contains(sg.StudentId) && sg.ReceivesNotifications)
+                .Select(sg => new Application.Interfaces.NotificationRecipient(
+                    sg.GuardianId.ToString(), sg.Guardian!.Email, sg.Guardian.Phone,
+                    sg.Guardian.FirstName + " " + sg.Guardian.LastName))
+                .ToListAsync(ct);
+            await notifications.DispatchAsync(new Application.Interfaces.NotificationDispatchRequest(
+                tenantId, schoolId, "Absence alert",
+                $"Your child was marked absent on {req.Date:dd MMM yyyy}.",
+                [NotificationChannel.Sms, NotificationChannel.WhatsApp, NotificationChannel.InApp],
+                recipients, "attendance.absent"), ct);
+        }
 
         return Ok(new { sessionId = session.Id, recordsMarked = session.Records.Count });
     }

@@ -20,6 +20,10 @@ public partial class AppDbContext
     public DbSet<RouteStop> RouteStops => Set<RouteStop>();
     public DbSet<Trip> Trips => Set<Trip>();
     public DbSet<NotificationMessage> NotificationMessages => Set<NotificationMessage>();
+    public DbSet<IntegrationSetting> IntegrationSettings => Set<IntegrationSetting>();
+    public DbSet<SchoolAnnouncement> SchoolAnnouncements => Set<SchoolAnnouncement>();
     public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<PayrollRun> PayrollRuns => Set<PayrollRun>();
+    public DbSet<Payslip> Payslips => Set<Payslip>();
 }

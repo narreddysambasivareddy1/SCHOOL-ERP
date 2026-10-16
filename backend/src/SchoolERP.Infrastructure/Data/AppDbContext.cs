@@ -53,6 +53,10 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             e.HasIndex(x => x.GatewayOrderId));
         modelBuilder.Entity<AttendanceSession>(e =>
             e.HasIndex(x => new { x.SchoolId, x.ClassId, x.SectionId, x.Date }));
+        modelBuilder.Entity<IntegrationSetting>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.ProviderKey }).IsUnique());
+        modelBuilder.Entity<PayrollRun>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.PeriodYear, x.PeriodMonth }).IsUnique());
     }
 
     private static System.Linq.Expressions.LambdaExpression BuildSoftDeleteFilter(Type type)

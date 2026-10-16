@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Infrastructure.Data;
+using SchoolERP.Infrastructure.Integrations;
 
 namespace SchoolERP.API.Controllers;
 
@@ -68,5 +69,31 @@ public class TransportController(AppDbContext db) : ControllerBase
             })
             .ToListAsync(ct);
         return Ok(trips);
+    }
+
+    [HttpGet("map")]
+    public async Task<IActionResult> Map(Guid schoolId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var maps = await db.IntegrationSettings
+            .FirstOrDefaultAsync(s => s.SchoolId == schoolId && s.TenantId == tenantId && s.ProviderKey == "google_maps", ct);
+        var routes = await db.Routes
+            .Where(r => r.TenantId == tenantId && r.SchoolId == schoolId && r.IsActive)
+            .Include(r => r.Stops)
+            .Select(r => new
+            {
+                r.Id, r.Name,
+                stops = r.Stops.OrderBy(s => s.StopOrder).Select(s => new { s.Name, s.StopOrder, s.PickupTime, s.Latitude, s.Longitude })
+            })
+            .ToListAsync(ct);
+
+        return Ok(new
+        {
+            sandbox = maps?.IsSandbox != false,
+            provider = "google_maps",
+            config = maps is null ? null : IntegrationCatalog.MaskConfig(maps.ConfigJson),
+            message = "Sandbox map. Live Google tiles load after the school provides a restricted Maps API key.",
+            routes
+        });
     }
 }

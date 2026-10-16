@@ -203,6 +203,7 @@ public class Employee : TenantEntity
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
     public Guid? UserId { get; set; }
     public User? User { get; set; }
+    public decimal BasicSalary { get; set; }
 }
 
 public class Department : TenantEntity

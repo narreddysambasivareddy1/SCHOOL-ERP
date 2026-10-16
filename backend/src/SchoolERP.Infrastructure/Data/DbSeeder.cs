@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
+using SchoolERP.Infrastructure.Integrations;
 
 namespace SchoolERP.Infrastructure.Data;
 
-public static class DbSeeder
+public static partial class DbSeeder
 {
     public static async Task SeedAsync(AppDbContext db)
     {
@@ -13,6 +14,13 @@ public static class DbSeeder
         if (await db.Tenants.AnyAsync())
         {
             await SeedDemoUsersIfMissingAsync(db);
+            var existingTenant = await db.Tenants.FirstAsync();
+            var existingSchool = await db.Schools.FirstOrDefaultAsync(s => s.TenantId == existingTenant.Id);
+            if (existingSchool is not null)
+            {
+                await SeedOpsPackAsync(db, existingTenant.Id, existingSchool.Id);
+                await SeedRichDemoAsync(db, existingTenant.Id, existingSchool.Id);
+            }
             return;
         }
 
@@ -99,6 +107,8 @@ public static class DbSeeder
 
         await AddPortalUsersAsync(db, tenantId, schoolId, ayId,
             roles, classes[0], sections.First(s => s.ClassId == classes[0].Id && s.Name == "A"));
+        await SeedOpsPackAsync(db, tenantId, schoolId);
+        await SeedRichDemoAsync(db, tenantId, schoolId);
 
         await db.SaveChangesAsync();
 
@@ -233,5 +243,39 @@ public static class DbSeeder
                 Relationship = "Mother", IsPrimary = true, CanPickup = true, ReceivesNotifications = true
             });
         }
+    }
+
+    private static async Task SeedOpsPackAsync(AppDbContext db, Guid tenantId, Guid schoolId)
+    {
+        if (!await db.LeaveTypes.AnyAsync(l => l.SchoolId == schoolId))
+        {
+            db.LeaveTypes.AddRange(
+                new LeaveType { TenantId = tenantId, SchoolId = schoolId, Name = "Casual Leave", MaxDaysPerYear = 12 },
+                new LeaveType { TenantId = tenantId, SchoolId = schoolId, Name = "Sick Leave", MaxDaysPerYear = 10 },
+                new LeaveType { TenantId = tenantId, SchoolId = schoolId, Name = "Earned Leave", MaxDaysPerYear = 15, IsCarryForward = true });
+        }
+
+        var existingKeys = await db.IntegrationSettings
+            .Where(s => s.SchoolId == schoolId)
+            .Select(s => s.ProviderKey)
+            .ToListAsync();
+        foreach (var def in IntegrationCatalog.Defaults.Where(d => !existingKeys.Contains(d.Key)))
+            db.IntegrationSettings.Add(IntegrationCatalog.CreateSetting(tenantId, schoolId, def));
+
+        if (!await db.Routes.AnyAsync(r => r.SchoolId == schoolId))
+        {
+            db.Routes.Add(new Route
+            {
+                TenantId = tenantId, SchoolId = schoolId, Name = "Route 1 — Banjara Hills", IsActive = true,
+                Stops =
+                [
+                    new RouteStop { TenantId = tenantId, Name = "Campus gate", StopOrder = 1, PickupTime = new TimeOnly(7, 10), Latitude = 17.4126, Longitude = 78.4090 },
+                    new RouteStop { TenantId = tenantId, Name = "Banjara Hills Rd 12", StopOrder = 2, PickupTime = new TimeOnly(7, 25), Latitude = 17.4148, Longitude = 78.4378 },
+                    new RouteStop { TenantId = tenantId, Name = "Jubilee Hills checkpost", StopOrder = 3, PickupTime = new TimeOnly(7, 40), Latitude = 17.4319, Longitude = 78.4070 }
+                ]
+            });
+        }
+
+        await db.SaveChangesAsync();
     }
 }

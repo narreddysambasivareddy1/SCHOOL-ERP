@@ -1,4 +1,5 @@
 using SchoolERP.Application.DTOs;
+using SchoolERP.Domain.Enums;
 
 namespace SchoolERP.Application.Interfaces;
 
@@ -29,4 +30,20 @@ public interface ITeacherAssignmentService
 public interface IAuditService
 {
     Task LogAsync(Guid tenantId, string actor, string action, string entityType, string? entityId, object? oldValues = null, object? newValues = null, string? ipAddress = null);
+}
+
+public record NotificationRecipient(string Ref, string? Email, string? Phone, string? Name);
+
+public record NotificationDispatchRequest(
+    Guid TenantId,
+    Guid SchoolId,
+    string Title,
+    string Body,
+    IReadOnlyList<NotificationChannel> Channels,
+    IReadOnlyList<NotificationRecipient> Recipients,
+    string TemplateKey);
+
+public interface INotificationService
+{
+    Task<int> DispatchAsync(NotificationDispatchRequest request, CancellationToken ct = default);
 }

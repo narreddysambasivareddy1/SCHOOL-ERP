@@ -33,6 +33,19 @@ interface ReportCard { icon: string; title: string; desc: string; value: string 
       <div class="alert-error">{{ error() }}</div>
     }
 
+    @if (trend().length) {
+      <div class="section-title">Attendance (7 days)</div>
+      <div class="bars">
+        @for (d of trend(); track d.date) {
+          <div class="bar-col">
+            <div class="bar" [style.height.%]="d.pct"></div>
+            <small>{{ d.pct }}%</small>
+            <span>{{ d.date | date:'dd MMM' }}</span>
+          </div>
+        }
+      </div>
+    }
+
     <!-- Report cards -->
     <div class="section-title">Available reports</div>
     <div class="reports-grid">
@@ -76,6 +89,11 @@ interface ReportCard { icon: string; title: string; desc: string; value: string 
     .report-sub { font-size: 11px; color: var(--teal); }
     @media (max-width: 1024px) { .kpi-strip { grid-template-columns: repeat(2,1fr); } .reports-grid { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 600px) { .kpi-strip { grid-template-columns: 1fr; } .reports-grid { grid-template-columns: 1fr; } }
+    .bars { display: flex; gap: 10px; align-items: flex-end; height: 140px; background: white; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 24px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+    .bar { width: 100%; max-width: 36px; background: var(--primary); border-radius: 6px 6px 0 0; min-height: 4px; }
+    .bar-col small { font-size: 10px; font-weight: 700; }
+    .bar-col span { font-size: 10px; color: var(--muted); }
   `]
 })
 export class AnalyticsComponent implements OnInit {
@@ -88,13 +106,15 @@ export class AnalyticsComponent implements OnInit {
     { label: 'Fee collected (month)', value: '—', icon: 'pi pi-wallet', iconBg: '#f0ebff' },
   ]);
 
+  trend = signal<{ date: string; pct: number }[]>([]);
+
   reports: ReportCard[] = [
     { icon: 'pi pi-users', title: 'Student strength', desc: 'By academic year, grade, section and enrolment status.', value: null, sub: 'Loading from API…', live: true },
     { icon: 'pi pi-check-square', title: 'Attendance trends', desc: 'Daily, monthly and class-level attendance with exceptions.', value: null, sub: 'Requires attendance data', live: true },
     { icon: 'pi pi-wallet', title: 'Fee collection & dues', desc: 'Collections, ageing, payment status and reconciliation.', value: null, sub: 'Loading from API…', live: true },
-    { icon: 'pi pi-id-card', title: 'Staff & leave', desc: 'Headcount, staffing changes, leave and attendance summaries.', value: null, sub: 'Phase 6 — leave workflows pending', live: false },
-    { icon: 'pi pi-map', title: 'Route utilisation', desc: 'Vehicle assignments, capacity, trips and transport fees.', value: null, sub: 'Requires GPS device integration', live: false },
-    { icon: 'pi pi-cog', title: 'Integration health', desc: 'Payment callbacks, device sync, notification delivery and job failures.', value: null, sub: 'Phase 7 — monitoring dashboard', live: false },
+    { icon: 'pi pi-id-card', title: 'Staff & leave', desc: 'Headcount, staffing changes, leave and attendance summaries.', value: null, sub: 'Leave workflow live', live: true },
+    { icon: 'pi pi-map', title: 'Route utilisation', desc: 'Vehicle assignments, capacity, trips and transport fees.', value: null, sub: 'Sandbox map + seeded route', live: true },
+    { icon: 'pi pi-cog', title: 'Integration health', desc: 'Payment callbacks, device sync, notification delivery and job failures.', value: null, sub: 'Sandbox outbox live', live: true },
   ];
 
   constructor(private api: ApiService, public ctx: SchoolContextService, private locale: LocaleService) {}
@@ -118,6 +138,7 @@ export class AnalyticsComponent implements OnInit {
         this.reports[1].sub = d.attendanceMarked ? `${d.attendancePct}% present today` : 'Not yet marked today';
         this.reports[2].value = feeVal;
         this.reports[2].sub = 'Collected this month';
+        this.trend.set(d.attendanceTrend || []);
 
         this.loading.set(false);
       },

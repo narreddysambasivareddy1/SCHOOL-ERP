@@ -38,6 +38,7 @@ export const routes: Routes = [
       { path: 'examinations', loadComponent: () => import('./features/examinations/examinations.component').then(m => m.ExaminationsComponent) },
       { path: 'leave', loadComponent: () => import('./features/leave/leave.component').then(m => m.LeaveComponent) },
       { path: 'settings', loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent) },
+      { path: 'integrations', loadComponent: () => import('./features/integrations/integrations.component').then(m => m.IntegrationsComponent) },
       { path: 'timetable', loadComponent: () => import('./features/timetable/timetable.component').then(m => m.TimetableComponent) },
       { path: 'audit', loadComponent: () => import('./features/audit/audit.component').then(m => m.AuditComponent) },
       { path: 'calendar', loadComponent: () => import('./features/calendar/calendar.component').then(m => m.CalendarComponent) },

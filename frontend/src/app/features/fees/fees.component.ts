@@ -10,6 +10,7 @@ import { CardModule } from 'primeng/card';
 import { environment } from '../../../environments/environment';
 import { SchoolContextService } from '../../core/services/school-context.service';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { ApiService } from '../../core/services/api.service';
 
 interface Payment { id: string; amount: number; status: string; method: string; receiptNumber: string; paidAt: string; }
 
@@ -24,7 +25,9 @@ interface Payment { id: string; amount: number; status: string; method: string; 
     <div class="toolbar">
       <input pInputText [(ngModel)]="studentId" placeholder="Enter Student ID to view payments..." style="width:320px" />
       <p-button label="Load" (onClick)="loadPayments()" [loading]="loading()" />
+      <p-button label="Sandbox online order" (onClick)="sandboxOrder()" [outlined]="true" />
     </div>
+    @if (notice()) { <p class="text-muted">{{ notice() }}</p> }
 
     @if (payments().length > 0) {
       <p-table [value]="payments()" styleClass="p-datatable-sm mt-3">
@@ -56,13 +59,22 @@ export class FeesComponent {
   payments = signal<Payment[]>([]);
   loading = signal(false);
   studentId = '';
+  notice = signal<string | null>(null);
 
-  constructor(private http: HttpClient, private ctx: SchoolContextService) {}
+  constructor(private http: HttpClient, private api: ApiService, private ctx: SchoolContextService) {}
 
   loadPayments() {
     if (!this.studentId || !this.ctx.schoolId) return;
     this.loading.set(true);
     this.http.get<Payment[]>(`${environment.apiUrl}/schools/${this.ctx.schoolId}/fees/student/${this.studentId}`)
       .subscribe({ next: p => { this.payments.set(p); this.loading.set(false); }, error: () => this.loading.set(false) });
+  }
+
+  sandboxOrder() {
+    if (!this.studentId || !this.ctx.schoolId) return;
+    this.api.createOnlineFeeOrder(this.ctx.schoolId, { studentId: this.studentId, amount: 5000 }).subscribe({
+      next: r => this.notice.set(`${r.message} Order ${r.orderId}`),
+      error: () => this.notice.set('Could not create sandbox order.')
+    });
   }
 }

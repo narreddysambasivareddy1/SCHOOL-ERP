@@ -5,6 +5,7 @@ import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { environment } from '../../../environments/environment';
+import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
 
 interface Route { id: string; name: string; stops: { name: string; stopOrder: number; pickupTime: string }[]; }
@@ -48,6 +49,18 @@ interface ActiveTrip { id: string; route: string; vehicle: string; driver: strin
         }
       </p-card>
     </div>
+
+    <p-card header="Sandbox map (Google Maps placeholder)" styleClass="mt-3">
+      <p class="text-muted">{{ map()?.message }}</p>
+      @for (r of map()?.routes || []; track r.id) {
+        <div class="route-item">
+          <strong>{{ r.name }}</strong>
+          @for (s of r.stops; track s.stopOrder) {
+            <div class="text-muted">{{ s.stopOrder }}. {{ s.name }} · {{ s.latitude }}, {{ s.longitude }}</div>
+          }
+        </div>
+      }
+    </p-card>
   `,
   styles: [`
     h1 { font-size: 22px; }
@@ -60,8 +73,9 @@ interface ActiveTrip { id: string; route: string; vehicle: string; driver: strin
 export class TransportComponent implements OnInit {
   routes = signal<Route[]>([]);
   trips = signal<ActiveTrip[]>([]);
+  map = signal<any>(null);
 
-  constructor(private http: HttpClient, private ctx: SchoolContextService) {}
+  constructor(private http: HttpClient, private api: ApiService, private ctx: SchoolContextService) {}
 
   ngOnInit() {
     if (!this.ctx.schoolId) return;
@@ -69,5 +83,6 @@ export class TransportComponent implements OnInit {
       .subscribe({ next: r => this.routes.set(r), error: () => {} });
     this.http.get<ActiveTrip[]>(`${environment.apiUrl}/schools/${this.ctx.schoolId}/transport/trips/active`)
       .subscribe({ next: t => this.trips.set(t), error: () => {} });
+    this.api.getTransportMap(this.ctx.schoolId).subscribe({ next: m => this.map.set(m), error: () => {} });
   }
 }

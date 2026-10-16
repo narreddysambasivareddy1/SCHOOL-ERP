@@ -174,6 +174,30 @@ public class NotificationMessage : TenantEntity
     public int RetryCount { get; set; }
     public DateTime? SentAt { get; set; }
     public string? ErrorDetails { get; set; }
+    public string? Provider { get; set; }
+    public string? ProviderMessageId { get; set; }
+    public string? TemplateKey { get; set; }
+}
+
+public class IntegrationSetting : TenantEntity
+{
+    public Guid SchoolId { get; set; }
+    public string ProviderKey { get; set; } = string.Empty;
+    public string ProviderName { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; } = true;
+    public bool IsSandbox { get; set; } = true;
+    public string ConfigJson { get; set; } = "{}";
+}
+
+public class SchoolAnnouncement : TenantEntity
+{
+    public Guid SchoolId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
+    public string Audience { get; set; } = "All";
+    public string Channels { get; set; } = "InApp";
+    public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
+    public string PublishedBy { get; set; } = string.Empty;
 }
 
 // ── Leave ───────────────────────────────────────────────────
@@ -183,6 +207,40 @@ public class LeaveType : TenantEntity
     public string Name { get; set; } = string.Empty;
     public int MaxDaysPerYear { get; set; }
     public bool IsCarryForward { get; set; }
+}
+
+public class PayrollRun : TenantEntity
+{
+    public Guid SchoolId { get; set; }
+    public int PeriodYear { get; set; }
+    public int PeriodMonth { get; set; }
+    public string PeriodLabel { get; set; } = string.Empty;
+    public string Status { get; set; } = "Draft";
+    public int EmployeeCount { get; set; }
+    public decimal GrossTotal { get; set; }
+    public decimal PfTotal { get; set; }
+    public decimal EsiTotal { get; set; }
+    public decimal TdsTotal { get; set; }
+    public decimal NetTotal { get; set; }
+    public DateTime? FinalizedAt { get; set; }
+    public ICollection<Payslip> Payslips { get; set; } = [];
+}
+
+public class Payslip : TenantEntity
+{
+    public Guid PayrollRunId { get; set; }
+    public PayrollRun? PayrollRun { get; set; }
+    public Guid EmployeeId { get; set; }
+    public Employee? Employee { get; set; }
+    public decimal Basic { get; set; }
+    public decimal Hra { get; set; }
+    public decimal Allowance { get; set; }
+    public decimal Gross { get; set; }
+    public decimal Pf { get; set; }
+    public decimal Esi { get; set; }
+    public decimal ProfessionalTax { get; set; }
+    public decimal Tds { get; set; }
+    public decimal Net { get; set; }
 }
 
 public class LeaveRequest : TenantEntity

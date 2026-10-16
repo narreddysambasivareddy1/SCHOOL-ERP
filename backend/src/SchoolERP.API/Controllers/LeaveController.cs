@@ -2,7 +2,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
+using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.API.Controllers;
@@ -12,7 +14,7 @@ public record ApplyLeaveRequest(Guid EmployeeId, Guid LeaveTypeId, DateOnly From
 [ApiController]
 [Route("api/schools/{schoolId}/leave")]
 [Authorize]
-public class LeaveController(AppDbContext db, Application.Interfaces.IAuditService audit) : ControllerBase
+public class LeaveController(AppDbContext db, IAuditService audit, INotificationService notifications) : ControllerBase
 {
     [HttpGet("types")]
     public async Task<IActionResult> GetTypes(Guid schoolId, CancellationToken ct)
@@ -59,6 +61,7 @@ public class LeaveController(AppDbContext db, Application.Interfaces.IAuditServi
         leave.ApprovedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         await audit.LogAsync(tenantId, actor, "LeaveApproved", "LeaveRequest", leaveId.ToString());
+        await NotifyLeaveAsync(tenantId, schoolId, leave, "approved", ct);
         return Ok(new { leaveId, status = "Approved" });
     }
 
@@ -75,6 +78,7 @@ public class LeaveController(AppDbContext db, Application.Interfaces.IAuditServi
         leave.ApprovedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         await audit.LogAsync(tenantId, actor, "LeaveRejected", "LeaveRequest", leaveId.ToString());
+        await NotifyLeaveAsync(tenantId, schoolId, leave, "rejected", ct);
         return Ok(new { leaveId, status = "Rejected" });
     }
 
@@ -99,5 +103,18 @@ public class LeaveController(AppDbContext db, Application.Interfaces.IAuditServi
             })
             .ToListAsync(ct);
         return Ok(list);
+    }
+
+    private async Task NotifyLeaveAsync(Guid tenantId, Guid schoolId, LeaveRequest leave, string outcome, CancellationToken ct)
+    {
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == leave.EmployeeId, ct);
+        if (employee is null) return;
+        await notifications.DispatchAsync(new NotificationDispatchRequest(
+            tenantId, schoolId,
+            $"Leave {outcome}",
+            $"Your leave from {leave.FromDate:dd MMM} to {leave.ToDate:dd MMM} was {outcome}.",
+            [NotificationChannel.Email, NotificationChannel.InApp],
+            [new NotificationRecipient(employee.Id.ToString(), employee.Email, employee.Phone, $"{employee.FirstName} {employee.LastName}")],
+            "leave.decision"), ct);
     }
 }

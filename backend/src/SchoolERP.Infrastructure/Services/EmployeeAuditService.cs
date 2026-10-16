@@ -57,6 +57,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
             DepartmentId = request.DepartmentId,
             DesignationId = request.DesignationId,
             JoiningDate = request.JoiningDate,
+            BasicSalary = 35_000m,
             CreatedBy = createdBy
         };
 

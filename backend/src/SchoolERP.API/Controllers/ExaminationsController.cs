@@ -2,7 +2,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
+using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.API.Controllers;
@@ -13,7 +15,7 @@ public record MarkEntryRequest(Guid StudentId, Guid SubjectId, decimal? MarksObt
 [ApiController]
 [Route("api/schools/{schoolId}/examinations")]
 [Authorize]
-public class ExaminationsController(AppDbContext db, Application.Interfaces.IAuditService audit) : ControllerBase
+public class ExaminationsController(AppDbContext db, IAuditService audit, INotificationService notifications) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(Guid schoolId, [FromQuery] Guid academicYearId, CancellationToken ct)
@@ -82,6 +84,19 @@ public class ExaminationsController(AppDbContext db, Application.Interfaces.IAud
         exam.IsPublished = true;
         await db.SaveChangesAsync(ct);
         await audit.LogAsync(tenantId, actor, "ExaminationPublished", "Examination", examId.ToString());
+
+        var recipients = await db.StudentGuardians
+            .Where(sg => sg.TenantId == tenantId && sg.ReceivesNotifications && sg.Student!.SchoolId == schoolId)
+            .Select(sg => new NotificationRecipient(
+                sg.GuardianId.ToString(), sg.Guardian!.Email, sg.Guardian.Phone,
+                sg.Guardian.FirstName + " " + sg.Guardian.LastName))
+            .ToListAsync(ct);
+        await notifications.DispatchAsync(new NotificationDispatchRequest(
+            tenantId, schoolId, "Results published",
+            $"{exam.Name} results are now available in the parent and student portals.",
+            [NotificationChannel.InApp, NotificationChannel.Email, NotificationChannel.WhatsApp],
+            recipients, "exam.published"), ct);
+
         return Ok(new { examId, published = true });
     }
 

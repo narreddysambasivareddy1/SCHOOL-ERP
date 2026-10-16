@@ -48,13 +48,30 @@ public class DashboardController(AppDbContext db) : ControllerBase
                 && p.PaidAt.Value.Year == now.Year)
             .SumAsync(p => (decimal?)p.Amount, ct) ?? 0;
 
+        var from = today.AddDays(-6);
+        var week = await db.AttendanceSessions
+            .Where(s => s.TenantId == tenantId && s.SchoolId == schoolId && s.Date >= from && s.Date <= today)
+            .SelectMany(s => s.Records.Select(r => new { s.Date, r.Code }))
+            .ToListAsync(ct);
+        var attendanceTrend = week
+            .GroupBy(x => x.Date)
+            .OrderBy(g => g.Key)
+            .Select(g =>
+            {
+                var total = g.Count();
+                var present = g.Count(x => x.Code == AttendanceCode.Present || x.Code == AttendanceCode.Late);
+                return new { date = g.Key, pct = total == 0 ? 0 : Math.Round((double)present / total * 100, 1) };
+            })
+            .ToList();
+
         return Ok(new
         {
             studentCount,
             staffCount,
             attendancePct,
             attendanceMarked = totalRecords > 0,
-            feeCollectedThisMonth = feeTotal
+            feeCollectedThisMonth = feeTotal,
+            attendanceTrend
         });
     }
 }

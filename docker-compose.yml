@@ -34,6 +34,7 @@ services:
       Jwt__Issuer: ${JWT_ISSUER:-schoolerp}
       Jwt__Audience: ${JWT_AUDIENCE:-schoolerp-clients}
       Jwt__ExpiryMinutes: ${JWT_EXPIRY_MINUTES:-60}
+      Integrations__Mode: ${INTEGRATIONS_MODE:-Sandbox}
     depends_on:
       db:
         condition: service_healthy

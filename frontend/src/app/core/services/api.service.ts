@@ -103,4 +103,38 @@ export class ApiService {
   getStudentAttendance(schoolId: string, studentId: string, from: string, to: string) {
     return this.http.get<any>(`${this.base}/schools/${schoolId}/attendance/student/${studentId}`, { params: { from, to } });
   }
+
+  getIntegrations(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/integrations`); }
+  updateIntegration(schoolId: string, key: string, body: any) {
+    return this.http.put<any>(`${this.base}/schools/${schoolId}/integrations/${key}`, body);
+  }
+  testIntegration(schoolId: string, key: string, body: any = {}) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/integrations/${key}/test`, body);
+  }
+
+  getAnnouncements(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/communications/announcements`); }
+  sendAnnouncement(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/communications/announcements`, body);
+  }
+  getNotificationOutbox(schoolId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/communications/outbox`);
+  }
+
+  createOnlineFeeOrder(schoolId: string, body: { studentId: string; amount: number }) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/online-order`, body);
+  }
+  getTransportMap(schoolId: string) {
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/transport/map`);
+  }
+
+  getPayrollRuns(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/payroll/runs`); }
+  createPayrollRun(schoolId: string, year: number, month: number) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/payroll/runs`, { year, month });
+  }
+  finalizePayroll(schoolId: string, runId: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/payroll/runs/${runId}/finalize`, {});
+  }
+  getPayslips(schoolId: string, runId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/payroll/runs/${runId}/payslips`);
+  }
 }

@@ -2,7 +2,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
+using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.API.Controllers;
@@ -12,7 +14,7 @@ public record CreateHomeworkRequest(Guid TeacherAssignmentId, string Title, stri
 [ApiController]
 [Route("api/schools/{schoolId}/homework")]
 [Authorize]
-public class HomeworkController(AppDbContext db) : ControllerBase
+public class HomeworkController(AppDbContext db, INotificationService notifications) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(Guid schoolId, [FromQuery] Guid? sectionId, CancellationToken ct)
@@ -55,6 +57,20 @@ public class HomeworkController(AppDbContext db) : ControllerBase
 
         db.Homeworks.Add(hw);
         await db.SaveChangesAsync(ct);
+
+        var recipients = await db.StudentGuardians
+            .Where(sg => sg.TenantId == tenantId && sg.ReceivesNotifications && sg.Student!.SchoolId == schoolId
+                && sg.Student.Enrollments.Any(en => en.SectionId == assignment.SectionId && en.EffectiveTo == null))
+            .Select(sg => new NotificationRecipient(
+                sg.GuardianId.ToString(), sg.Guardian!.Email, sg.Guardian.Phone,
+                sg.Guardian.FirstName + " " + sg.Guardian.LastName))
+            .ToListAsync(ct);
+        await notifications.DispatchAsync(new NotificationDispatchRequest(
+            tenantId, schoolId, "New homework",
+            $"{hw.Title} is due {hw.DueDate:dd MMM yyyy}.",
+            [NotificationChannel.InApp, NotificationChannel.Email],
+            recipients, "homework.published"), ct);
+
         return CreatedAtAction(nameof(GetAll), new { schoolId }, new { hw.Id, hw.Title, hw.DueDate });
     }
 }

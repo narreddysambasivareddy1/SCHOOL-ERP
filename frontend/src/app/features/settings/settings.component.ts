@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="page-header">
       <div class="eyebrow">ADMINISTRATION</div>
@@ -25,7 +26,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
         <div class="card"><label>Language</label><strong>{{ school().defaultLanguage }}</strong></div>
         <div class="card"><label>Primary colour</label><strong>{{ school().primaryColor || '—' }}</strong></div>
       </div>
-      <p class="text-muted">Editing branding and modules from this screen will be wired to a PATCH API next. Values already drive money, dates and theme after login.</p>
+      <p class="text-muted">Email, SMS, WhatsApp, Google and payment keys live under Integrations. Dummy values are already seeded; swap them when the school provides live credentials.</p>
+      <p><a routerLink="/integrations">Open integrations</a></p>
     }
   `,
   styles: [`
@@ -33,6 +35,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
     label { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }
+    a { color: var(--primary); font-size: 13px; }
   `]
 })
 export class SettingsComponent implements OnInit {
