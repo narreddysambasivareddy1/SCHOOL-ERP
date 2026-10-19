@@ -29,14 +29,35 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     }
 
     [HttpPost("apply")]
+    [Authorize(Roles = "SchoolAdmin,HRManager,Teacher")]
     public async Task<IActionResult> Apply(Guid schoolId, [FromBody] ApplyLeaveRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
+        if (req.FromDate > req.ToDate || req.ToDate.DayNumber - req.FromDate.DayNumber > 90)
+            return BadRequest(new { error = "Leave dates must be valid and cannot span more than 91 days." });
+
+        var employeeId = req.EmployeeId;
+        if (User.IsInRole("Teacher"))
+        {
+            if (!Guid.TryParse(User.FindFirstValue("sub"), out var userId)) return Forbid();
+            var ownEmployeeId = await db.Employees.Where(e => e.UserId == userId &&
+                    e.SchoolId == schoolId && e.TenantId == tenantId)
+                .Select(e => (Guid?)e.Id).FirstOrDefaultAsync(ct);
+            if (ownEmployeeId is null || (employeeId != Guid.Empty && employeeId != ownEmployeeId))
+                return Forbid();
+            employeeId = ownEmployeeId.Value;
+        }
+
+        var valid = await db.Employees.AnyAsync(e => e.Id == employeeId &&
+                e.SchoolId == schoolId && e.TenantId == tenantId && e.Status == EmployeeStatus.Active, ct)
+            && await db.LeaveTypes.AnyAsync(l => l.Id == req.LeaveTypeId &&
+                l.SchoolId == schoolId && l.TenantId == tenantId, ct);
+        if (!valid) return BadRequest(new { error = "Employee or leave type is not valid for this school." });
 
         var leave = new LeaveRequest
         {
-            TenantId = tenantId, EmployeeId = req.EmployeeId,
+            TenantId = tenantId, EmployeeId = employeeId,
             LeaveTypeId = req.LeaveTypeId, FromDate = req.FromDate,
             ToDate = req.ToDate, Reason = req.Reason,
             Status = "Pending", CreatedBy = actor
@@ -44,7 +65,7 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
         db.LeaveRequests.Add(leave);
         await db.SaveChangesAsync(ct);
         await audit.LogAsync(tenantId, actor, "LeaveApplied", "LeaveRequest", leave.Id.ToString(),
-            newValues: new { req.EmployeeId, req.FromDate, req.ToDate });
+            newValues: new { EmployeeId = employeeId, req.FromDate, req.ToDate });
         return Ok(new { leave.Id, leave.Status });
     }
 
@@ -54,14 +75,18 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
-        var leave = await db.LeaveRequests.FirstOrDefaultAsync(l => l.Id == leaveId && l.TenantId == tenantId, ct);
+        var leave = await db.LeaveRequests.FirstOrDefaultAsync(l => l.Id == leaveId &&
+            l.TenantId == tenantId && l.Employee!.SchoolId == schoolId &&
+            l.Employee.TenantId == tenantId, ct);
         if (leave is null) return NotFound();
         if (leave.Status != "Pending") return Conflict(new { error = "Leave is not in Pending status." });
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
         leave.Status = "Approved";
         leave.ApprovedBy = actor;
         leave.ApprovedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         var opened = await ops.OpenSubstitutionsForLeaveAsync(schoolId, tenantId, leave, ct);
+        await transaction.CommitAsync(ct);
         await audit.LogAsync(tenantId, actor, "LeaveApproved", "LeaveRequest", leaveId.ToString());
         await NotifyLeaveAsync(tenantId, schoolId, leave, "approved", ct);
         return Ok(new { leaveId, status = "Approved", substitutionsOpened = opened });
@@ -73,8 +98,11 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
-        var leave = await db.LeaveRequests.FirstOrDefaultAsync(l => l.Id == leaveId && l.TenantId == tenantId, ct);
+        var leave = await db.LeaveRequests.FirstOrDefaultAsync(l => l.Id == leaveId &&
+            l.TenantId == tenantId && l.Employee!.SchoolId == schoolId &&
+            l.Employee.TenantId == tenantId, ct);
         if (leave is null) return NotFound();
+        if (leave.Status != "Pending") return Conflict(new { error = "Leave is not in Pending status." });
         leave.Status = "Rejected";
         leave.ApprovedBy = actor;
         leave.ApprovedAt = DateTime.UtcNow;
@@ -90,7 +118,8 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var query = db.LeaveRequests
-            .Where(l => l.TenantId == tenantId)
+            .Where(l => l.TenantId == tenantId && l.Employee!.SchoolId == schoolId &&
+                l.Employee.TenantId == tenantId)
             .Include(l => l.Employee)
             .Include(l => l.LeaveType)
             .AsQueryable();
@@ -109,8 +138,9 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
 
     private async Task NotifyLeaveAsync(Guid tenantId, Guid schoolId, LeaveRequest leave, string outcome, CancellationToken ct)
     {
-        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == leave.EmployeeId, ct);
-        if (employee is null) return;
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == leave.EmployeeId &&
+            e.TenantId == tenantId && e.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Leave employee was not found in this school.");
         await notifications.DispatchAsync(new NotificationDispatchRequest(
             tenantId, schoolId,
             $"Leave {outcome}",

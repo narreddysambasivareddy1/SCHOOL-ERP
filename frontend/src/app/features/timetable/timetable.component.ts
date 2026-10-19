@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
 
 @Component({
   selector: 'app-timetable',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonModule, TableModule],
   template: `
     <div class="page-header">
       <div class="eyebrow">ACADEMICS</div>
@@ -30,81 +32,95 @@ import { AuthService } from '../../core/auth/auth.service';
         <label>Start<input type="time" [(ngModel)]="period.startTime" name="pstart" /></label>
         <label>End<input type="time" [(ngModel)]="period.endTime" name="pend" /></label>
         <label>Band
-          <select [(ngModel)]="period.band" name="pband"><option>Morning</option><option>Evening</option></select>
+          <select [(ngModel)]="period.band" name="pband">
+            @for (band of periodBands; track band) { <option [value]="band">{{ band }}</option> }
+          </select>
         </label>
-        <button type="submit">Save period</button>
+        <p-button type="submit" label="Save period" />
       </form>
-      <table class="card">
-        <tr><th>Period</th><th>Band</th><th>Time</th></tr>
-        @for (p of periods(); track p.id) {
+      <p-table [value]="periods()">
+        <ng-template pTemplate="header"><tr><th>Period</th><th>Band</th><th>Time</th></tr></ng-template>
+        <ng-template pTemplate="body" let-p>
           <tr><td>{{ p.name }}</td><td>{{ p.band }}</td><td>{{ p.startTime }}–{{ p.endTime }}</td></tr>
-        }
-      </table>
+        </ng-template>
+      </p-table>
     }
 
     @if (tab==='grid') {
       <div class="toolbar">
-        <select [(ngModel)]="classId" (ngModelChange)="onClass()">
+        <select aria-label="Class" [(ngModel)]="classId" (ngModelChange)="onClass()">
           <option value="">Class</option>
-          @for (c of classes(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+          @for (cls of classes(); track cls.id) { <option [value]="cls.id">{{ cls.name }}</option> }
         </select>
-        <select [(ngModel)]="sectionId" (ngModelChange)="loadGrid()">
+        <select aria-label="Section" [(ngModel)]="sectionId" (ngModelChange)="loadGrid()">
           <option value="">Section</option>
-          @for (s of sections(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+          @for (section of sections(); track section.id) { <option [value]="section.id">{{ section.name }}</option> }
         </select>
       </div>
       @if (grid()) {
-        <div class="wrap">
-          <table>
-            <thead>
+        <div class="grid-scroll">
+          <p-table [value]="grid().days" styleClass="timetable-grid-table"
+            [tableStyle]="{ 'min-width': (100 + grid().periods.length * 190) + 'px' }">
+            <ng-template pTemplate="header">
               <tr>
                 <th>Day</th>
                 @for (p of grid().periods; track p.id) { <th>{{ p.name }}<small>{{ p.startTime }}</small></th> }
               </tr>
-            </thead>
-            <tbody>
-              @for (d of grid().days; track d.dayOfWeek) {
-                <tr>
-                  <th>{{ d.name }}</th>
-                  @for (cell of d.cells; track cell.periodId) {
-                    <td [class.open]="cell.unassigned">
-                      @if (admin) {
-                        <select [ngModel]="cell.subjectId || ''" (ngModelChange)="pick(d.dayOfWeek, cell.periodId, 'subjectId', $event)">
+            </ng-template>
+            <ng-template pTemplate="body" let-d>
+              <tr>
+                <th>{{ d.name }}</th>
+                @for (cell of d.cells; track cell.periodId) {
+                  <td [class.open]="cell.unassigned">
+                    @if (admin) {
+                      <div class="grid-cell-controls">
+                        <select aria-label="Subject" [ngModel]="cell.subjectId || ''"
+                          (ngModelChange)="pick(d.dayOfWeek, cell.periodId, 'subjectId', $event)">
                           <option value="">Subject</option>
-                          @for (s of subjects(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+                          @for (subject of subjects(); track subject.id) { <option [value]="subject.id">{{ subject.name }}</option> }
                         </select>
-                        <select [ngModel]="cell.employeeId || ''" (ngModelChange)="pick(d.dayOfWeek, cell.periodId, 'employeeId', $event)">
+                        <select aria-label="Teacher" [ngModel]="cell.employeeId || ''"
+                          (ngModelChange)="pick(d.dayOfWeek, cell.periodId, 'employeeId', $event)">
                           <option value="">Teacher</option>
-                          @for (e of teachers(); track e.id) { <option [value]="e.id">{{ e.firstName }} {{ e.lastName }}</option> }
+                          @for (teacher of teachers(); track teacher.id) { <option [value]="teacher.id">{{ teacher.fullName }}</option> }
                         </select>
-                      } @else {
-                        <strong>{{ cell.subject || '—' }}</strong>
-                        <small>{{ cell.unassigned ? 'Unassigned' : (cell.teacher || '') }}</small>
-                      }
-                    </td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
+                      </div>
+                    } @else {
+                      <strong>{{ cell.subject || '—' }}</strong>
+                      <small>{{ cell.unassigned ? 'Unassigned' : (cell.teacher || '') }}</small>
+                    }
+                  </td>
+                }
+              </tr>
+            </ng-template>
+          </p-table>
         </div>
       }
     }
   `,
   styles: [`
     .tabs { display: flex; gap: 8px; margin: 12px 0; }
-    .tabs button, .form button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: white; border-radius: 8px; padding: 6px 10px; }
+    .tabs button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: white; border-radius: 8px; padding: 6px 10px; }
     .tabs button.on { background: var(--primary); color: white; border-color: transparent; }
     .card, table { background: white; border: 1px solid var(--line); border-radius: 12px; }
     .form { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 8px; padding: 12px; margin-bottom: 12px; }
-    .form label { font-size: 11px; font-weight: 700; }
-    .form input, .form select, .toolbar select, td select { width: 100%; padding: 6px; border-radius: 8px; border: 1px solid var(--line); font: inherit; }
-    .form button { background: var(--primary); color: white; border: 0; align-self: end; }
-    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-    .wrap { overflow: auto; }
+    .form label { display: grid; gap: 4px; min-width: 0; font-size: 11px; font-weight: 700; }
+    .form input, .form select, .toolbar select { width: 100%; min-width: 0; min-height: 40px; font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); }
+    .toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 8px; margin-bottom: 12px; }
     table { width: 100%; border-collapse: collapse; }
     th, td { border: 1px solid var(--line); padding: 8px; font-size: 12px; min-width: 120px; vertical-align: top; }
     th small { display: block; font-weight: 400; color: var(--muted); }
+    .grid-scroll { width: 100%; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: white; }
+    :host ::ng-deep .timetable-grid-table .p-datatable-table { table-layout: fixed; }
+    :host ::ng-deep .timetable-grid-table .p-datatable-thead > tr > th:first-child,
+    :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > th { width: 100px; min-width: 100px; }
+    :host ::ng-deep .timetable-grid-table .p-datatable-thead > tr > th:not(:first-child),
+    :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > td { width: 190px; min-width: 190px; }
+    :host ::ng-deep .timetable-grid-table .p-datatable-thead > tr > th,
+    :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > th,
+    :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > td { padding: 8px; vertical-align: top; }
+    .grid-cell-controls { display: grid; gap: 8px; min-width: 0; }
+    .grid-cell-controls select { display: block; width: 100%; min-width: 0; min-height: 38px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; }
     td.open { background: #fff4db; }
     td strong, td small { display: block; }
     .ok { background: #e5f8f1; color: #087d68; padding: 8px; border-radius: 8px; }
@@ -124,17 +140,20 @@ export class TimetableComponent implements OnInit {
   error = signal<string | null>(null);
   classId = '';
   sectionId = '';
+  periodBands = ['Morning', 'Evening'];
   period = { name: 'M1', sortOrder: 1, startTime: '08:00', endTime: '08:45', band: 'Morning' };
 
   constructor(private api: ApiService, public ctx: SchoolContextService, auth: AuthService) {
-    this.admin = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin');
+    this.admin = auth.hasRole('SchoolAdmin');
   }
 
   ngOnInit() {
     if (!this.ctx.schoolId) return;
     this.api.getClasses(this.ctx.schoolId).subscribe({ next: c => this.classes.set(c) });
     this.api.getSubjects(this.ctx.schoolId).subscribe({ next: s => this.subjects.set(s) });
-    this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({ next: r => this.teachers.set(r.items || []) });
+    this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({
+      next: r => this.teachers.set((r.items || []).map((t: any) => ({ ...t, fullName: `${t.firstName} ${t.lastName}` })))
+    });
     this.api.getPeriods(this.ctx.schoolId, this.ctx.academicYearId).subscribe({ next: p => this.periods.set(p) });
   }
 

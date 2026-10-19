@@ -356,6 +356,10 @@ namespace SchoolERP.Infrastructure.Migrations
                     b.HasIndex("SchoolId", "Date", "SectionId", "EmployeeId", "SubjectId")
                         .IsUnique();
 
+                    b.HasIndex("TenantId", "SchoolId", "Date", "SectionId", "EmployeeId")
+                        .IsUnique()
+                        .HasFilter("\"SubjectId\" IS NULL");
+
                     b.ToTable("ClassDiaries");
                 });
 
@@ -2387,6 +2391,10 @@ namespace SchoolERP.Infrastructure.Migrations
 
                     b.HasIndex("SchoolId", "Date", "Status");
 
+                    b.HasIndex("TenantId", "TimetableSlotId", "Date")
+                        .IsUnique()
+                        .HasFilter("\"Status\" <> 2");
+
                     b.ToTable("SubstitutionNeeds");
                 });
 
@@ -2947,6 +2955,9 @@ namespace SchoolERP.Infrastructure.Migrations
                     b.HasIndex("PlanId");
 
                     b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "PlanId", "DayOfWeek")
+                        .IsUnique();
 
                     b.ToTable("WeeklyLessonPlanDays");
                 });

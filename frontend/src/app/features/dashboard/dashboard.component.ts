@@ -62,7 +62,7 @@ interface Mod { icon: string; label: string; desc: string; route: string; }
       <div class="ops">
         <a routerLink="/substitutions" class="today-card">
           <strong>{{ ops().openSubstitutions }} open periods</strong>
-          <small>{{ ops().onLeave }} teacher(s) on leave · assign substitutes</small>
+          <small>{{ ops().presentStaff }} present · {{ ops().onLeave }} teacher(s) on leave · assign substitutes</small>
         </a>
         <a routerLink="/diary" class="today-card">
           <strong>Class diary</strong>
@@ -71,7 +71,9 @@ interface Mod { icon: string; label: string; desc: string; route: string; }
         <div class="today-card">
           <strong>Free teachers by period</strong>
           <small>
-            @for (a of ops().availability || []; track a.periodId) { {{ a.period }}: {{ a.free }} · }
+            @for (a of ops().availability || []; track a.periodId) {
+              {{ a.period }}: {{ a.free ? teacherNames(a) : 'none available' }} ·
+            }
           </small>
         </div>
       </div>
@@ -195,5 +197,9 @@ export class DashboardComponent implements OnInit {
   private getGreeting(): string {
     const h = new Date().getHours();
     return h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  }
+
+  teacherNames(period: any): string {
+    return (period.freeTeachers || []).map((teacher: any) => teacher.name).join(', ');
   }
 }

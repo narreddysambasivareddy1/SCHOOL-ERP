@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-substitutions',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonModule],
   template: `
     <div class="page-header">
       <div class="eyebrow">ACADEMIC OPERATIONS</div>
@@ -25,14 +26,12 @@ import { SchoolContextService } from '../../core/services/school-context.service
         </div>
         @if (n.status === 'Open') {
           <div class="row">
-            <select [(ngModel)]="pick[n.id]">
+            <select aria-label="Available substitute teacher" [(ngModel)]="pick[n.id]">
               <option value="">Available teachers</option>
-              @for (t of free()[n.periodId] || []; track t.id) {
-                <option [value]="t.id">{{ t.name }}</option>
-              }
+              @for (teacher of free()[n.periodId] || []; track teacher.id) { <option [value]="teacher.id">{{ teacher.name }}</option> }
             </select>
-            <button type="button" (click)="assign(n)">Assign</button>
-            <button type="button" class="ghost" (click)="loadFree(n)">Refresh free list</button>
+            <p-button label="Assign" (onClick)="assign(n)" [disabled]="!pick[n.id]" />
+            <p-button label="Refresh free list" [outlined]="true" (onClick)="loadFree(n)" />
           </div>
         } @else {
           <span>Covered by {{ n.substitute }}</span>
@@ -44,9 +43,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 10px 0; }
     small { display: block; color: var(--muted); }
     .row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-    select, button, input { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
-    button { background: var(--primary); color: white; border: 0; cursor: pointer; }
-    .ghost { background: white; color: var(--navy); border: 1px solid var(--line); }
+    .row select { flex: 1 1 240px; min-width: min(100%, 240px); min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; }
+    input { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
     .ok { background: #e5f8f1; color: #087d68; padding: 8px; border-radius: 8px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 8px; border-radius: 8px; }
   `]

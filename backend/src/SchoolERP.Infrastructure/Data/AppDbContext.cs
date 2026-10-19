@@ -72,11 +72,23 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         modelBuilder.Entity<TimetableSlot>(e =>
             e.HasIndex(x => new { x.AcademicYearId, x.SectionId, x.DayOfWeek, x.PeriodId }).IsUnique());
         modelBuilder.Entity<SubstitutionNeed>(e =>
-            e.HasIndex(x => new { x.SchoolId, x.Date, x.Status }));
+        {
+            e.HasIndex(x => new { x.SchoolId, x.Date, x.Status });
+            e.HasIndex(x => new { x.TenantId, x.TimetableSlotId, x.Date })
+                .IsUnique()
+                .HasFilter("\"Status\" <> 2");
+        });
         modelBuilder.Entity<WeeklyLessonPlan>(e =>
             e.HasIndex(x => new { x.SchoolId, x.WeekStart, x.SectionId, x.SubjectId, x.EmployeeId }).IsUnique());
         modelBuilder.Entity<ClassDiary>(e =>
-            e.HasIndex(x => new { x.SchoolId, x.Date, x.SectionId, x.EmployeeId, x.SubjectId }).IsUnique());
+        {
+            e.HasIndex(x => new { x.SchoolId, x.Date, x.SectionId, x.EmployeeId, x.SubjectId }).IsUnique();
+            e.HasIndex(x => new { x.TenantId, x.SchoolId, x.Date, x.SectionId, x.EmployeeId })
+                .IsUnique()
+                .HasFilter("\"SubjectId\" IS NULL");
+        });
+        modelBuilder.Entity<WeeklyLessonPlanDay>(e =>
+            e.HasIndex(x => new { x.TenantId, x.PlanId, x.DayOfWeek }).IsUnique());
     }
 
     private static System.Linq.Expressions.LambdaExpression BuildSoftDeleteFilter(Type type)

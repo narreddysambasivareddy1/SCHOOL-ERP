@@ -4,11 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { ButtonModule } from 'primeng/button';
+import { EditorModule } from 'primeng/editor';
+import { FileUploadModule } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
 
 @Component({
   selector: 'app-diary',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonModule, EditorModule, FileUploadModule, TableModule],
   template: `
     <div class="page-header">
       <div class="eyebrow">CLASS WORK</div>
@@ -20,18 +24,24 @@ import { AuthService } from '../../core/auth/auth.service';
 
     <div class="toolbar">
       <input type="date" [(ngModel)]="date" (ngModelChange)="refresh()" />
-      <select [(ngModel)]="form.classId" (ngModelChange)="onClass()">
+      <select aria-label="Class" [(ngModel)]="form.classId" (ngModelChange)="onClass()">
         <option value="">Class</option>
-        @for (c of classes(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+        @for (cls of classOptions(); track cls.id) { <option [value]="cls.id">{{ cls.name }}</option> }
       </select>
-      <select [(ngModel)]="form.sectionId" (ngModelChange)="refresh()">
+      <select aria-label="Section" [(ngModel)]="form.sectionId" (ngModelChange)="onSection()">
         <option value="">Section</option>
-        @for (s of sections(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+        @for (section of sections(); track section.id) { <option [value]="section.id">{{ section.name }}</option> }
       </select>
-      <select [(ngModel)]="form.subjectId">
+      <select aria-label="Subject" [(ngModel)]="form.subjectId">
         <option value="">Subject</option>
-        @for (s of subjects(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+        @for (subject of subjectOptions(); track subject.id) { <option [value]="subject.id">{{ subject.name }}</option> }
       </select>
+      @if (admin) {
+        <select aria-label="Teacher" [(ngModel)]="form.employeeId">
+          <option value="">Teacher</option>
+          @for (teacher of teachers(); track teacher.id) { <option [value]="teacher.id">{{ teacher.fullName }}</option> }
+        </select>
+      }
     </div>
 
     @if (canEdit) {
@@ -39,14 +49,16 @@ import { AuthService } from '../../core/auth/auth.service';
         <form class="card" (ngSubmit)="saveDigital()">
           <h3>Digital card</h3>
           <label>Class notes</label>
-          <textarea [(ngModel)]="form.notes" name="notes" rows="5"></textarea>
+          <p-editor [(ngModel)]="form.notes" name="notes" [style]="{ height: '180px' }" />
           <label>Homework</label>
-          <textarea [(ngModel)]="form.homework" name="hw" rows="4"></textarea>
-          <button type="submit">Publish card</button>
+          <p-editor [(ngModel)]="form.homework" name="hw" [style]="{ height: '140px' }" />
+          <p-button type="submit" label="Publish card" [disabled]="!form.classId || !form.sectionId || (admin && !form.employeeId)" />
         </form>
         <div class="card">
           <h3>Scan / PDF upload</h3>
-          <input type="file" accept="image/*,.pdf" (change)="upload($event)" />
+          <p-fileUpload mode="basic" chooseLabel="Choose and upload scan" accept=".pdf,.png,.jpg,.jpeg,.webp"
+            [maxFileSize]="8000000" [auto]="true" [customUpload]="true"
+            (uploadHandler)="upload($event.files)" />
         </div>
       </div>
     }
@@ -54,10 +66,15 @@ import { AuthService } from '../../core/auth/auth.service';
     @if (admin) {
       <div class="card">
         <h3>Compliance · {{ compliance()?.submitted || 0 }} submitted · {{ compliance()?.pending || 0 }} pending</h3>
-        <button type="button" (click)="remind()">Remind pending teachers</button>
-        @for (r of compliance()?.rows || []; track r.employeeId + r.sectionId) {
-          <div class="row"><span>{{ r.teacher }} · {{ r.className }} {{ r.sectionName }}</span><strong>{{ r.status }}</strong></div>
-        }
+        <label>Daily deadline <input type="time" [(ngModel)]="deadlineValue" /></label>
+        <p-button label="Save deadline" [outlined]="true" (onClick)="saveDeadline()" />
+        <p-button label="Remind pending teachers" (onClick)="remind()" />
+        <p-table [value]="compliance()?.rows || []" responsiveLayout="scroll">
+          <ng-template pTemplate="header"><tr><th>Teacher</th><th>Section</th><th>Status</th></tr></ng-template>
+          <ng-template pTemplate="body" let-r>
+            <tr><td>{{ r.teacher }}</td><td>{{ r.className }} {{ r.sectionName }}</td><td>{{ r.status }}</td></tr>
+          </ng-template>
+        </p-table>
       </div>
     }
 
@@ -66,23 +83,23 @@ import { AuthService } from '../../core/auth/auth.service';
         <article class="slide">
           <header>{{ d.className }} {{ d.sectionName }} · {{ d.subject || 'General' }}</header>
           <small>{{ d.teacher }} · {{ d.mode }}{{ d.isLate ? ' · late' : '' }}</small>
-          @if (d.notes) { <p>{{ d.notes }}</p> }
-          @if (d.homework) { <p class="hw"><strong>Homework</strong> {{ d.homework }}</p> }
-          @if (d.url) { <a [href]="d.url" target="_blank">Open scan</a> }
+          @if (d.notes) { <div class="rich-text" [innerHTML]="d.notes"></div> }
+          @if (d.homework) { <div class="hw"><strong>Homework</strong><div class="rich-text" [innerHTML]="d.homework"></div></div> }
+          @if (d.url) { <p-button label="Download scan" [link]="true" (onClick)="downloadScan(d)" /> }
         </article>
       } @empty { <p class="text-muted">No diary cards for this date.</p> }
     </div>
   `,
   styles: [`
-    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; margin-bottom: 16px; align-items: end; }
+    .toolbar select { width: 100%; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; }
     .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .card, .slide { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
-    textarea, input, select, button { font: inherit; width: 100%; box-sizing: border-box; margin: 6px 0; padding: 8px; border-radius: 8px; border: 1px solid var(--line); }
-    button { background: var(--primary); color: white; border: 0; cursor: pointer; width: auto; }
+    input { font: inherit; width: 100%; box-sizing: border-box; margin: 6px 0; padding: 8px; border-radius: 8px; border: 1px solid var(--line); }
     .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 12px; margin-top: 16px; }
     .slide header { font-weight: 800; color: var(--navy); }
     .hw { background: #f8fafc; padding: 8px; border-radius: 8px; }
-    .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .rich-text { overflow-wrap: anywhere; }
     .ok { background: #e5f8f1; color: #087d68; padding: 8px; border-radius: 8px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 8px; border-radius: 8px; }
     @media (max-width: 800px) { .split { grid-template-columns: 1fr; } }
@@ -96,9 +113,12 @@ export class DiaryComponent implements OnInit {
   classes = signal<any[]>([]);
   sections = signal<any[]>([]);
   subjects = signal<any[]>([]);
+  teachers = signal<any[]>([]);
+  assignments = signal<any[]>([]);
   diaries = signal<any[]>([]);
   compliance = signal<any>(null);
-  form = { classId: '', sectionId: '', subjectId: '', notes: '', homework: '' };
+  form = { classId: '', sectionId: '', subjectId: '', employeeId: '', notes: '', homework: '' };
+  deadlineValue = '16:30';
   notice = signal<string | null>(null);
   error = signal<string | null>(null);
 
@@ -111,15 +131,51 @@ export class DiaryComponent implements OnInit {
     if (!this.ctx.schoolId) return;
     this.api.getClasses(this.ctx.schoolId).subscribe({ next: c => this.classes.set(c) });
     this.api.getSubjects(this.ctx.schoolId).subscribe({ next: s => this.subjects.set(s) });
-    this.api.getTimetableSettings(this.ctx.schoolId).subscribe({ next: s => this.deadline.set(s.diaryDeadline) });
+    if (!this.admin && this.canEdit) {
+      this.api.getTeacherAssignments(this.ctx.schoolId, this.ctx.academicYearId).subscribe({
+        next: assignments => { this.assignments.set(assignments); if (this.form.classId) this.onClass(); },
+        error: () => this.error.set('Could not load your teaching assignments.')
+      });
+    }
+    if (this.admin) {
+      this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({
+        next: r => this.teachers.set((r.items || []).map((e: any) => ({ ...e, fullName: `${e.firstName} ${e.lastName}` })))
+      });
+    }
+    this.api.getTimetableSettings(this.ctx.schoolId).subscribe({
+      next: s => { this.deadline.set(s.diaryDeadline); this.deadlineValue = s.diaryDeadline; },
+      error: () => this.error.set('Could not load diary settings.')
+    });
     this.refresh();
   }
 
   onClass() {
     const cls = this.classes().find(c => c.id === this.form.classId);
-    this.sections.set(cls?.sections || []);
+    const assignedSections = this.assignments().filter(a => a.classId === this.form.classId);
+    this.sections.set(this.admin ? cls?.sections || [] :
+      (cls?.sections || []).filter((s: any) => assignedSections.some(a => a.sectionId === s.id)));
     this.form.sectionId = this.sections()[0]?.id || '';
+    this.form.subjectId = '';
     this.refresh();
+  }
+
+  onSection() {
+    this.form.subjectId = '';
+    this.refresh();
+  }
+
+  classOptions() {
+    if (this.admin) return this.classes();
+    const ids = new Set(this.assignments().map(a => a.classId));
+    return this.classes().filter(c => ids.has(c.id));
+  }
+
+  subjectOptions() {
+    if (this.admin) return this.subjects();
+    const ids = new Set(this.assignments()
+      .filter(a => a.sectionId === this.form.sectionId)
+      .map(a => a.subjectId));
+    return this.subjects().filter(s => ids.has(s.id));
   }
 
   refresh() {
@@ -133,6 +189,7 @@ export class DiaryComponent implements OnInit {
     this.api.saveDiary(this.ctx.schoolId, {
       academicYearId: this.ctx.academicYearId, date: this.date,
       classId: this.form.classId, sectionId: this.form.sectionId, subjectId: this.form.subjectId || null,
+      ...(this.admin ? { employeeId: this.form.employeeId } : {}),
       notes: this.form.notes, homework: this.form.homework
     }).subscribe({
       next: r => { this.notice.set(r.isLate ? 'Saved after the deadline.' : 'Diary card published.'); this.refresh(); },
@@ -140,14 +197,37 @@ export class DiaryComponent implements OnInit {
     });
   }
 
-  upload(ev: Event) {
-    const file = (ev.target as HTMLInputElement).files?.[0];
+  upload(files: File[]) {
+    const file = files[0];
     if (!file) return;
-    this.api.uploadDiaryScan(this.ctx.schoolId, this.ctx.academicYearId, this.date, this.form.classId, this.form.sectionId, this.form.subjectId || null, file)
+    this.api.uploadDiaryScan(
+      this.ctx.schoolId, this.ctx.academicYearId, this.date, this.form.classId, this.form.sectionId,
+      this.form.subjectId || null, file, this.admin ? this.form.employeeId : undefined)
       .subscribe({
         next: () => { this.notice.set('Scan uploaded.'); this.refresh(); },
         error: e => this.error.set(e?.error?.error || 'Upload failed.')
       });
+  }
+
+  saveDeadline() {
+    this.api.saveTimetableSettings(this.ctx.schoolId, this.deadlineValue).subscribe({
+      next: () => { this.deadline.set(this.deadlineValue); this.notice.set('Diary deadline updated.'); },
+      error: e => this.error.set(e?.error?.error || 'Could not save the deadline.')
+    });
+  }
+
+  downloadScan(diary: any) {
+    this.api.getDiaryScan(this.ctx.schoolId, diary.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = diary.fileName || 'class-diary-scan';
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.error.set('Could not download the diary scan.')
+    });
   }
 
   remind() {

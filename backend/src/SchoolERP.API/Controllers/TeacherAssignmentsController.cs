@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolERP.Domain.Entities;
+using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.API.Controllers;
@@ -16,8 +17,12 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
     public async Task<IActionResult> GetAll(Guid schoolId, [FromQuery] Guid academicYearId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var yearExists = await db.AcademicYears.AnyAsync(y =>
+            y.Id == academicYearId && y.SchoolId == schoolId && y.TenantId == tenantId, ct);
+        if (!yearExists) return NotFound(new { error = "Academic year not found for this school." });
         var list = await db.TeacherAssignments
-            .Where(a => a.TenantId == tenantId && a.AcademicYearId == academicYearId && a.IsActive)
+            .Where(a => a.TenantId == tenantId && a.AcademicYearId == academicYearId &&
+                a.Employee!.SchoolId == schoolId && a.IsActive)
             .Include(a => a.Employee)
             .Include(a => a.Subject)
             .Include(a => a.Class)
@@ -25,6 +30,7 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
             .Select(a => new
             {
                 a.Id,
+                a.EmployeeId, a.SubjectId, a.ClassId, a.SectionId,
                 teacher = $"{a.Employee!.FirstName} {a.Employee.LastName}",
                 employeeCode = a.Employee.EmployeeCode,
                 subject = a.Subject!.Name,
@@ -43,18 +49,37 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
 
-        var exists = await db.TeacherAssignments.AnyAsync(a =>
+        var valid = await db.AcademicYears.AnyAsync(y => y.Id == req.AcademicYearId &&
+                y.SchoolId == schoolId && y.TenantId == tenantId, ct)
+            && await db.Employees.AnyAsync(e => e.Id == req.EmployeeId && e.SchoolId == schoolId &&
+                e.TenantId == tenantId && e.Status == EmployeeStatus.Active, ct)
+            && await db.Subjects.AnyAsync(s => s.Id == req.SubjectId && s.SchoolId == schoolId &&
+                s.TenantId == tenantId, ct)
+            && await db.Classes.AnyAsync(c => c.Id == req.ClassId && c.SchoolId == schoolId &&
+                c.TenantId == tenantId, ct)
+            && await db.Sections.AnyAsync(s => s.Id == req.SectionId && s.TenantId == tenantId &&
+                s.ClassId == req.ClassId, ct);
+        if (!valid) return BadRequest(new { error = "The teacher, subject, class, section, or academic year is not valid for this school." });
+
+        var existing = await db.TeacherAssignments.FirstOrDefaultAsync(a =>
             a.TenantId == tenantId && a.AcademicYearId == req.AcademicYearId &&
-            a.EmployeeId == req.EmployeeId && a.SubjectId == req.SubjectId &&
-            a.SectionId == req.SectionId && a.IsActive &&
+            a.EmployeeId == req.EmployeeId && a.SubjectId == req.SubjectId && a.SectionId == req.SectionId &&
             a.PeriodSlot == req.PeriodSlot && a.ElectiveGroup == req.ElectiveGroup, ct);
-        if (exists) return Conflict(new { error = "Assignment already exists for this teacher/subject/section/period/group." });
+        if (existing is not null)
+        {
+            if (existing.IsActive)
+                return Conflict(new { error = "Assignment already exists for this teacher/subject/section/period/group." });
+            existing.IsActive = true;
+            await db.SaveChangesAsync(ct);
+            await audit.LogAsync(tenantId, actor, "TeacherAssignmentReactivated", "TeacherAssignment", existing.Id.ToString());
+            return Ok(new { existing.Id, reactivated = true });
+        }
 
         if (!string.IsNullOrWhiteSpace(req.PeriodSlot))
         {
             var clash = await db.TeacherAssignments.AnyAsync(a =>
                 a.TenantId == tenantId && a.AcademicYearId == req.AcademicYearId &&
-                a.EmployeeId == req.EmployeeId && a.IsActive &&
+                a.EmployeeId == req.EmployeeId && a.IsActive && a.Employee!.SchoolId == schoolId &&
                 a.PeriodSlot == req.PeriodSlot, ct);
             if (clash) return Conflict(new { error = $"Scheduling conflict: this teacher is already mapped to period {req.PeriodSlot}." });
         }
@@ -80,7 +105,8 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
-        var a = await db.TeacherAssignments.FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId, ct);
+        var a = await db.TeacherAssignments.FirstOrDefaultAsync(x => x.Id == id &&
+            x.TenantId == tenantId && x.Employee!.SchoolId == schoolId, ct);
         if (a is null) return NotFound();
         a.IsActive = false;
         await db.SaveChangesAsync(ct);

@@ -264,15 +264,22 @@ export class ApiService {
   saveDiary(schoolId: string, body: any) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/diaries`, body);
   }
-  uploadDiaryScan(schoolId: string, academicYearId: string, date: string, classId: string, sectionId: string, subjectId: string | null, file: File) {
+  uploadDiaryScan(
+    schoolId: string, academicYearId: string, date: string, classId: string, sectionId: string,
+    subjectId: string | null, file: File, employeeId?: string
+  ) {
     const data = new FormData();
     data.append('academicYearId', academicYearId);
     data.append('date', date);
     data.append('classId', classId);
     data.append('sectionId', sectionId);
     if (subjectId) data.append('subjectId', subjectId);
+    if (employeeId) data.append('employeeId', employeeId);
     data.append('file', file);
     return this.http.post<any>(`${this.base}/schools/${schoolId}/diaries/scan`, data);
+  }
+  getDiaryScan(schoolId: string, diaryId: string) {
+    return this.http.get(`${this.base}/schools/${schoolId}/diaries/${diaryId}/scan`, { responseType: 'blob' });
   }
   getDiaryCompliance(schoolId: string, academicYearId: string, date?: string) {
     let params = new HttpParams().set('academicYearId', academicYearId);
