@@ -92,6 +92,7 @@ export class AuthService {
     if (roles.includes('Parent')) return '/parent/dashboard';
     if (roles.includes('Teacher') || roles.includes('AttendanceOfficer')) return '/teacher/dashboard';
     if (roles.includes('Student')) return '/student/dashboard';
+    if (roles.includes('FrontOffice')) return '/enquiries';
     return '/dashboard';
   }
 
@@ -101,6 +102,7 @@ export class AuthService {
     if (portal === 'teacher') return '/teacher/login';
     if (portal === 'student') return '/student/login';
     if (portal === 'admin') return '/admin/login';
+    if (portal === 'frontOffice') return '/front-office/login';
     return '/login';
   }
 

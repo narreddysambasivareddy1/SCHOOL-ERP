@@ -24,6 +24,18 @@ public partial class AppDbContext
     public DbSet<SchoolAnnouncement> SchoolAnnouncements => Set<SchoolAnnouncement>();
     public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<Enquiry> Enquiries => Set<Enquiry>();
+    public DbSet<EnquiryActivity> EnquiryActivities => Set<EnquiryActivity>();
+    public DbSet<EnquiryOtpChallenge> EnquiryOtpChallenges => Set<EnquiryOtpChallenge>();
     public DbSet<PayrollRun> PayrollRuns => Set<PayrollRun>();
     public DbSet<Payslip> Payslips => Set<Payslip>();
+    public DbSet<StudentRegistration> StudentRegistrations => Set<StudentRegistration>();
+    public DbSet<StudentDocument> StudentDocuments => Set<StudentDocument>();
+    public DbSet<SchoolAcademicSetting> SchoolAcademicSettings => Set<SchoolAcademicSetting>();
+    public DbSet<TimetablePeriod> TimetablePeriods => Set<TimetablePeriod>();
+    public DbSet<TimetableSlot> TimetableSlots => Set<TimetableSlot>();
+    public DbSet<SubstitutionNeed> SubstitutionNeeds => Set<SubstitutionNeed>();
+    public DbSet<WeeklyLessonPlan> WeeklyLessonPlans => Set<WeeklyLessonPlan>();
+    public DbSet<WeeklyLessonPlanDay> WeeklyLessonPlanDays => Set<WeeklyLessonPlanDay>();
+    public DbSet<ClassDiary> ClassDiaries => Set<ClassDiary>();
 }

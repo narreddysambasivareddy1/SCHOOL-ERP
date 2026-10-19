@@ -101,4 +101,14 @@ public class StudentService(AppDbContext db) : IStudentService
 
         return (await GetStudentAsync(student.Id, schoolId, ct))!;
     }
+
+    public async Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default)
+    {
+        if (!Enum.TryParse<StudentStatus>(status, true, out var next) || next is StudentStatus.Enquiry)
+            throw new InvalidOperationException("Invalid student status.");
+        var student = await db.Students.FirstOrDefaultAsync(s => s.Id == id && s.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Student not found.");
+        student.Status = next;
+        await db.SaveChangesAsync(ct);
+    }
 }

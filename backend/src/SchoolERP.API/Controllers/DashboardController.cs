@@ -48,6 +48,12 @@ public class DashboardController(AppDbContext db) : ControllerBase
                 && p.PaidAt.Value.Year == now.Year)
             .SumAsync(p => (decimal?)p.Amount, ct) ?? 0;
 
+        var enquiryNew = await db.Enquiries.CountAsync(e =>
+            e.TenantId == tenantId && e.SchoolId == schoolId && e.Status == EnquiryStatus.New, ct);
+        var enquiryOpen = await db.Enquiries.CountAsync(e =>
+            e.TenantId == tenantId && e.SchoolId == schoolId
+            && e.Status != EnquiryStatus.Converted && e.Status != EnquiryStatus.Rejected, ct);
+
         var from = today.AddDays(-6);
         var week = await db.AttendanceSessions
             .Where(s => s.TenantId == tenantId && s.SchoolId == schoolId && s.Date >= from && s.Date <= today)
@@ -71,6 +77,8 @@ public class DashboardController(AppDbContext db) : ControllerBase
             attendancePct,
             attendanceMarked = totalRecords > 0,
             feeCollectedThisMonth = feeTotal,
+            enquiryNew,
+            enquiryOpen,
             attendanceTrend
         });
     }

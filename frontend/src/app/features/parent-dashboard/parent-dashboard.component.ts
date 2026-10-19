@@ -106,7 +106,7 @@ const CHILD_KEY = 'erp_active_child';
         <div class="card">
           <div class="card-header">
             <div class="card-title">Homework</div>
-            <a routerLink="/academics" class="card-link">Academics</a>
+            <a routerLink="/lesson-plans" class="card-link">Week topics</a>
           </div>
           @if (loadingHw()) {
             <div class="empty-row">Loading…</div>

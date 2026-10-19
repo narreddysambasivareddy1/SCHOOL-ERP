@@ -43,7 +43,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         modelBuilder.Entity<Student>(e => e.HasIndex(x => new { x.SchoolId, x.StudentCode }).IsUnique());
         modelBuilder.Entity<Employee>(e => e.HasIndex(x => new { x.SchoolId, x.EmployeeCode }).IsUnique());
         modelBuilder.Entity<TeacherAssignment>(e =>
-            e.HasIndex(x => new { x.AcademicYearId, x.EmployeeId, x.SubjectId, x.SectionId }).IsUnique());
+            e.HasIndex(x => new { x.AcademicYearId, x.EmployeeId, x.SubjectId, x.SectionId, x.PeriodSlot, x.ElectiveGroup }).IsUnique());
         modelBuilder.Entity<AuditEvent>(e =>
         {
             e.HasIndex(x => new { x.TenantId, x.OccurredAt });
@@ -57,6 +57,26 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             e.HasIndex(x => new { x.SchoolId, x.ProviderKey }).IsUnique());
         modelBuilder.Entity<PayrollRun>(e =>
             e.HasIndex(x => new { x.SchoolId, x.PeriodYear, x.PeriodMonth }).IsUnique());
+        modelBuilder.Entity<Enquiry>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.Status, x.CreatedAt }));
+        modelBuilder.Entity<EnquiryOtpChallenge>(e =>
+            e.HasIndex(x => new { x.Phone, x.CreatedAt }));
+        modelBuilder.Entity<StudentRegistration>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.RegistrationNumber }).IsUnique());
+        modelBuilder.Entity<StudentDocument>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.StudentId, x.Kind }));
+        modelBuilder.Entity<SchoolAcademicSetting>(e =>
+            e.HasIndex(x => x.SchoolId).IsUnique());
+        modelBuilder.Entity<TimetablePeriod>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.AcademicYearId, x.SortOrder }).IsUnique());
+        modelBuilder.Entity<TimetableSlot>(e =>
+            e.HasIndex(x => new { x.AcademicYearId, x.SectionId, x.DayOfWeek, x.PeriodId }).IsUnique());
+        modelBuilder.Entity<SubstitutionNeed>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.Date, x.Status }));
+        modelBuilder.Entity<WeeklyLessonPlan>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.WeekStart, x.SectionId, x.SubjectId, x.EmployeeId }).IsUnique());
+        modelBuilder.Entity<ClassDiary>(e =>
+            e.HasIndex(x => new { x.SchoolId, x.Date, x.SectionId, x.EmployeeId, x.SubjectId }).IsUnique());
     }
 
     private static System.Linq.Expressions.LambdaExpression BuildSoftDeleteFilter(Type type)

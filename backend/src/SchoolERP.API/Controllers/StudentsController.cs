@@ -38,4 +38,16 @@ public class StudentsController(IStudentService studentService, IAuditService au
             newValues: new { student.StudentCode, student.FirstName, student.LastName });
         return CreatedAtAction(nameof(Get), new { schoolId, id = student.Id }, student);
     }
+
+    [HttpPost("{id:guid}/status")]
+    [Authorize(Roles = "SchoolAdmin,AdmissionOfficer")]
+    public async Task<IActionResult> Status(Guid schoolId, Guid id, [FromBody] StatusToggleRequest body, CancellationToken ct)
+    {
+        try
+        {
+            await studentService.SetStatusAsync(id, schoolId, body.Status, ct);
+            return Ok(new { id, status = body.Status });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 }

@@ -133,6 +133,12 @@ public static partial class DbSeeder
         if (string.IsNullOrWhiteSpace(school.Currency)) school.Currency = "INR";
 
         var roles = await db.Roles.ToListAsync();
+        if (!roles.Any(r => r.Name == "FrontOffice"))
+        {
+            db.Roles.Add(new Role { Name = "FrontOffice", Description = "Front office / admission counselor" });
+            await db.SaveChangesAsync();
+            roles = await db.Roles.ToListAsync();
+        }
         if (roles.Count == 0) return;
 
         var ay = await db.AcademicYears.FirstOrDefaultAsync(a => a.SchoolId == school.Id && a.IsCurrent)
@@ -161,6 +167,7 @@ public static partial class DbSeeder
         new Role { Id = Guid.NewGuid(), Name = "HRManager" },
         new Role { Id = Guid.NewGuid(), Name = "Accountant" },
         new Role { Id = Guid.NewGuid(), Name = "AdmissionOfficer" },
+        new Role { Id = Guid.NewGuid(), Name = "FrontOffice", Description = "Front office / admission counselor" },
         new Role { Id = Guid.NewGuid(), Name = "AttendanceOfficer" },
         new Role { Id = Guid.NewGuid(), Name = "TransportManager" },
         new Role { Id = Guid.NewGuid(), Name = "PayrollOfficer" },
@@ -193,6 +200,7 @@ public static partial class DbSeeder
         }
 
         await EnsureUser("admin@school.edu", "School", "Admin", "SchoolAdmin");
+        await EnsureUser("frontoffice@school.edu", "Neha", "Kapoor", "FrontOffice");
         await EnsureUser("teacher@school.edu", "Maya", "Iyer", "Teacher");
         var studentUser = await EnsureUser("student@school.edu", "Aarav", "Mehta", "Student");
         var parentUser = await EnsureUser("parent@school.edu", "Priya", "Mehta", "Parent");

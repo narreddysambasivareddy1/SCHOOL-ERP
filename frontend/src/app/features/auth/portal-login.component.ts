@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/auth/auth.service';
 import { ApiService } from '../../core/services/api.service';
 
-export type PortalRole = 'admin' | 'teacher' | 'student' | 'parent';
+export type PortalRole = 'admin' | 'teacher' | 'student' | 'parent' | 'frontOffice';
 
 interface PortalConfig {
   title: string;
@@ -53,6 +53,15 @@ const PORTAL_CONFIG: Record<PortalRole, PortalConfig> = {
     accentBg: 'linear-gradient(135deg,#92400e,#d97706)',
     roleHint: 'Parent · Guardian',
     dashboardRoute: '/parent/dashboard',
+  },
+  frontOffice: {
+    title: 'Front Office Portal',
+    subtitle: 'Verified enquiries, follow-ups and conversion',
+    icon: 'pi pi-inbox',
+    accentColor: '#0F8B8D',
+    accentBg: 'linear-gradient(135deg,#0e7c7b,#14b8a6)',
+    roleHint: 'Front office · Admission counselor',
+    dashboardRoute: '/enquiries',
   },
 };
 
@@ -124,6 +133,7 @@ const PORTAL_CONFIG: Record<PortalRole, PortalConfig> = {
             @if (role !== 'teacher') { <a routerLink="/teacher/login">Teacher</a> }
             @if (role !== 'student') { <a routerLink="/student/login">Student</a> }
             @if (role !== 'parent') { <a routerLink="/parent/login">Parent</a> }
+            @if (role !== 'frontOffice') { <a routerLink="/front-office/login">Front office</a> }
           </div>
         </div>
       </div>
@@ -226,7 +236,8 @@ export class PortalLoginComponent implements OnInit {
   private destination(): string {
     const roles = this.auth.user()?.roles ?? [];
     const expected: Record<PortalRole, string[]> = {
-      admin: ['SchoolAdmin','PlatformSuperAdmin','Accountant','HRManager','AdmissionOfficer','TransportManager'],
+      admin: ['SchoolAdmin','PlatformSuperAdmin','Accountant','HRManager','AdmissionOfficer','TransportManager','FrontOffice'],
+      frontOffice: ['FrontOffice','AdmissionOfficer','SchoolAdmin'],
       teacher: ['Teacher','AttendanceOfficer'],
       student: ['Student'],
       parent: ['Parent'],

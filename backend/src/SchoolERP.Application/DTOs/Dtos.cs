@@ -36,7 +36,27 @@ public record CreateEmployeeRequest(string FirstName, string LastName, string? E
 
 // Teacher Assignments
 public record TeacherAssignmentDto(Guid Id, string TeacherName, string SubjectName, string ClassName, string SectionName, bool CanTakeAttendance, bool CanSetHomework, bool CanEnterMarks, bool IsActive);
-public record CreateTeacherAssignmentRequest(Guid AcademicYearId, Guid EmployeeId, Guid SubjectId, Guid ClassId, Guid SectionId);
+public record CreateTeacherAssignmentRequest(
+    Guid AcademicYearId, Guid EmployeeId, Guid SubjectId, Guid ClassId, Guid SectionId,
+    string? PeriodSlot = null, string? ElectiveGroup = null);
+
+public record CreateRegistrationRequest(
+    Guid AcademicYearId,
+    string FirstName,
+    string LastName,
+    DateOnly DateOfBirth,
+    string? Gender,
+    Guid PreferredClassId,
+    Guid PreferredSectionId,
+    string GuardianName,
+    string GuardianPhone,
+    string? GuardianEmail,
+    string Relationship,
+    decimal RegistrationFeeAmount);
+
+public record PayRegistrationFeeRequest(decimal Amount, string? Method);
+
+public record StatusToggleRequest(string Status);
 
 // School
 public record SchoolDto(Guid Id, string Name, string? LogoUrl, string? PrimaryColor, string TimeZone, string DefaultLanguage, string Locale, string Currency);

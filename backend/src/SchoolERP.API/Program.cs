@@ -22,6 +22,7 @@ try
 
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddControllers();
+    builder.Services.AddSignalR();
     builder.Services.AddEndpointsApiExplorer();
 
     // Health checks
@@ -48,6 +49,16 @@ try
                 RoleClaimType = System.Security.Claims.ClaimTypes.Role,
                 NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub
             };
+            opts.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    var access = ctx.Request.Query["access_token"];
+                    if (!string.IsNullOrEmpty(access) && ctx.HttpContext.Request.Path.StartsWithSegments("/hubs/enquiries"))
+                        ctx.Token = access;
+                    return Task.CompletedTask;
+                }
+            };
         });
     builder.Services.AddAuthorization();
 
@@ -67,8 +78,9 @@ try
     });
 
     builder.Services.AddCors(opts => opts.AddPolicy("Frontend", p =>
-        p.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? ["http://localhost:4200"])
-         .AllowAnyHeader().AllowAnyMethod()));
+        p.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+              ?? ["http://localhost:4200", "http://127.0.0.1:8200", "http://localhost:8181", "http://127.0.0.1:8181"])
+         .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
     var app = builder.Build();
 
@@ -87,10 +99,19 @@ try
     }
 
     app.UseSerilogRequestLogging();
+    var uploadRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
+    Directory.CreateDirectory(uploadRoot);
+    app.UseStaticFiles();
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadRoot),
+        RequestPath = "/uploads"
+    });
     app.UseCors("Frontend");
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+    app.MapHub<SchoolERP.API.Hubs.EnquiryHub>("/hubs/enquiries");
     app.MapHealthChecks("/health", new HealthCheckOptions
     {
         ResponseWriter = async (ctx, report) =>

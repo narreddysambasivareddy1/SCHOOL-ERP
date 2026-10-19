@@ -214,6 +214,89 @@ public static partial class DbSeeder
             db.PayrollRuns.Add(run);
         }
 
+        async Task<Subject> EnsureSubject(string code, string name)
+        {
+            var existing = await db.Subjects.FirstOrDefaultAsync(s => s.SchoolId == schoolId && s.Code == code);
+            if (existing is not null) return existing;
+            existing = new Subject { TenantId = tenantId, SchoolId = schoolId, Name = name, Code = code };
+            db.Subjects.Add(existing);
+            await db.SaveChangesAsync();
+            return existing;
+        }
+        var pt = await EnsureSubject("PT", "P.T.");
+        var craft = await EnsureSubject("CRAFT", "Craft");
+        var karate = await EnsureSubject("KARATE", "Karate");
+        await EnsureAssignment(maya, pt, grade5, g5a);
+        await EnsureAssignment(ravi, craft, grade5, g5a);
+        await EnsureAssignment(maya, karate, grade5, g5b);
+
+        if (!await db.SchoolAcademicSettings.AnyAsync(s => s.SchoolId == schoolId))
+            db.SchoolAcademicSettings.Add(new SchoolAcademicSetting { TenantId = tenantId, SchoolId = schoolId, DiaryDeadline = new TimeOnly(16, 30) });
+
+        if (!await db.TimetablePeriods.AnyAsync(p => p.SchoolId == schoolId && p.AcademicYearId == ay.Id))
+        {
+            var defs = new (string Name, int Order, string Start, string End, PeriodBand Band)[]
+            {
+                ("M1", 1, "08:00", "08:45", PeriodBand.Morning),
+                ("M2", 2, "08:45", "09:30", PeriodBand.Morning),
+                ("M3", 3, "09:30", "10:15", PeriodBand.Morning),
+                ("E1", 4, "10:45", "11:30", PeriodBand.Evening),
+                ("E2", 5, "11:30", "12:15", PeriodBand.Evening),
+                ("E3", 6, "12:15", "13:00", PeriodBand.Evening),
+                ("E4", 7, "13:45", "14:30", PeriodBand.Evening),
+            };
+            foreach (var d in defs)
+                db.TimetablePeriods.Add(new TimetablePeriod
+                {
+                    TenantId = tenantId, SchoolId = schoolId, AcademicYearId = ay.Id, Name = d.Name, SortOrder = d.Order,
+                    StartTime = TimeOnly.Parse(d.Start), EndTime = TimeOnly.Parse(d.End), Band = d.Band, CreatedBy = "seed"
+                });
+            await db.SaveChangesAsync();
+        }
+
+        var periods = await db.TimetablePeriods.Where(p => p.SchoolId == schoolId && p.AcademicYearId == ay.Id).OrderBy(p => p.SortOrder).ToListAsync();
+        if (periods.Count >= 4 && !await db.TimetableSlots.AnyAsync(s => s.SchoolId == schoolId && s.SectionId == g5a.Id))
+        {
+            void Slot(int day, TimetablePeriod period, Subject? subject, Employee emp)
+            {
+                if (subject is null) return;
+                db.TimetableSlots.Add(new TimetableSlot
+                {
+                    TenantId = tenantId, SchoolId = schoolId, AcademicYearId = ay.Id, ClassId = grade5.Id, SectionId = g5a.Id,
+                    DayOfWeek = day, PeriodId = period.Id, SubjectId = subject.Id, EmployeeId = emp.Id, CreatedBy = "seed"
+                });
+            }
+            for (var day = 1; day <= 6; day++)
+            {
+                Slot(day, periods[0], math, maya);
+                Slot(day, periods[1], sci, ravi);
+                Slot(day, periods[2], pt, maya);
+                Slot(day, periods[3], craft, ravi);
+            }
+        }
+
+        var weekStart = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(5.5));
+        var iso = (int)weekStart.DayOfWeek;
+        if (iso == 0) iso = 7;
+        weekStart = weekStart.AddDays(-(iso - 1));
+        if (math is not null && !await db.WeeklyLessonPlans.AnyAsync(p => p.SchoolId == schoolId && p.WeekStart == weekStart && p.SectionId == g5a.Id))
+        {
+            db.WeeklyLessonPlans.Add(new WeeklyLessonPlan
+            {
+                TenantId = tenantId, SchoolId = schoolId, AcademicYearId = ay.Id, WeekStart = weekStart,
+                ClassId = grade5.Id, SectionId = g5a.Id, SubjectId = math.Id, EmployeeId = maya.Id, CreatedBy = "seed",
+                Days =
+                [
+                    new WeeklyLessonPlanDay { TenantId = tenantId, DayOfWeek = 1, Topic = "Fractions — like and unlike" },
+                    new WeeklyLessonPlanDay { TenantId = tenantId, DayOfWeek = 2, Topic = "Equivalent fractions" },
+                    new WeeklyLessonPlanDay { TenantId = tenantId, DayOfWeek = 3, Topic = "Adding fractions" },
+                    new WeeklyLessonPlanDay { TenantId = tenantId, DayOfWeek = 4, Topic = "Word problems" },
+                    new WeeklyLessonPlanDay { TenantId = tenantId, DayOfWeek = 5, Topic = "Practice worksheet" },
+                    new WeeklyLessonPlanDay { TenantId = tenantId, DayOfWeek = 6, Topic = "Weekly recap quiz" },
+                ]
+            });
+        }
+
         if (!await db.SchoolAnnouncements.AnyAsync(a => a.SchoolId == schoolId))
         {
             db.SchoolAnnouncements.Add(new SchoolAnnouncement

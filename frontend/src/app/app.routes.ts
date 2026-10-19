@@ -11,6 +11,7 @@ export const routes: Routes = [
   { path: 'teacher/login', loadComponent: () => import('./features/auth/teacher-login.component').then(m => m.TeacherLoginComponent) },
   { path: 'student/login', loadComponent: () => import('./features/auth/student-login.component').then(m => m.StudentLoginComponent) },
   { path: 'parent/login', loadComponent: () => import('./features/auth/parent-login.component').then(m => m.ParentLoginComponent) },
+  { path: 'front-office/login', loadComponent: () => import('./features/auth/front-office-login.component').then(m => m.FrontOfficeLoginComponent) },
 
   // Authenticated shell
   {
@@ -19,12 +20,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       // Admin dashboard
-      { path: 'dashboard', canActivate: [roleGuard(['SchoolAdmin','PlatformSuperAdmin','Accountant','HRManager','AdmissionOfficer','TransportManager'])], loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'dashboard', canActivate: [roleGuard(['SchoolAdmin','PlatformSuperAdmin','Accountant','HRManager','AdmissionOfficer','TransportManager','FrontOffice'])], loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'teacher/dashboard', canActivate: [roleGuard(['Teacher','AttendanceOfficer'])], loadComponent: () => import('./features/teacher-dashboard/teacher-dashboard.component').then(m => m.TeacherDashboardComponent) },
       { path: 'student/dashboard', canActivate: [roleGuard(['Student'])], loadComponent: () => import('./features/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
       { path: 'parent/dashboard', canActivate: [roleGuard(['Parent'])], loadComponent: () => import('./features/parent-dashboard/parent-dashboard.component').then(m => m.ParentDashboardComponent) },
       // Shared modules
       { path: 'admissions', loadComponent: () => import('./features/admissions/admissions.component').then(m => m.AdmissionsComponent) },
+      { path: 'enquiries', canActivate: [roleGuard(['SchoolAdmin','PlatformSuperAdmin','AdmissionOfficer','FrontOffice'])], loadComponent: () => import('./features/enquiries/enquiry-desk.component').then(m => m.EnquiryDeskComponent) },
+      { path: 'registrations', canActivate: [roleGuard(['SchoolAdmin','PlatformSuperAdmin','AdmissionOfficer','FrontOffice'])], loadComponent: () => import('./features/registrations/registrations.component').then(m => m.RegistrationsComponent) },
       { path: 'students', loadComponent: () => import('./features/students/student-list.component').then(m => m.StudentListComponent) },
       { path: 'staff', loadComponent: () => import('./features/staff/staff-list.component').then(m => m.StaffListComponent) },
       { path: 'academics', loadComponent: () => import('./features/academics/academics.component').then(m => m.AcademicsComponent) },
@@ -40,6 +43,9 @@ export const routes: Routes = [
       { path: 'settings', loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'integrations', loadComponent: () => import('./features/integrations/integrations.component').then(m => m.IntegrationsComponent) },
       { path: 'timetable', loadComponent: () => import('./features/timetable/timetable.component').then(m => m.TimetableComponent) },
+      { path: 'substitutions', canActivate: [roleGuard(['SchoolAdmin','PlatformSuperAdmin','HRManager'])], loadComponent: () => import('./features/substitutions/substitutions.component').then(m => m.SubstitutionsComponent) },
+      { path: 'lesson-plans', loadComponent: () => import('./features/lesson-plans/lesson-plans.component').then(m => m.LessonPlansComponent) },
+      { path: 'diary', loadComponent: () => import('./features/diary/diary.component').then(m => m.DiaryComponent) },
       { path: 'audit', loadComponent: () => import('./features/audit/audit.component').then(m => m.AuditComponent) },
       { path: 'calendar', loadComponent: () => import('./features/calendar/calendar.component').then(m => m.CalendarComponent) },
       { path: 'announcements', loadComponent: () => import('./features/announcements/announcements.component').then(m => m.AnnouncementsComponent) },

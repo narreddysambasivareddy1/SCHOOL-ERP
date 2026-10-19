@@ -137,4 +137,151 @@ export class ApiService {
   getPayslips(schoolId: string, runId: string) {
     return this.http.get<any[]>(`${this.base}/schools/${schoolId}/payroll/runs/${runId}/payslips`);
   }
+
+  requestEnquiryOtp(schoolCode: string, body: any) {
+    return this.http.post<any>(`${this.base}/public/${encodeURIComponent(schoolCode)}/enquiries/otp`, body);
+  }
+  verifyEnquiryOtp(schoolCode: string, body: { challengeId: string; otp: string }) {
+    return this.http.post<any>(`${this.base}/public/${encodeURIComponent(schoolCode)}/enquiries/otp/verify`, body);
+  }
+  getEnquiries(schoolId: string, status?: string, kind?: string) {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    if (kind) params = params.set('kind', kind);
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/enquiries`, { params });
+  }
+  getEnquiry(schoolId: string, id: string) {
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/enquiries/${id}`);
+  }
+  getEnquiryStaff(schoolId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/enquiries/staff`);
+  }
+  assignEnquiry(schoolId: string, id: string, assignedToUserId: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/enquiries/${id}/assign`, { assignedToUserId });
+  }
+  updateEnquiryStatus(schoolId: string, id: string, status: string, followUpOn?: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/enquiries/${id}/status`, { status, followUpOn: followUpOn || null });
+  }
+  addEnquiryNote(schoolId: string, id: string, note: string, action = 'Call') {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/enquiries/${id}/notes`, { note, action });
+  }
+
+  getRegistrations(schoolId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/registrations`);
+  }
+  createRegistration(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations`, body);
+  }
+  payRegistrationFee(schoolId: string, id: string, amount: number) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/fee`, { amount, method: 'Cash' });
+  }
+  confirmRegistration(schoolId: string, id: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/confirm`, {});
+  }
+  getAdmissionForm(schoolId: string, id: string) {
+    return this.http.get(`${this.base}/schools/${schoolId}/registrations/${id}/admission-form`, { responseType: 'text' });
+  }
+  issueBonafide(schoolId: string, id: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/bonafide`, {});
+  }
+  registrationDocuments(schoolId: string, id: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/registrations/${id}/documents`);
+  }
+  uploadRegistrationDocument(schoolId: string, id: string, file: File, kind: string) {
+    const data = new FormData();
+    data.append('file', file);
+    data.append('kind', kind);
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/documents`, data);
+  }
+  verifyRegistrationDocument(schoolId: string, documentId: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/documents/${documentId}/verify`, {});
+  }
+  previewStudentImport(schoolId: string, academicYearId: string, file: File) {
+    const data = new FormData();
+    data.append('file', file);
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/import/preview`, data, { params: { academicYearId } });
+  }
+  commitStudentImport(schoolId: string, academicYearId: string, file: File) {
+    const data = new FormData();
+    data.append('file', file);
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/import/commit`, data, { params: { academicYearId } });
+  }
+  setStudentStatus(schoolId: string, id: string, status: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/students/${id}/status`, { status });
+  }
+  setEmployeeStatus(schoolId: string, id: string, status: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/employees/${id}/status`, { status });
+  }
+  createTeacherAssignment(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/teacher-assignments`, body);
+  }
+
+  getTimetableSettings(schoolId: string) {
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/timetable/settings`);
+  }
+  saveTimetableSettings(schoolId: string, diaryDeadline: string) {
+    return this.http.put<any>(`${this.base}/schools/${schoolId}/timetable/settings`, { diaryDeadline });
+  }
+  getPeriods(schoolId: string, academicYearId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/timetable/periods`, { params: { academicYearId } });
+  }
+  savePeriod(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/timetable/periods`, body);
+  }
+  getTimetableGrid(schoolId: string, academicYearId: string, sectionId: string, date?: string) {
+    let params = new HttpParams().set('academicYearId', academicYearId).set('sectionId', sectionId);
+    if (date) params = params.set('date', date);
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/timetable/grid`, { params });
+  }
+  saveTimetableSlot(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/timetable/slots`, body);
+  }
+  getOpsToday(schoolId: string, academicYearId: string) {
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/ops-today`, { params: { academicYearId } });
+  }
+  getSubstitutions(schoolId: string, date: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/substitutions`, { params: { date } });
+  }
+  getAvailableSubstitutes(schoolId: string, academicYearId: string, date: string, periodId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/substitutions/available`, { params: { academicYearId, date, periodId } });
+  }
+  assignSubstitute(schoolId: string, id: string, substituteEmployeeId: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/substitutions/${id}/assign`, { substituteEmployeeId });
+  }
+  getLessonPlans(schoolId: string, weekStart: string, sectionId?: string) {
+    let params = new HttpParams().set('weekStart', weekStart);
+    if (sectionId) params = params.set('sectionId', sectionId);
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/lesson-plans`, { params });
+  }
+  saveLessonPlan(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/lesson-plans`, body);
+  }
+  getDiaries(schoolId: string, date: string, sectionId?: string) {
+    let params = new HttpParams().set('date', date);
+    if (sectionId) params = params.set('sectionId', sectionId);
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/diaries`, { params });
+  }
+  saveDiary(schoolId: string, body: any) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/diaries`, body);
+  }
+  uploadDiaryScan(schoolId: string, academicYearId: string, date: string, classId: string, sectionId: string, subjectId: string | null, file: File) {
+    const data = new FormData();
+    data.append('academicYearId', academicYearId);
+    data.append('date', date);
+    data.append('classId', classId);
+    data.append('sectionId', sectionId);
+    if (subjectId) data.append('subjectId', subjectId);
+    data.append('file', file);
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/diaries/scan`, data);
+  }
+  getDiaryCompliance(schoolId: string, academicYearId: string, date?: string) {
+    let params = new HttpParams().set('academicYearId', academicYearId);
+    if (date) params = params.set('date', date);
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/diaries/compliance`, { params });
+  }
+  remindDiary(schoolId: string, academicYearId: string, date?: string) {
+    let params = new HttpParams().set('academicYearId', academicYearId);
+    if (date) params = params.set('date', date);
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/diaries/remind`, {}, { params });
+  }
 }

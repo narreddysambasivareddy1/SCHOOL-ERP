@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolERP.Application.DTOs;
 using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
+using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.Infrastructure.Services;
@@ -66,6 +67,16 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
 
         return new EmployeeListDto(employee.Id, employee.EmployeeCode,
             employee.FirstName, employee.LastName, null, null, employee.Status.ToString());
+    }
+
+    public async Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default)
+    {
+        if (!Enum.TryParse<EmployeeStatus>(status, true, out var next))
+            throw new InvalidOperationException("Invalid employee status.");
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id && e.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Employee not found.");
+        employee.Status = next;
+        await db.SaveChangesAsync(ct);
     }
 }
 

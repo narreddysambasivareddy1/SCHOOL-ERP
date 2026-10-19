@@ -15,6 +15,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
       <p class="text-muted">Enquiry → application → admitted. New students are created on the SIS record; lifecycle stays on the permanent student identity.</p>
     </div>
     <div class="toolbar">
+      <a routerLink="/enquiries" class="btn">Enquiry desk</a>
+      <a routerLink="/registrations" class="btn">Walk-in registrations</a>
       <a routerLink="/students" class="btn">Open student records</a>
     </div>
     <div class="pipe">

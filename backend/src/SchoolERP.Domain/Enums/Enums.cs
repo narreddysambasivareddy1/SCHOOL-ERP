@@ -5,6 +5,7 @@ public enum StudentStatus
     Enquiry,
     AdmissionPending,
     Active,
+    Inactive,
     OnLeave,
     TransferredOut,
     Withdrawn,
@@ -20,7 +21,8 @@ public enum EmployeeStatus
     Suspended,
     ResignationPending,
     Terminated,
-    Archived
+    Archived,
+    Inactive
 }
 
 public enum PaymentStatus
@@ -51,4 +53,56 @@ public enum NotificationChannel
     Sms,
     WhatsApp,
     WebPush
+}
+
+public enum EnquiryKind
+{
+    Admission,
+    Fees,
+    General
+}
+
+public enum EnquiryStatus
+{
+    Unverified,
+    New,
+    Contacted,
+    SiteVisit,
+    Converted,
+    Rejected
+}
+
+public enum RegistrationStatus
+{
+    Registered,
+    FeePaid,
+    Confirmed,
+    Rejected
+}
+
+public enum StudentDocumentKind
+{
+    Photo,
+    Identity,
+    TransferCertificate,
+    Other
+}
+
+public enum PeriodBand
+{
+    Morning,
+    Evening
+}
+
+public enum SubstitutionStatus
+{
+    Open,
+    Assigned,
+    Cancelled
+}
+
+public enum DiaryEntryMode
+{
+    Digital,
+    Scan
 }

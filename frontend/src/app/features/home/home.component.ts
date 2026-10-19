@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, PublicEnquiryComponent],
   template: `
     <nav class="nav">
       <div class="nav-inner">
@@ -146,6 +147,18 @@ import { RouterLink } from '@angular/router';
             </ul>
             <a routerLink="/parent/login" class="portal-btn parent-btn">Sign in as Parent →</a>
           </div>
+          <div class="portal-card teacher-card">
+            <div class="portal-icon">☎</div>
+            <h3>Front Office</h3>
+            <p>OTP-verified website enquiries, call notes and conversion pipeline.</p>
+            <ul>
+              <li>✓ Lead desk</li>
+              <li>✓ Follow-up dates</li>
+              <li>✓ Assignment</li>
+              <li>✓ Live alerts</li>
+            </ul>
+            <a routerLink="/front-office/login" class="portal-btn teacher-btn">Sign in as Front Office →</a>
+          </div>
         </div>
       </div>
     </section>
@@ -163,9 +176,7 @@ import { RouterLink } from '@angular/router';
           </div>
         </div>
         <div class="cta-box">
-          <h3>Schedule a demo</h3>
-          <p>See EduCampus live with your school's data in under 30 minutes.</p>
-          <a routerLink="/login" class="btn-primary-lg dark">Open workspace →</a>
+          <app-public-enquiry schoolCode="bright-future" title="Admission, fees or general enquiry" />
         </div>
       </div>
     </section>
@@ -254,7 +265,7 @@ import { RouterLink } from '@angular/router';
     .feature-card p { font-size: 12px; color: #718096; margin: 0; line-height: 1.6; }
 
     .portals { background: white; padding: 96px 24px; }
-    .portals-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+    .portals-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; }
     .portal-card { border: 1px solid #e4eaf2; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px; }
     .admin-card { border-top: 4px solid #2463eb; }
     .teacher-card { border-top: 4px solid #0F8B8D; }

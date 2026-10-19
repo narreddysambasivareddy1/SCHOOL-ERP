@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { environment } from '../../../environments/environment';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { ApiService } from '../../core/services/api.service';
 
 interface EmployeeListDto { id: string; employeeCode: string; firstName: string; lastName: string; department?: string; designation?: string; status: string; }
 
@@ -25,7 +26,7 @@ interface EmployeeListDto { id: string; employeeCode: string; firstName: string;
              (onLazyLoad)="onLazy($event)" [totalRecords]="total()"
              [rows]="25" [paginator]="true" styleClass="p-datatable-sm">
       <ng-template pTemplate="header">
-        <tr><th>Employee</th><th>Department</th><th>Designation</th><th>Status</th></tr>
+        <tr><th>Employee</th><th>Department</th><th>Designation</th><th>Status</th><th></th></tr>
       </ng-template>
       <ng-template pTemplate="body" let-e>
         <tr>
@@ -38,10 +39,14 @@ interface EmployeeListDto { id: string; employeeCode: string; firstName: string;
           <td>{{ e.department ?? '—' }}</td>
           <td>{{ e.designation ?? '—' }}</td>
           <td><p-tag [value]="e.status" [severity]="e.status === 'Active' ? 'success' : 'warn'" /></td>
+          <td>
+            <p-button [label]="e.status === 'Active' ? 'Set inactive' : 'Set active'" [outlined]="true"
+              (onClick)="toggle(e)" />
+          </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">No employees found.</td></tr>
+        <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No employees found.</td></tr>
       </ng-template>
     </p-table>
   `,
@@ -63,7 +68,7 @@ export class StaffListComponent implements OnInit {
   private page = 1;
   private pageSize = 25;
 
-  constructor(private http: HttpClient, private ctx: SchoolContextService) {}
+  constructor(private http: HttpClient, private ctx: SchoolContextService, private api: ApiService) {}
 
   ngOnInit() { this.load(); }
 
@@ -73,6 +78,11 @@ export class StaffListComponent implements OnInit {
     this.page = Math.floor(first / rows) + 1;
     this.pageSize = rows;
     this.load();
+  }
+
+  toggle(e: EmployeeListDto) {
+    const next = e.status === 'Active' ? 'Inactive' : 'Active';
+    this.api.setEmployeeStatus(this.ctx.schoolId, e.id, next).subscribe({ next: () => this.load() });
   }
 
   load() {

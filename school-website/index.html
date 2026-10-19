@@ -685,17 +685,26 @@ section { padding: 100px 32px; }
       <div class="reveal-right">
         <div class="enquiry-form">
           <h3>Send an Enquiry</h3>
-          <div class="form-row">
-            <div class="field"><label>Parent Name</label><input type="text" placeholder="Your full name"></div>
-            <div class="field"><label>Phone Number</label><input type="tel" placeholder="+91 98765 43210"></div>
+          <p id="enq-msg" style="font-size:13px;color:var(--muted);margin-bottom:14px">Mobile OTP is required. Unverified submissions are not stored as leads.</p>
+          <div id="enq-step1">
+            <div class="form-row">
+              <div class="field"><label>Parent Name</label><input id="enq-name" type="text" placeholder="Your full name"></div>
+              <div class="field"><label>Phone Number</label><input id="enq-phone" type="tel" placeholder="+91 98765 43210"></div>
+            </div>
+            <div class="field"><label>Email Address</label><input id="enq-email" type="email" required placeholder="name@example.com"></div>
+            <div class="form-row">
+              <div class="field"><label>Student Grade</label><select id="enq-grade"><option value="">Select Grade</option><option>Nursery / KG</option><option>Grade 1–5</option><option>Grade 6–8</option><option>Grade 9–10</option><option>Grade 11–12</option></select></div>
+              <div class="field"><label>Enquiry Type</label><select id="enq-kind"><option>Admission</option><option>Fees</option><option>General</option></select></div>
+            </div>
+            <div class="field"><label>Message</label><textarea id="enq-message" placeholder="Tell us about your requirements..."></textarea></div>
+            <button class="form-submit" type="button" id="enq-send"><i data-lucide="send" style="width:16px;height:16px"></i> Send OTP</button>
           </div>
-          <div class="field"><label>Email Address</label><input type="email" placeholder="you@email.com"></div>
-          <div class="form-row">
-            <div class="field"><label>Student Grade</label><select><option>Select Grade</option><option>Nursery / KG</option><option>Grade 1–5</option><option>Grade 6–8</option><option>Grade 9–10</option><option>Grade 11–12</option></select></div>
-            <div class="field"><label>Enquiry Type</label><select><option>Admissions</option><option>Fee Structure</option><option>Transport</option><option>General</option></select></div>
+          <div id="enq-step2" style="display:none">
+            <div class="field"><label>6-digit OTP</label><input id="enq-otp" type="text" maxlength="6" placeholder="Enter OTP"></div>
+            <p id="enq-sandbox" style="font-size:13px;color:#087d68"></p>
+            <button class="form-submit" type="button" id="enq-verify">Verify &amp; submit</button>
+            <button class="form-submit" type="button" id="enq-back" style="margin-top:10px;background:#fff;color:var(--navy);border:1px solid var(--border)">Change details</button>
           </div>
-          <div class="field"><label>Message</label><textarea placeholder="Tell us about your requirements..."></textarea></div>
-          <button class="form-submit" onclick="alert('Thank you! We will contact you within 24 hours.')"><i data-lucide="send" style="width:16px;height:16px"></i> Send Enquiry</button>
         </div>
       </div>
     </div>
@@ -799,6 +808,82 @@ document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el))
 
 // Init Lucide icons
 lucide.createIcons();
+
+(function () {
+  const schoolCode = 'bright-future';
+  const apiBase = window.SCHOOL_ERP_API || 'http://localhost:8100/api';
+  let challengeId = '';
+  const msg = document.getElementById('enq-msg');
+  const step1 = document.getElementById('enq-step1');
+  const step2 = document.getElementById('enq-step2');
+  const sandbox = document.getElementById('enq-sandbox');
+  async function post(path, body) {
+    const res = await fetch(apiBase + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+  function validEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
+  }
+  function resetEnquiryForm() {
+    document.getElementById('enq-name').value = '';
+    document.getElementById('enq-phone').value = '';
+    document.getElementById('enq-email').value = '';
+    document.getElementById('enq-grade').value = '';
+    document.getElementById('enq-kind').value = 'Admission';
+    document.getElementById('enq-message').value = '';
+    document.getElementById('enq-otp').value = '';
+    sandbox.textContent = '';
+    challengeId = '';
+    step2.style.display = 'none';
+    step1.style.display = 'block';
+  }
+  document.getElementById('enq-send')?.addEventListener('click', async () => {
+    const email = document.getElementById('enq-email').value;
+    if (!validEmail(email)) {
+      msg.textContent = 'Enter a valid email address (for example name@school.com).';
+      return;
+    }
+    msg.textContent = 'Sending OTP…';
+    try {
+      const data = await post('/public/' + schoolCode + '/enquiries/otp', {
+        kind: document.getElementById('enq-kind').value,
+        parentName: document.getElementById('enq-name').value,
+        phone: document.getElementById('enq-phone').value,
+        email: email.trim(),
+        gradeInterested: document.getElementById('enq-grade').value,
+        message: document.getElementById('enq-message').value
+      });
+      challengeId = data.challengeId;
+      sandbox.textContent = data.sandboxOtp ? ('Sandbox OTP: ' + data.sandboxOtp) : 'OTP sent to your mobile (valid 5 minutes).';
+      step1.style.display = 'none';
+      step2.style.display = 'block';
+      msg.textContent = 'Enter the OTP to verify this enquiry.';
+    } catch (e) {
+      msg.textContent = e.message;
+    }
+  });
+  document.getElementById('enq-verify')?.addEventListener('click', async () => {
+    try {
+      const data = await post('/public/' + schoolCode + '/enquiries/otp/verify', {
+        challengeId, otp: document.getElementById('enq-otp').value
+      });
+      resetEnquiryForm();
+      msg.textContent = data.message || 'Verified. Front office has been notified.';
+    } catch (e) {
+      msg.textContent = e.message;
+    }
+  });
+  document.getElementById('enq-back')?.addEventListener('click', () => {
+    step2.style.display = 'none';
+    step1.style.display = 'block';
+  });
+})();
 </script>
 
 <!-- RESPONSIVE -->

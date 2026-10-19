@@ -30,7 +30,7 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
                 subject = a.Subject!.Name,
                 className = a.Class!.Name,
                 sectionName = a.Section!.Name,
-                a.CanTakeAttendance, a.CanSetHomework, a.CanEnterMarks, a.IsActive
+                a.CanTakeAttendance, a.CanSetHomework, a.CanEnterMarks, a.IsActive, a.PeriodSlot, a.ElectiveGroup
             })
             .ToListAsync(ct);
         return Ok(list);
@@ -46,14 +46,25 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
         var exists = await db.TeacherAssignments.AnyAsync(a =>
             a.TenantId == tenantId && a.AcademicYearId == req.AcademicYearId &&
             a.EmployeeId == req.EmployeeId && a.SubjectId == req.SubjectId &&
-            a.SectionId == req.SectionId && a.IsActive, ct);
-        if (exists) return Conflict(new { error = "Assignment already exists for this teacher/subject/section/year." });
+            a.SectionId == req.SectionId && a.IsActive &&
+            a.PeriodSlot == req.PeriodSlot && a.ElectiveGroup == req.ElectiveGroup, ct);
+        if (exists) return Conflict(new { error = "Assignment already exists for this teacher/subject/section/period/group." });
+
+        if (!string.IsNullOrWhiteSpace(req.PeriodSlot))
+        {
+            var clash = await db.TeacherAssignments.AnyAsync(a =>
+                a.TenantId == tenantId && a.AcademicYearId == req.AcademicYearId &&
+                a.EmployeeId == req.EmployeeId && a.IsActive &&
+                a.PeriodSlot == req.PeriodSlot, ct);
+            if (clash) return Conflict(new { error = $"Scheduling conflict: this teacher is already mapped to period {req.PeriodSlot}." });
+        }
 
         var assignment = new TeacherAssignment
         {
             TenantId = tenantId, AcademicYearId = req.AcademicYearId,
             EmployeeId = req.EmployeeId, SubjectId = req.SubjectId,
             ClassId = req.ClassId, SectionId = req.SectionId,
+            PeriodSlot = req.PeriodSlot, ElectiveGroup = req.ElectiveGroup,
             CreatedBy = actor
         };
         db.TeacherAssignments.Add(assignment);

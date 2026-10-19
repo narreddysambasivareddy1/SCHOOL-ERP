@@ -6,6 +6,7 @@ using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
+using SchoolERP.Infrastructure.Services;
 
 namespace SchoolERP.API.Controllers;
 
@@ -14,7 +15,7 @@ public record ApplyLeaveRequest(Guid EmployeeId, Guid LeaveTypeId, DateOnly From
 [ApiController]
 [Route("api/schools/{schoolId}/leave")]
 [Authorize]
-public class LeaveController(AppDbContext db, IAuditService audit, INotificationService notifications) : ControllerBase
+public class LeaveController(AppDbContext db, IAuditService audit, INotificationService notifications, AcademicOpsService ops) : ControllerBase
 {
     [HttpGet("types")]
     public async Task<IActionResult> GetTypes(Guid schoolId, CancellationToken ct)
@@ -60,9 +61,10 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
         leave.ApprovedBy = actor;
         leave.ApprovedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
+        var opened = await ops.OpenSubstitutionsForLeaveAsync(schoolId, tenantId, leave, ct);
         await audit.LogAsync(tenantId, actor, "LeaveApproved", "LeaveRequest", leaveId.ToString());
         await NotifyLeaveAsync(tenantId, schoolId, leave, "approved", ct);
-        return Ok(new { leaveId, status = "Approved" });
+        return Ok(new { leaveId, status = "Approved", substitutionsOpened = opened });
     }
 
     [HttpPost("{leaveId}/reject")]

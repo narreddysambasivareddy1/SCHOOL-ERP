@@ -47,6 +47,8 @@ import { MoneyPipe } from '../../shared/money.pipe';
     <div class="mod-section">Learning</div>
     <div class="mod-grid">
       <a class="mod-card" routerLink="/timetable"><i class="pi pi-table"></i><strong>Timetable</strong><small>Your class periods and subjects</small></a>
+      <a class="mod-card" routerLink="/lesson-plans"><i class="pi pi-calendar"></i><strong>This week's topics</strong><small>Day-wise lesson plan for your class</small></a>
+      <a class="mod-card" routerLink="/diary"><i class="pi pi-book"></i><strong>Class diary</strong><small>Today's notes and homework cards</small></a>
       <a class="mod-card" routerLink="/homework"><i class="pi pi-book"></i><strong>Homework</strong><small>Due work and teacher instructions</small></a>
       <a class="mod-card" routerLink="/attendance"><i class="pi pi-check-square"></i><strong>Attendance</strong><small>Your attendance history</small></a>
       <a class="mod-card" routerLink="/examinations"><i class="pi pi-file"></i><strong>Results</strong><small>Published exams and marksheets only</small></a>

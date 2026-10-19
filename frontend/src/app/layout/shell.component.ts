@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../core/auth/auth.service';
 import { SchoolContextService } from '../core/services/school-context.service';
 import { ApiService } from '../core/services/api.service';
+import { EnquiryAlertService } from '../core/services/enquiry-alert.service';
 
 interface NavItem {
   label: string;
@@ -16,7 +17,8 @@ interface NavItem {
 
 const ADMIN = ['SchoolAdmin','PlatformSuperAdmin'];
 const TEACH = ['Teacher','AttendanceOfficer'];
-const OFFICE = ['AdmissionOfficer','Accountant','HRManager','TransportManager'];
+const OFFICE = ['AdmissionOfficer','Accountant','HRManager','TransportManager','FrontOffice'];
+const FO = ['FrontOffice','AdmissionOfficer'];
 
 const ALL_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'pi pi-th-large', route: '/dashboard', group: 'Workspace', roles: [...ADMIN, ...OFFICE] },
@@ -24,13 +26,18 @@ const ALL_NAV: NavItem[] = [
   { label: 'My dashboard', icon: 'pi pi-th-large', route: '/student/dashboard', group: 'Workspace', roles: ['Student'] },
   { label: 'Family', icon: 'pi pi-home', route: '/parent/dashboard', group: 'Workspace', roles: ['Parent'] },
 
-  { label: 'Admissions', icon: 'pi pi-user-plus', route: '/admissions', group: 'People', roles: [...ADMIN, 'AdmissionOfficer'] },
+  { label: 'Enquiry desk', icon: 'pi pi-inbox', route: '/enquiries', group: 'People', roles: [...ADMIN, ...FO] },
+  { label: 'Registrations', icon: 'pi pi-id-card', route: '/registrations', group: 'People', roles: [...ADMIN, ...FO] },
+  { label: 'Admissions', icon: 'pi pi-user-plus', route: '/admissions', group: 'People', roles: [...ADMIN, ...FO] },
   { label: 'Students', icon: 'pi pi-users', route: '/students', group: 'People', roles: [...ADMIN, 'AdmissionOfficer', ...TEACH] },
   { label: 'Staff & HR', icon: 'pi pi-id-card', route: '/staff', group: 'People', roles: [...ADMIN, 'HRManager'] },
   { label: 'Leave', icon: 'pi pi-calendar-plus', route: '/leave', group: 'People', roles: [...ADMIN, 'HRManager', ...TEACH] },
 
   { label: 'Classes', icon: 'pi pi-sitemap', route: '/academics', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
   { label: 'Timetable', icon: 'pi pi-table', route: '/timetable', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
+  { label: 'Substitutions', icon: 'pi pi-users', route: '/substitutions', group: 'Academics', roles: [...ADMIN, 'HRManager'] },
+  { label: 'Lesson plans', icon: 'pi pi-calendar', route: '/lesson-plans', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
+  { label: 'Class diary', icon: 'pi pi-book', route: '/diary', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
   { label: 'Attendance', icon: 'pi pi-check-square', route: '/attendance', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
   { label: 'Homework', icon: 'pi pi-book', route: '/homework', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
   { label: 'Exams & results', icon: 'pi pi-file', route: '/examinations', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
@@ -245,6 +252,7 @@ export class ShellComponent implements OnInit {
     if (roles.includes('Parent')) return 'Parent';
     if (roles.includes('Teacher') || roles.includes('AttendanceOfficer')) return 'Teacher';
     if (roles.includes('Student')) return 'Student';
+    if (roles.includes('FrontOffice') || roles.includes('AdmissionOfficer')) return 'Front office';
     return roles[0] ?? 'User';
   });
 
@@ -259,10 +267,12 @@ export class ShellComponent implements OnInit {
     public auth: AuthService,
     public ctx: SchoolContextService,
     private api: ApiService,
-    private router: Router
+    private router: Router,
+    private enquiryAlerts: EnquiryAlertService
   ) {}
 
   ngOnInit() {
+    this.enquiryAlerts.start();
     if (!this.ctx.schoolId) return;
     this.api.getAcademicYears(this.ctx.schoolId).subscribe({
       next: (list) => this.years.set((list ?? []).map((y: any) => ({ id: y.id ?? y.Id, name: y.name ?? y.Name }))),

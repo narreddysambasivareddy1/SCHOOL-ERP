@@ -3,5 +3,16 @@
     "target": "http://localhost:8100",
     "secure": false,
     "changeOrigin": true
+  },
+  "/uploads": {
+    "target": "http://localhost:8100",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/hubs": {
+    "target": "http://localhost:8100",
+    "secure": false,
+    "ws": true,
+    "changeOrigin": true
   }
 }

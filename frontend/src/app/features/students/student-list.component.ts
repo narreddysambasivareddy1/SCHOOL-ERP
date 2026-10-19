@@ -40,7 +40,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
              styleClass="p-datatable-sm" [rowHover]="true">
       <ng-template pTemplate="header">
         <tr>
-          <th>Student</th><th>Class / Section</th><th>Status</th>
+          <th>Student</th><th>Class / Section</th><th>Status</th><th></th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-s>
@@ -53,10 +53,14 @@ import { SchoolContextService } from '../../core/services/school-context.service
           </td>
           <td>{{ s.className }} · {{ s.sectionName }}</td>
           <td><p-tag [value]="s.status" [severity]="s.status === 'Active' ? 'success' : 'warn'" /></td>
+          <td>
+            <p-button [label]="s.status === 'Active' ? 'Set inactive' : 'Set active'" [outlined]="true" size="small"
+              (onClick)="toggle(s)" />
+          </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:32px">
+        <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">
           {{ ctx.schoolId ? 'No students found.' : 'School context not loaded. Please log in again.' }}
         </td></tr>
       </ng-template>
@@ -182,6 +186,14 @@ export class StudentListComponent implements OnInit {
     const cls = this.classes().find(c => c.id === classId);
     this.sections.set(cls?.sections ?? []);
     this.form.patchValue({ sectionId: '' });
+  }
+
+  toggle(s: any) {
+    const next = s.status === 'Active' ? 'Inactive' : 'Active';
+    this.api.setStudentStatus(this.ctx.schoolId, s.id, next).subscribe({
+      next: () => this.load(),
+      error: () => this.msg.add({ severity: 'error', summary: 'Status', detail: 'Could not update student status.' })
+    });
   }
 
   createStudent() {

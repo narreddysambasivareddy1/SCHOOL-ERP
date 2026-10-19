@@ -47,15 +47,35 @@ interface Mod { icon: string; label: string; desc: string; route: string; }
         <strong>Leave queue</strong>
         <small>Approve or reject pending staff leave</small>
       </a>
-      <a routerLink="/admissions" class="today-card">
-        <strong>Admissions</strong>
-        <small>New enquiries and active enrolments</small>
+      <a routerLink="/enquiries" class="today-card">
+        <strong>Enquiry desk</strong>
+        <small>{{ enquiryNew() }} new · {{ enquiryOpen() }} open verified leads</small>
       </a>
       <a routerLink="/fees" class="today-card">
         <strong>Fee exceptions</strong>
         <small>Collection, dues and receipts</small>
       </a>
     </div>
+
+    @if (ops()) {
+      <div class="mod-section">Cover & diary today</div>
+      <div class="ops">
+        <a routerLink="/substitutions" class="today-card">
+          <strong>{{ ops().openSubstitutions }} open periods</strong>
+          <small>{{ ops().onLeave }} teacher(s) on leave · assign substitutes</small>
+        </a>
+        <a routerLink="/diary" class="today-card">
+          <strong>Class diary</strong>
+          <small>{{ diaryPending() }} pending section/teacher uploads · remind from diary</small>
+        </a>
+        <div class="today-card">
+          <strong>Free teachers by period</strong>
+          <small>
+            @for (a of ops().availability || []; track a.periodId) { {{ a.period }}: {{ a.free }} · }
+          </small>
+        </div>
+      </div>
+    }
 
     <div class="mod-section">People</div>
     <div class="mod-grid">
@@ -97,6 +117,8 @@ interface Mod { icon: string; label: string; desc: string; route: string; }
     .today-card:hover { border-color: #93b4f0; }
     .today-card strong { display: block; font-size: 13px; color: var(--navy); margin-bottom: 4px; }
     .today-card small { color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .ops { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 8px; }
+    @media (max-width: 1024px) { .ops { grid-template-columns: 1fr; } }
     @media (max-width: 1024px) { .stats-grid, .today-row { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
   `]
@@ -106,6 +128,10 @@ export class DashboardComponent implements OnInit {
   greeting = this.getGreeting();
   loading = signal(true);
   error = signal<string | null>(null);
+  enquiryNew = signal(0);
+  enquiryOpen = signal(0);
+  ops = signal<any>(null);
+  diaryPending = signal(0);
 
   stats = signal<Stat[]>([
     { label: 'Active students', value: '—', sub: 'Enrolments this year', icon: 'pi pi-users', iconBg: '#eaf3ff', iconColor: '#1c5cb7' },
@@ -115,6 +141,7 @@ export class DashboardComponent implements OnInit {
   ]);
 
   people: Mod[] = [
+    { icon: 'pi pi-inbox', label: 'Enquiry desk', desc: 'OTP-verified website leads and follow-ups', route: '/enquiries' },
     { icon: 'pi pi-user-plus', label: 'Admissions', desc: 'Enquiries, applicants and new admissions', route: '/admissions' },
     { icon: 'pi pi-users', label: 'Students', desc: 'SIS records, guardians and lifecycle', route: '/students' },
     { icon: 'pi pi-id-card', label: 'Staff & HR', desc: 'Employees, departments and designations', route: '/staff' },
@@ -122,7 +149,10 @@ export class DashboardComponent implements OnInit {
   ];
   academics: Mod[] = [
     { icon: 'pi pi-sitemap', label: 'Classes & assignments', desc: 'Teacher–subject–section mapping', route: '/academics' },
-    { icon: 'pi pi-table', label: 'Timetable', desc: 'Class and teacher allocations', route: '/timetable' },
+    { icon: 'pi pi-table', label: 'Timetable', desc: 'Periods and weekly teacher grid', route: '/timetable' },
+    { icon: 'pi pi-users', label: 'Substitutions', desc: 'Cover leave periods with free teachers', route: '/substitutions' },
+    { icon: 'pi pi-calendar', label: 'Lesson plans', desc: 'Weekly topics for each class', route: '/lesson-plans' },
+    { icon: 'pi pi-book', label: 'Class diary', desc: 'Daily notes, scans and compliance', route: '/diary' },
     { icon: 'pi pi-check-square', label: 'Attendance', desc: 'Oversight and session marking', route: '/attendance' },
     { icon: 'pi pi-book', label: 'Homework', desc: 'Assignments, due dates and submissions', route: '/homework' },
     { icon: 'pi pi-file', label: 'Examinations', desc: 'Marks approval and report publication', route: '/examinations' },
@@ -146,9 +176,11 @@ export class DashboardComponent implements OnInit {
     if (!this.ctx.schoolId || !this.ctx.academicYearId) { this.loading.set(false); return; }
     this.api.getDashboardStats(this.ctx.schoolId, this.ctx.academicYearId).subscribe({
       next: (d) => {
+        this.enquiryNew.set(d.enquiryNew ?? 0);
+        this.enquiryOpen.set(d.enquiryOpen ?? 0);
         this.stats.set([
           { label: 'Active students', value: d.studentCount.toLocaleString(), sub: 'Enrolments this year', icon: 'pi pi-users', iconBg: '#eaf3ff', iconColor: '#1c5cb7' },
-          { label: 'Staff', value: d.staffCount.toLocaleString(), sub: 'Employees', icon: 'pi pi-id-card', iconBg: '#e3f8f3', iconColor: '#087d68' },
+          { label: 'New enquiries', value: String(d.enquiryNew ?? 0), sub: `${d.enquiryOpen ?? 0} open in desk`, icon: 'pi pi-inbox', iconBg: '#eaf3ff', iconColor: '#1c5cb7' },
           { label: 'Attendance today', value: d.attendanceMarked ? `${d.attendancePct}%` : 'Not marked', sub: d.attendanceMarked ? 'Present today' : 'Pending', icon: 'pi pi-check-square', iconBg: '#fff4db', iconColor: '#9a6900' },
           { label: 'Fees this month', value: this.locale.formatMoney(d.feeCollectedThisMonth), sub: 'Collected', icon: 'pi pi-wallet', iconBg: '#f0ebff', iconColor: '#6b3fa0' },
         ]);
@@ -156,6 +188,8 @@ export class DashboardComponent implements OnInit {
       },
       error: (e) => { this.error.set(e?.error?.message ?? 'API unavailable'); this.loading.set(false); }
     });
+    this.api.getOpsToday(this.ctx.schoolId, this.ctx.academicYearId).subscribe({ next: o => this.ops.set(o) });
+    this.api.getDiaryCompliance(this.ctx.schoolId, this.ctx.academicYearId).subscribe({ next: c => this.diaryPending.set(c.pending || 0) });
   }
 
   private getGreeting(): string {

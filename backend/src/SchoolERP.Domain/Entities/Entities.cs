@@ -184,6 +184,8 @@ public class TeacherAssignment : TenantEntity
     public bool CanSetHomework { get; set; } = true;
     public bool CanEnterMarks { get; set; } = true;
     public bool IsActive { get; set; } = true;
+    public string? PeriodSlot { get; set; }
+    public string? ElectiveGroup { get; set; }
 }
 
 public class Employee : TenantEntity

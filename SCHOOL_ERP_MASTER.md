@@ -245,7 +245,7 @@ Navigation items must be configurable; disabled pages should not appear as dead 
 - Events, announcements, circulars and calendars
 - News/articles and gallery
 - Careers and job enquiry/application forms
-- Contact form with spam protection and consent/notice text
+- Contact form with spam protection, consent/notice text and mobile OTP verification before a lead is stored
 - Downloadable prospectus and policy documents
 - SEO title/description, canonical URL, sitemap and social sharing metadata
 - Editable content via authorized CMS dashboard; no source-code edits for routine content updates
@@ -761,6 +761,20 @@ These records require more restrictive permissions than ordinary academic inform
 
 ## 15. Office operations and additional school modules
 
+- Dedicated **Front Office / Admission Counselor** role with least-privilege access (enquiry desk, admissions pipeline; no payroll, audit or tenant settings)
+- OTP-verified public enquiry capture (Admission, Fees, General / Contact Us) — unverified submissions must not be persisted as leads or trigger staff alerts
+- 6-digit OTP via SMS and WhatsApp; 5-minute expiry; max 3 OTP requests per phone or IP per 15 minutes
+- Enquiry management desk (Front Office and Admin) with incoming leads, assignment, follow-up dates, call notes and conversion status
+- Instant alerts on verified enquiry: web push / desktop notification to active desk sessions, email to admissions, WhatsApp to the front-office desk line
+- Enquiry lifecycle: `Unverified` (OTP challenge only), `Verified/New`, `Contacted`, `Site Visit`, `Converted`, `Rejected`
+- Audit of call notes and status changes with timestamp and staff actor ID
+- Walk-in **Registrations** module (Front Office and Admin): student, guardian and academic preference capture; unique `REG-YYYY-XXXX`; registration fee receipt
+- Seat confirmation (Admin / Admission Officer) issues permanent `STU-YYYY-XXXX`, enrolls the student, and produces a printable/PDF admission form
+- Photo capture via file upload or browser `MediaDevices` live camera; identity (Aadhaar/ID) and Transfer Certificate stored against the registration/student
+- Verified identity or TC is required before a unique bonafide number `BON-YYYY-XXXX`
+- CSV/Excel (CSV template) bulk student import with server-side row validation, error preview, and atomic commit (no partial writes)
+- Active/inactive status toggles for students and staff without deleting records
+- Many-to-many teacher mapping across class, section, subject, period slot and elective group, with backend period-clash rejection
 - Admissions enquiry pipeline and application processing
 - Document verification and admission checklist
 - Student/employee certificate generation
@@ -1210,11 +1224,22 @@ Deliver working, testable increments. Do not implement all modules in one uncont
 - Student transfer/withdrawal/readmission
 - Employee transfer/resignation/termination/rejoining
 - Document management and account provisioning
+- Front Office / Admission Counselor role, enquiry desk and OTP-verified website lead capture
+- Multi-channel alerts (web push, email, WhatsApp) for verified enquiries
+- Enquiry assignment, follow-up dates, call notes and conversion audit
+- Walk-in registration, fee, seat confirmation and admission form
+- Student photo/ID/TC capture, document verification and bonafide numbering
+- Bulk student import with preview and atomic commit
+- Teacher–class–section–subject–period mapping with scheduling conflict checks
 
-**Exit criteria:** lifecycle histories are preserved; access is revoked correctly; assignment rules are tested.
+**Exit criteria:** lifecycle histories are preserved; access is revoked correctly; assignment rules are tested; unverified website enquiries never appear in the desk or staff alerts; confirmed registrations create students with admission numbers.
 
 ### Phase 3 — Academics and attendance
 
+- Timetable period master (morning/evening bands) and weekly class–section grid
+- Leave approval opens unassigned periods and lists free substitute teachers
+- Weekly lesson plans (Mon–Sat) visible to parents and students
+- Daily class diary (digital card or scan) with deadline, compliance widget and reminders
 - Timetable and substitution
 - Student/staff attendance
 - Leave requests and approvals
@@ -1350,6 +1375,9 @@ Do not block creation of the initial architecture on these questions; record ass
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 10 October 2026 | Initial master specification covering international-quality public website, role-based School ERP, student and employee lifecycles, academics, teacher-subject mapping, PWA, integrations, HRMS/payroll, security, architecture and phased delivery. |
+| 1.2 | 18 October 2026 | Front Office enquiry desk, OTP mobile verification on public forms, multi-channel verified-lead alerts, and enquiry lifecycle/audit. |
+| 1.3 | 18 October 2026 | Walk-in registration and seat confirmation, photo/document capture, bulk student import, student/staff active-inactive toggles, and teacher period/elective mapping with clash validation. |
+| 1.4 | 18 October 2026 | Timetable period master and weekly grid, leave-driven substitutions with free-teacher matching, weekly lesson plans, digital/scan class diary, deadline compliance and admin reminders. |
 
 ---
 

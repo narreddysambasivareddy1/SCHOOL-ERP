@@ -31,4 +31,16 @@ public class EmployeesController(IEmployeeService employeeService, IAuditService
             newValues: new { employee.EmployeeCode, employee.FirstName, employee.LastName });
         return CreatedAtAction(nameof(GetAll), new { schoolId }, employee);
     }
+
+    [HttpPost("{id:guid}/status")]
+    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    public async Task<IActionResult> Status(Guid schoolId, Guid id, [FromBody] StatusToggleRequest body, CancellationToken ct)
+    {
+        try
+        {
+            await employeeService.SetStatusAsync(id, schoolId, body.Status, ct);
+            return Ok(new { id, status = body.Status });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 }

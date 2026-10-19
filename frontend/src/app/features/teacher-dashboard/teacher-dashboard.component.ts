@@ -37,6 +37,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
       <a class="mod-card" routerLink="/homework"><i class="pi pi-book"></i><strong>Homework & worksheets</strong><small>Create, publish and review submissions</small></a>
       <a class="mod-card" routerLink="/examinations"><i class="pi pi-file"></i><strong>Enter marks</strong><small>Draft marks for assigned subjects; admin publishes</small></a>
       <a class="mod-card" routerLink="/timetable"><i class="pi pi-table"></i><strong>My timetable</strong><small>Class, subject and section allocations</small></a>
+      <a class="mod-card" routerLink="/lesson-plans"><i class="pi pi-calendar"></i><strong>Weekly lesson plan</strong><small>Map Monday–Saturday topics by Friday</small></a>
+      <a class="mod-card" routerLink="/diary"><i class="pi pi-book"></i><strong>Class diary</strong><small>Digital card or scanned notes and homework</small></a>
       <a class="mod-card" routerLink="/students"><i class="pi pi-users"></i><strong>Class roster</strong><small>Students in groups you are assigned to</small></a>
       <a class="mod-card" routerLink="/communications"><i class="pi pi-send"></i><strong>Message parents</strong><small>School-approved channels only</small></a>
     </div>

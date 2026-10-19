@@ -50,6 +50,8 @@ services:
     restart: unless-stopped
     ports:
       - "${SCHOOL_WEBSITE_PORT:-8181}:80"
+    volumes:
+      - ./school-website/index.html:/usr/share/nginx/html/index.html:ro
     networks:
       - external
 
