@@ -10,7 +10,7 @@ namespace SchoolERP.API.Controllers;
 
 public record SavePeriodRequest(Guid AcademicYearId, Guid? Id, string Name, int SortOrder, string StartTime, string EndTime, string Band);
 public record SaveSlotRequest(Guid AcademicYearId, Guid ClassId, Guid SectionId, int DayOfWeek, Guid PeriodId, Guid SubjectId, Guid EmployeeId, string? ElectiveGroup);
-public record DiaryDeadlineRequest(string DiaryDeadline);
+public record DiaryDeadlineRequest(string DiaryDeadline, string? WeeklyPlanDeadline = null);
 
 [ApiController]
 [Route("api/schools/{schoolId}/timetable")]
@@ -23,7 +23,11 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
         try
         {
             var s = await ops.SettingsAsync(schoolId, Tenant(), ct);
-            return Ok(new { diaryDeadline = s.DiaryDeadline.ToString("HH:mm") });
+            return Ok(new
+            {
+                diaryDeadline = s.DiaryDeadline.ToString("HH:mm"),
+                weeklyPlanDeadline = s.WeeklyPlanDeadline.ToString("HH:mm")
+            });
         }
         catch (InvalidOperationException ex) { return NotFound(new { error = ex.Message }); }
     }
@@ -33,7 +37,14 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
     public async Task<IActionResult> SaveSettings(Guid schoolId, [FromBody] DiaryDeadlineRequest body, CancellationToken ct)
     {
         if (!TimeOnly.TryParse(body.DiaryDeadline, out var t)) return BadRequest(new { error = "Use HH:mm for the diary deadline." });
-        try { return Ok(await ops.SaveSettingsAsync(schoolId, Tenant(), t, ct)); }
+        TimeOnly? planDeadline = null;
+        if (body.WeeklyPlanDeadline is not null)
+        {
+            if (!TimeOnly.TryParse(body.WeeklyPlanDeadline, out var parsed))
+                return BadRequest(new { error = "Use HH:mm for the weekly lesson-plan deadline." });
+            planDeadline = parsed;
+        }
+        try { return Ok(await ops.SaveSettingsAsync(schoolId, Tenant(), t, planDeadline, ct)); }
         catch (InvalidOperationException ex) { return NotFound(new { error = ex.Message }); }
     }
 
@@ -61,6 +72,18 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
             return Ok(await ops.SavePeriodAsync(schoolId, Tenant(), body.AcademicYearId, body.Id, body.Name, body.SortOrder, start, end, band, Actor(), ct));
         }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpDelete("periods/{id:guid}")]
+    [Authorize(Roles = "SchoolAdmin")]
+    public async Task<IActionResult> DeletePeriod(Guid schoolId, Guid id, [FromQuery] Guid academicYearId, CancellationToken ct)
+    {
+        try
+        {
+            await ops.DeletePeriodAsync(schoolId, Tenant(), academicYearId, id, ct);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex) { return Conflict(new { error = ex.Message }); }
     }
 
     [HttpGet("grid")]

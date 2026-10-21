@@ -215,18 +215,24 @@ export class ApiService {
   createTeacherAssignment(schoolId: string, body: any) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/teacher-assignments`, body);
   }
+  deactivateTeacherAssignment(schoolId: string, id: string) {
+    return this.http.delete<void>(`${this.base}/schools/${schoolId}/teacher-assignments/${id}`);
+  }
 
   getTimetableSettings(schoolId: string) {
     return this.http.get<any>(`${this.base}/schools/${schoolId}/timetable/settings`);
   }
-  saveTimetableSettings(schoolId: string, diaryDeadline: string) {
-    return this.http.put<any>(`${this.base}/schools/${schoolId}/timetable/settings`, { diaryDeadline });
+  saveTimetableSettings(schoolId: string, diaryDeadline: string, weeklyPlanDeadline?: string) {
+    return this.http.put<any>(`${this.base}/schools/${schoolId}/timetable/settings`, { diaryDeadline, weeklyPlanDeadline });
   }
   getPeriods(schoolId: string, academicYearId: string) {
     return this.http.get<any[]>(`${this.base}/schools/${schoolId}/timetable/periods`, { params: { academicYearId } });
   }
   savePeriod(schoolId: string, body: any) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/timetable/periods`, body);
+  }
+  deletePeriod(schoolId: string, academicYearId: string, id: string) {
+    return this.http.delete<void>(`${this.base}/schools/${schoolId}/timetable/periods/${id}`, { params: { academicYearId } });
   }
   getTimetableGrid(schoolId: string, academicYearId: string, sectionId: string, date?: string) {
     let params = new HttpParams().set('academicYearId', academicYearId).set('sectionId', sectionId);
@@ -235,6 +241,9 @@ export class ApiService {
   }
   saveTimetableSlot(schoolId: string, body: any) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/timetable/slots`, body);
+  }
+  clearTimetableSlot(schoolId: string, id: string) {
+    return this.http.delete<void>(`${this.base}/schools/${schoolId}/timetable/slots/${id}`);
   }
   getOpsToday(schoolId: string, academicYearId: string) {
     return this.http.get<any>(`${this.base}/schools/${schoolId}/ops-today`, { params: { academicYearId } });

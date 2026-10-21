@@ -350,6 +350,7 @@ public class SchoolAcademicSetting : TenantEntity
 {
     public Guid SchoolId { get; set; }
     public TimeOnly DiaryDeadline { get; set; } = new(16, 30);
+    public TimeOnly WeeklyPlanDeadline { get; set; } = new(18, 0);
 }
 
 public class TimetablePeriod : TenantEntity

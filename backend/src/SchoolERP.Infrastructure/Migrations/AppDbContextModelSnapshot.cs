@@ -351,8 +351,6 @@ namespace SchoolERP.Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.HasIndex("TenantId");
-
                     b.HasIndex("SchoolId", "Date", "SectionId", "EmployeeId", "SubjectId")
                         .IsUnique();
 
@@ -1756,6 +1754,9 @@ namespace SchoolERP.Infrastructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
+                    b.Property<TimeOnly>("WeeklyPlanDeadline")
+                        .HasColumnType("time without time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SchoolId")
@@ -2385,8 +2386,6 @@ namespace SchoolERP.Infrastructure.Migrations
 
                     b.HasIndex("SubstituteEmployeeId");
 
-                    b.HasIndex("TenantId");
-
                     b.HasIndex("TimetableSlotId");
 
                     b.HasIndex("SchoolId", "Date", "Status");
@@ -2953,8 +2952,6 @@ namespace SchoolERP.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PlanId");
-
-                    b.HasIndex("TenantId");
 
                     b.HasIndex("TenantId", "PlanId", "DayOfWeek")
                         .IsUnique();

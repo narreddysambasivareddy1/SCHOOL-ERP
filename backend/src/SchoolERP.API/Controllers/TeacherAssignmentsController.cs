@@ -20,9 +20,12 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
         var yearExists = await db.AcademicYears.AnyAsync(y =>
             y.Id == academicYearId && y.SchoolId == schoolId && y.TenantId == tenantId, ct);
         if (!yearExists) return NotFound(new { error = "Academic year not found for this school." });
-        var list = await db.TeacherAssignments
+        var assignments = db.TeacherAssignments
             .Where(a => a.TenantId == tenantId && a.AcademicYearId == academicYearId &&
-                a.Employee!.SchoolId == schoolId && a.IsActive)
+                a.Employee!.SchoolId == schoolId);
+        if (!User.IsInRole("SchoolAdmin") && !User.IsInRole("PlatformSuperAdmin"))
+            assignments = assignments.Where(a => a.IsActive);
+        var list = await assignments
             .Include(a => a.Employee)
             .Include(a => a.Subject)
             .Include(a => a.Class)

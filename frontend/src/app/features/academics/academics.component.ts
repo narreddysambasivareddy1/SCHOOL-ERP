@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Assignment {
   id: string; teacher: string; employeeCode: string; subject: string;
   className: string; sectionName: string; periodSlot?: string; electiveGroup?: string;
-  canTakeAttendance: boolean; canSetHomework: boolean; canEnterMarks: boolean;
+  canTakeAttendance: boolean; canSetHomework: boolean; canEnterMarks: boolean; isActive: boolean;
 }
 
 @Component({
@@ -96,6 +97,7 @@ interface Assignment {
               <th>Period / Group</th>
               <th>Permissions</th>
               <th>Status</th>
+              @if (isAdmin) { <th>Actions</th> }
             </tr>
           </thead>
           <tbody>
@@ -120,7 +122,16 @@ interface Assignment {
                     @if (a.canEnterMarks) { <span class="perm-tag">Marks</span> }
                   </div>
                 </td>
-                <td><span class="badge badge-success">Active</span></td>
+                <td><span class="badge" [class.badge-success]="a.isActive" [class.badge-inactive]="!a.isActive">{{ a.isActive ? 'Active' : 'Inactive' }}</span></td>
+                @if (isAdmin) {
+                  <td>
+                    @if (a.isActive) {
+                      <button type="button" class="deactivate" (click)="deactivate(a)">Deactivate</button>
+                    } @else {
+                      <span>Save the same mapping again to reactivate.</span>
+                    }
+                  </td>
+                }
               </tr>
             }
           </tbody>
@@ -150,6 +161,8 @@ interface Assignment {
     .perm-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: #f0ebff; color: #6b3fa0; }
     .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .badge-success { background: #e5f8f1; color: #087d68; }
+    .badge-inactive { background: #f1f5f9; color: #64748b; }
+    .deactivate { border: 1px solid #fecaca; border-radius: 6px; background: #fff; color: #b91c1c; padding: 6px 9px; cursor: pointer; font: inherit; }
     .loading-row { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
     .alert-error { margin: 16px 20px; background: #fff0f0; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #c0392b; }
     .ok { margin: 12px 20px 0; background: #e5f8f1; color: #087d68; padding: 8px 12px; border-radius: 8px; font-size: 12px; }
@@ -163,6 +176,7 @@ interface Assignment {
   `]
 })
 export class AcademicsComponent implements OnInit {
+  isAdmin = false;
   assignments = signal<Assignment[]>([]);
   employees = signal<any[]>([]);
   subjects = signal<any[]>([]);
@@ -175,7 +189,9 @@ export class AcademicsComponent implements OnInit {
   notice = signal<string | null>(null);
   form = { employeeId: '', subjectId: '', classId: '', sectionId: '', periodSlot: '', electiveGroup: '' };
 
-  constructor(private api: ApiService, public ctx: SchoolContextService) {}
+  constructor(private api: ApiService, public ctx: SchoolContextService, auth: AuthService) {
+    this.isAdmin = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin');
+  }
 
   ngOnInit() {
     if (!this.ctx.schoolId || !this.ctx.academicYearId) { this.loading.set(false); return; }
@@ -221,6 +237,18 @@ export class AcademicsComponent implements OnInit {
         this.busy.set(false);
         this.mapError.set(e?.error?.error || 'Could not save mapping (period clash or duplicate).');
       }
+    });
+  }
+
+  deactivate(assignment: Assignment) {
+    this.mapError.set(null);
+    this.notice.set(null);
+    this.api.deactivateTeacherAssignment(this.ctx.schoolId, assignment.id).subscribe({
+      next: () => {
+        this.notice.set('Teacher mapping deactivated.');
+        this.load();
+      },
+      error: e => this.mapError.set(e?.error?.error || 'Could not deactivate mapping.')
     });
   }
 }

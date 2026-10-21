@@ -13,6 +13,20 @@ namespace SchoolERP.Tests.Unit;
 public class AcademicOpsServiceTests
 {
     [Fact]
+    public void LessonPlanDeadline_IsFridayAtConfiguredSchoolTime()
+    {
+        var monday = new DateOnly(2026, 10, 19);
+        var deadline = new TimeOnly(18, 0);
+
+        AcademicOpsService.IsLessonPlanDeadlinePassed(monday, deadline, new DateTime(2026, 10, 23, 17, 59, 0))
+            .Should().BeFalse();
+        AcademicOpsService.IsLessonPlanDeadlinePassed(monday, deadline, new DateTime(2026, 10, 23, 18, 0, 1))
+            .Should().BeTrue();
+        AcademicOpsService.IsLessonPlanDeadlinePassed(new DateOnly(2026, 10, 21), deadline, new DateTime(2026, 10, 24, 9, 0, 0))
+            .Should().BeTrue();
+    }
+
+    [Fact]
     public async Task UpsertSlot_RejectsTeacherWithoutMatchingAssignment()
     {
         await using var db = CreateDb();

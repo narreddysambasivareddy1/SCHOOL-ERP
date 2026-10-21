@@ -1,11 +1,12 @@
 import { Component, HostListener, OnInit, computed, signal } from '@angular/core';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../core/auth/auth.service';
 import { SchoolContextService } from '../core/services/school-context.service';
 import { ApiService } from '../core/services/api.service';
 import { EnquiryAlertService } from '../core/services/enquiry-alert.service';
+import { filter } from 'rxjs';
 
 interface NavItem {
   label: string;
@@ -63,7 +64,8 @@ const ALL_NAV: NavItem[] = [
   template: `
     <div class="app-shell">
       <header class="topbar">
-        <button class="icon-btn mobile-menu-btn" (click)="sidebarOpen.set(!sidebarOpen())" aria-label="Toggle navigation">
+        <button class="icon-btn mobile-menu-btn" (click)="sidebarOpen.set(!sidebarOpen())"
+          [attr.aria-expanded]="sidebarOpen()" aria-controls="primary-navigation" aria-label="Toggle navigation">
           <i class="pi pi-bars"></i>
         </button>
         <div class="brand">
@@ -81,8 +83,13 @@ const ALL_NAV: NavItem[] = [
         <button class="search-chip" type="button" (click)="openPalette()">
           <i class="pi pi-search"></i>
           <span>Search</span>
-          <kbd>⌘K</kbd>
+          <kbd>Ctrl K</kbd>
         </button>
+
+        <div class="route-context" aria-live="polite">
+          <span>{{ currentGroup() }}</span>
+          <strong>{{ currentPage() }}</strong>
+        </div>
 
         <div class="topbar-right">
           @if (years().length) {
@@ -114,13 +121,28 @@ const ALL_NAV: NavItem[] = [
         </div>
       </header>
 
+      <button class="sidebar-backdrop" type="button" [hidden]="!sidebarOpen()"
+        aria-label="Close navigation" (click)="sidebarOpen.set(false)"></button>
+
       <div class="layout">
-        <aside class="sidebar" [class.open]="sidebarOpen()">
-          <nav>
+        <aside class="sidebar" id="primary-navigation" [class.open]="sidebarOpen()"
+          [class.collapsed]="sidebarCollapsed()">
+          <div class="sidebar-heading">
+            <span>School workspace</span>
+            <button type="button" class="collapse-btn" (click)="toggleSidebar()"
+              [attr.aria-expanded]="!sidebarCollapsed()"
+              [attr.aria-label]="sidebarCollapsed() ? 'Expand navigation' : 'Collapse navigation'"
+              [title]="sidebarCollapsed() ? 'Expand navigation' : 'Collapse navigation'">
+              <i [class]="sidebarCollapsed() ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></i>
+            </button>
+          </div>
+          <nav aria-label="Main navigation">
             @for (group of navGroups(); track group.name) {
               <div class="nav-label">{{ group.name }}</div>
               @for (item of group.items; track item.route) {
-                <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" (click)="sidebarOpen.set(false)">
+                <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+                  class="nav-item" [attr.title]="sidebarCollapsed() ? item.label : null"
+                  [attr.aria-label]="sidebarCollapsed() ? item.label : null" (click)="sidebarOpen.set(false)">
                   <i class="nav-icon" [class]="item.icon"></i>
                   <span>{{ item.label }}</span>
                 </a>
@@ -160,15 +182,19 @@ const ALL_NAV: NavItem[] = [
   `,
   styles: [`
     .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
-    .topbar { height: var(--topbar-h); background: white; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 16px; padding: 0 20px; position: sticky; top: 0; z-index: 20; }
+    .topbar { height: var(--topbar-h); background: white; border-bottom: 1px solid #d9e5f1; display: flex; align-items: center; gap: 14px; padding: 0 20px; position: sticky; top: 0; z-index: 40; box-shadow: 0 2px 8px rgba(35,73,112,.045); }
     .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .logo, .logo-img { height: 36px; width: 36px; border-radius: 10px; flex-shrink: 0; }
-    .logo { background: linear-gradient(145deg, var(--primary), var(--teal)); display: grid; place-items: center; color: white; }
+    .logo { background: linear-gradient(145deg, #2d7ec1, #59a6dc); display: grid; place-items: center; color: white; }
     .logo-img { object-fit: cover; border: 1px solid var(--line); }
     .brand strong { display: block; color: var(--navy); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .brand small { color: var(--muted); font-size: 10px; }
-    .search-chip { margin-left: 12px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 8px 12px; color: var(--muted); font-size: 12px; cursor: pointer; min-width: 220px; }
+    .search-chip { margin-left: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #f8fafc; border-radius: 9px; padding: 8px 12px; color: var(--muted); font-size: 12px; cursor: pointer; min-width: 190px; transition: border-color 140ms ease, background 140ms ease; }
+    .search-chip:hover { border-color: #b8c7d9; background: white; }
     .search-chip kbd { margin-left: auto; font-size: 10px; border: 1px solid var(--line); background: white; border-radius: 6px; padding: 1px 6px; }
+    .route-context { display: grid; gap: 0; min-width: 0; margin-left: 4px; padding-left: 16px; border-left: 1px solid var(--line); line-height: 1.25; }
+    .route-context span { color: var(--muted); font-size: 10px; }
+    .route-context strong { overflow: hidden; color: var(--navy); font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
     .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .year-select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font-size: 12px; background: white; color: var(--ink); }
     .user-wrap { position: relative; }
@@ -185,17 +211,27 @@ const ALL_NAV: NavItem[] = [
     .menu-meta { font-size: 11px; color: var(--muted); padding: 4px 8px; }
     .menu-item { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; }
     .menu-item:hover { background: var(--bg); }
-    .icon-btn { border: 1px solid var(--line); background: white; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+    .icon-btn { border: 1px solid var(--line); background: white; border-radius: 8px; padding: 7px 10px; cursor: pointer; color: var(--navy); }
     .mobile-menu-btn { display: none; }
     .layout { display: flex; flex: 1; min-height: calc(100vh - var(--topbar-h)); }
-    .sidebar { width: var(--sidebar-w); background: linear-gradient(180deg, var(--navy), var(--navy2)); color: #dce8f8; padding: 16px 10px; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
-    .nav-label { font-size: 10px; letter-spacing: 1.3px; color: #8fa9ca; padding: 14px 12px 6px; text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; color: #c6d5e9; text-decoration: none; font-size: 13px; }
-    .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
-    .nav-item.active { background: var(--primary); color: white; }
-    .nav-icon { width: 16px; font-size: 13px; text-align: center; }
-    .sidebar-footer { margin-top: auto; padding: 14px 12px; color: #8fa9ca; font-size: 10px; }
-    .main-content { flex: 1; min-width: 0; padding: 24px; overflow: auto; }
+    .sidebar { width: var(--sidebar-w); background: #f8fbff; color: #354b62; padding: 12px 10px 16px; border-right: 1px solid #dce7f2; display: flex; flex-direction: column; flex-shrink: 0; overflow-x: hidden; overflow-y: auto; transition: width 180ms ease; }
+    .sidebar-heading { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; color: #7b8fa5; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+    .collapse-btn { width: 28px; height: 28px; flex: none; border: 1px solid #dbe6f1; border-radius: 7px; background: white; color: #617991; cursor: pointer; }
+    .collapse-btn:hover { background: #edf5fc; }
+    .sidebar.collapsed { width: var(--sidebar-collapsed-w); }
+    .sidebar.collapsed .sidebar-heading { justify-content: center; padding: 0; }
+    .sidebar.collapsed .sidebar-heading > span, .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-item span, .sidebar.collapsed .sidebar-footer { display: none; }
+    .nav-label { margin-top: 8px; font-size: 9px; letter-spacing: 1.1px; color: #91a2b4; padding: 13px 12px 6px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 11px; min-height: 38px; padding: 8px 12px; border-radius: 8px; color: #52677e; text-decoration: none; font-size: 12px; transition: background 120ms ease, color 120ms ease; }
+    .nav-item:hover { background: #eaf3fb; color: #1f67a6; }
+    .nav-item.active { background: #e2f0fc; color: #1769ad; box-shadow: inset 3px 0 #3b90cf; font-weight: 700; }
+    .nav-icon { width: 18px; flex: none; color: #7294b1; font-size: 14px; text-align: center; }
+    .nav-item.active .nav-icon { color: #247dbb; }
+    .sidebar.collapsed .nav-item { justify-content: center; padding-inline: 0; }
+    .sidebar.collapsed .nav-icon { font-size: 16px; }
+    .sidebar-footer { margin-top: auto; padding: 14px 12px; color: #8ca0b4; font-size: 10px; }
+    .main-content { flex: 1; min-width: 0; padding: 24px clamp(16px, 2.5vw, 36px); overflow: auto; background: #eaf3fb; }
+    .sidebar-backdrop { display: none; }
     .palette-back { position: fixed; inset: 0; background: rgba(15,39,68,0.35); z-index: 50; display: grid; place-items: start center; padding-top: 12vh; }
     .palette { width: min(560px, calc(100% - 32px)); background: white; border-radius: 16px; box-shadow: 0 24px 80px rgba(15,39,68,0.25); overflow: hidden; }
     .palette-input { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
@@ -204,14 +240,24 @@ const ALL_NAV: NavItem[] = [
     .palette-item:hover { background: var(--bg); }
     .palette-item small { margin-left: auto; color: var(--muted); }
     .palette-empty { padding: 24px; text-align: center; color: var(--muted); font-size: 13px; }
-    @media (max-width: 900px) {
-      .search-chip span, .search-chip kbd, .user-meta, .year-select { display: none; }
-      .search-chip { min-width: 40px; padding: 8px; }
+    @media (max-width: 1100px) {
+      .search-chip span, .search-chip kbd, .user-meta { display: none; }
+      .search-chip { min-width: 38px; justify-content: center; padding: 9px; }
     }
+    @media (max-width: 900px) { .year-select { display: none; } }
     @media (max-width: 768px) {
+      .topbar { gap: 9px; padding: 0 12px; }
       .mobile-menu-btn { display: block; }
-      .sidebar { display: none; position: fixed; top: var(--topbar-h); bottom: 0; z-index: 20; width: 270px; }
+      .route-context { display: none; }
+      .collapse-btn { display: none; }
+      .sidebar { display: none; position: fixed; top: var(--topbar-h); bottom: 0; left: 0; z-index: 32; width: min(290px, calc(100vw - 52px)); }
       .sidebar.open { display: flex; }
+      .sidebar.collapsed { width: min(290px, calc(100vw - 52px)); }
+      .sidebar.collapsed .sidebar-heading > span, .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-item span { display: block; }
+      .sidebar.collapsed .sidebar-heading { justify-content: space-between; padding: 0 10px; }
+      .sidebar.collapsed .nav-item { justify-content: flex-start; padding: 9px 12px; }
+      .sidebar.collapsed .nav-icon { font-size: 14px; }
+      .sidebar-backdrop:not([hidden]) { display: block; position: fixed; inset: var(--topbar-h) 0 0; z-index: 30; width: 100%; border: 0; background: rgba(15,39,68,.38); }
       .main-content { padding: 16px 12px; }
     }
   `]
@@ -220,7 +266,9 @@ export class ShellComponent implements OnInit {
   sidebarOpen = signal(false);
   userMenu = signal(false);
   paletteOpen = signal(false);
+  sidebarCollapsed = signal(true);
   query = signal('');
+  currentRoute = signal('');
   years = signal<{ id: string; name: string }[]>([]);
 
   visibleNav = computed(() => {
@@ -245,6 +293,13 @@ export class ShellComponent implements OnInit {
     if (!q) return items;
     return items.filter(i => i.label.toLowerCase().includes(q) || i.group.toLowerCase().includes(q));
   });
+
+  currentNavItem = computed(() =>
+    this.visibleNav().find(item => item.route === this.currentRoute()) ??
+    this.visibleNav().find(item => this.currentRoute().startsWith(`${item.route}/`))
+  );
+  currentPage = computed(() => this.currentNavItem()?.label ?? 'Workspace');
+  currentGroup = computed(() => this.currentNavItem()?.group ?? 'School ERP');
 
   primaryRole = computed(() => {
     const roles = this.auth.user()?.roles ?? [];
@@ -272,6 +327,9 @@ export class ShellComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.currentRoute.set(this.router.url.split('?')[0]);
+    this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => this.currentRoute.set(event.urlAfterRedirects.split('?')[0]));
     this.enquiryAlerts.start();
     if (!this.ctx.schoolId) return;
     this.api.getAcademicYears(this.ctx.schoolId).subscribe({
@@ -283,6 +341,10 @@ export class ShellComponent implements OnInit {
   onYearChange(id: string) {
     const year = this.years().find(y => y.id === id);
     if (year) this.ctx.setAcademicYear(year.id, year.name);
+  }
+
+  toggleSidebar() {
+    this.sidebarCollapsed.update(value => !value);
   }
 
   openPalette() {
@@ -306,6 +368,7 @@ export class ShellComponent implements OnInit {
     if (e.key === 'Escape') {
       this.paletteOpen.set(false);
       this.userMenu.set(false);
+      this.sidebarOpen.set(false);
     }
   }
 

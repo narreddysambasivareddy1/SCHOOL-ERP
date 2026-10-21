@@ -74,7 +74,8 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
         try
         {
             return Ok(await ops.SaveLessonPlanAsync(schoolId, Tenant(), body.AcademicYearId, body.WeekStart, body.ClassId, body.SectionId,
-                body.SubjectId, employeeId.Value, body.Days.Select(d => (d.DayOfWeek, d.Topic)).ToList(), Actor(), ct));
+                body.SubjectId, employeeId.Value, body.Days.Select(d => (d.DayOfWeek, d.Topic)).ToList(),
+                Actor(), User.IsInRole("SchoolAdmin") || User.IsInRole("PlatformSuperAdmin"), ct));
         }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }

@@ -10,94 +10,125 @@ import { SchoolContextService } from '../../core/services/school-context.service
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="page-header">
-      <div class="eyebrow">TEACHER</div>
-      <h1>Good {{ greeting }}, {{ auth.user()?.firstName }}</h1>
-      <p class="sub">Only your assigned classes, subjects and sections — attendance, homework and marks.</p>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#e3f8f3;color:#087d68"><i class="pi pi-book"></i></div>
-        <div><div class="stat-label">My groups</div><div class="stat-value">{{ loading() ? '—' : assignments().length }}</div><div class="stat-sub">Active sections</div></div>
+    <section class="welcome">
+      <div>
+        <div class="eyebrow">TEACHER WORKSPACE</div>
+        <h1>Good {{ greeting }}, {{ auth.user()?.firstName }}</h1>
+        <p>Your teaching day, assignments and classroom tools in one place.</p>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#eaf3ff;color:#1c5cb7"><i class="pi pi-check-square"></i></div>
-        <div><div class="stat-label">Can take attendance</div><div class="stat-value">{{ loading() ? '—' : attendanceGroups }}</div><div class="stat-sub">Teaching groups</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#fff4db;color:#9a6900"><i class="pi pi-bookmark"></i></div>
-        <div><div class="stat-label">Subjects</div><div class="stat-value">{{ loading() ? '—' : uniqueSubjects }}</div><div class="stat-sub">This year</div></div>
-      </div>
-    </div>
+      <a routerLink="/attendance" class="primary-action"><i class="pi pi-check-square"></i> Take attendance</a>
+    </section>
 
-    <div class="mod-section">Teaching tools</div>
-    <div class="mod-grid">
-      <a class="mod-card" routerLink="/attendance"><i class="pi pi-check-square"></i><strong>Mark attendance</strong><small>Present, absent, late, excused for assigned groups</small></a>
-      <a class="mod-card" routerLink="/homework"><i class="pi pi-book"></i><strong>Homework & worksheets</strong><small>Create, publish and review submissions</small></a>
-      <a class="mod-card" routerLink="/examinations"><i class="pi pi-file"></i><strong>Enter marks</strong><small>Draft marks for assigned subjects; admin publishes</small></a>
-      <a class="mod-card" routerLink="/timetable"><i class="pi pi-table"></i><strong>My timetable</strong><small>Class, subject and section allocations</small></a>
-      <a class="mod-card" routerLink="/lesson-plans"><i class="pi pi-calendar"></i><strong>Weekly lesson plan</strong><small>Map Monday–Saturday topics by Friday</small></a>
-      <a class="mod-card" routerLink="/diary"><i class="pi pi-book"></i><strong>Class diary</strong><small>Digital card or scanned notes and homework</small></a>
-      <a class="mod-card" routerLink="/students"><i class="pi pi-users"></i><strong>Class roster</strong><small>Students in groups you are assigned to</small></a>
-      <a class="mod-card" routerLink="/communications"><i class="pi pi-send"></i><strong>Message parents</strong><small>School-approved channels only</small></a>
-    </div>
+    @if (error()) {
+      <div class="alert-banner" role="alert"><i class="pi pi-exclamation-circle"></i> {{ error() }}</div>
+    }
 
-    <div class="mod-section">My HR</div>
-    <div class="mod-grid">
-      <a class="mod-card" routerLink="/leave"><i class="pi pi-calendar-plus"></i><strong>Leave</strong><small>Balance, apply and request status</small></a>
-      <a class="mod-card" routerLink="/calendar"><i class="pi pi-calendar"></i><strong>School calendar</strong><small>Events, holidays and activities</small></a>
-      <a class="mod-card" routerLink="/announcements"><i class="pi pi-megaphone"></i><strong>Announcements</strong><small>School notices for staff</small></a>
-    </div>
+    <section class="stats-row" aria-label="Teaching overview">
+      <article class="stat-card">
+        <span class="stat-icon teal"><i class="pi pi-users"></i></span>
+        <span><small>Teaching groups</small><strong>{{ loading() ? '—' : assignments().length }}</strong><em>Assigned classes and sections</em></span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon blue"><i class="pi pi-check-square"></i></span>
+        <span><small>Attendance groups</small><strong>{{ loading() ? '—' : attendanceGroups }}</strong><em>Groups you can mark</em></span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon violet"><i class="pi pi-bookmark"></i></span>
+        <span><small>Subjects</small><strong>{{ loading() ? '—' : uniqueSubjects }}</strong><em>Across your assignments</em></span>
+      </article>
+    </section>
 
-    <div class="mod-section">My class assignments</div>
-    @if (loading()) { <div class="empty">Loading your assignments…</div> }
-    @else if (!assignments().length) { <div class="empty">No assignments for this academic year. Ask the academic coordinator to map your subjects.</div> }
-    @else {
-      <div class="assignments-grid">
-        @for (a of assignments(); track a.id) {
-          <div class="assignment-card">
-            <div class="ac-subject">{{ a.subject }}</div>
-            <div class="ac-class">{{ a.className }} · {{ a.sectionName }}</div>
-            <div class="ac-perms">
-              @if (a.canTakeAttendance) { <span class="perm">Attendance</span> }
-              @if (a.canSetHomework) { <span class="perm">Homework</span> }
-              @if (a.canEnterMarks) { <span class="perm">Marks</span> }
-            </div>
-            <div class="ac-actions">
-              <a routerLink="/attendance" class="ac-btn primary">Attendance</a>
-              <a routerLink="/homework" class="ac-btn ghost">Homework</a>
-            </div>
+    <section class="dashboard-grid">
+      <article class="panel assignments-panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">YOUR CLASSES</span><h2>Teaching assignments</h2><p>Your mapped subjects and classroom permissions.</p></div>
+          <a routerLink="/timetable" class="text-link">View timetable <i class="pi pi-arrow-up-right"></i></a>
+        </div>
+        @if (loading()) {
+          <div class="empty">Loading your assignments…</div>
+        } @else if (!assignments().length) {
+          <div class="empty"><i class="pi pi-inbox"></i><strong>No assignments yet</strong><span>Ask the academic coordinator to map your subjects for this year.</span></div>
+        } @else {
+          <div class="assignments-grid">
+            @for (a of assignments(); track a.id) {
+              <article class="assignment-card">
+                <div class="assignment-top"><span class="subject-icon"><i class="pi pi-book"></i></span><span class="assignment-label">SUBJECT</span></div>
+                <strong class="ac-subject">{{ a.subject }}</strong>
+                <span class="ac-class">{{ a.className }} <span>·</span> {{ a.sectionName }}</span>
+                <div class="ac-perms">
+                  @if (a.canTakeAttendance) { <span class="perm">Attendance</span> }
+                  @if (a.canSetHomework) { <span class="perm">Homework</span> }
+                  @if (a.canEnterMarks) { <span class="perm">Marks</span> }
+                </div>
+                <div class="ac-actions">
+                  @if (a.canTakeAttendance) { <a routerLink="/attendance">Attendance <i class="pi pi-arrow-right"></i></a> }
+                  @if (a.canSetHomework) { <a routerLink="/homework">Homework <i class="pi pi-arrow-right"></i></a> }
+                </div>
+              </article>
+            }
           </div>
         }
-      </div>
-    }
+      </article>
+
+      <aside class="panel actions-panel">
+        <div class="panel-heading"><div><span class="eyebrow">GET STARTED</span><h2>Classroom tools</h2><p>Pick up where your students need you.</p></div></div>
+        <a class="action-row" routerLink="/diary"><span class="action-icon blue"><i class="pi pi-book"></i></span><span><strong>Class diary</strong><small>Share today's notes and homework</small></span><i class="pi pi-chevron-right"></i></a>
+        <a class="action-row" routerLink="/lesson-plans"><span class="action-icon violet"><i class="pi pi-calendar"></i></span><span><strong>Weekly lesson plan</strong><small>Plan topics for the week</small></span><i class="pi pi-chevron-right"></i></a>
+        <a class="action-row" routerLink="/examinations"><span class="action-icon amber"><i class="pi pi-file-edit"></i></span><span><strong>Enter marks</strong><small>Update assessment results</small></span><i class="pi pi-chevron-right"></i></a>
+        <a class="action-row" routerLink="/leave"><span class="action-icon teal"><i class="pi pi-calendar-plus"></i></span><span><strong>Leave requests</strong><small>Apply and check request status</small></span><i class="pi pi-chevron-right"></i></a>
+        <a class="action-row" routerLink="/announcements"><span class="action-icon blue"><i class="pi pi-megaphone"></i></span><span><strong>School notices</strong><small>Events and staff announcements</small></span><i class="pi pi-chevron-right"></i></a>
+      </aside>
+    </section>
   `,
   styles: [`
-    .sub { margin: 0; color: var(--muted); font-size: 13px; }
-    .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-    .stat-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; gap: 14px; box-shadow: var(--shadow); }
-    .stat-icon { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; }
-    .stat-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
-    .stat-value { font-size: 24px; font-weight: 800; color: var(--navy); }
-    .stat-sub { font-size: 11px; color: var(--teal); }
-    .assignments-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
-    .assignment-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .ac-subject { font-size: 15px; font-weight: 800; color: var(--navy); }
-    .ac-class { font-size: 12px; color: var(--muted); }
-    .ac-perms { display: flex; gap: 5px; flex-wrap: wrap; }
-    .perm { font-size: 10px; font-weight: 700; background: #f0ebff; color: #6b3fa0; padding: 2px 8px; border-radius: 4px; }
-    .ac-actions { display: flex; gap: 8px; margin-top: auto; }
-    .ac-btn { flex: 1; text-align: center; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; }
-    .ac-btn.primary { background: var(--primary); color: white; }
-    .ac-btn.ghost { background: white; border: 1px solid var(--line); color: var(--navy); }
-    .empty { padding: 28px; text-align: center; color: var(--muted); background: white; border: 1px dashed var(--line); border-radius: 12px; }
-    @media (max-width: 900px) { .stats-row, .assignments-grid { grid-template-columns: 1fr; } }
+    .welcome { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; padding: 28px 32px; border: 1px solid #dce8f6; border-radius: 18px; background: linear-gradient(115deg,#fff 20%,#f1f7ff 100%); }
+    .welcome h1 { margin: 5px 0 6px; color: var(--navy); font-size: clamp(24px,3vw,34px); letter-spacing: -.04em; }
+    .welcome p { margin: 0; color: var(--muted); }
+    .alert-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 11px 14px; border: 1px solid #f5c97a; border-radius: 10px; background: #fff4e5; color: #7a4f00; font-size: 12px; }
+    .primary-action { display: inline-flex; align-items: center; gap: 9px; padding: 12px 16px; border-radius: 10px; background: var(--primary); color: white; text-decoration: none; font-weight: 700; box-shadow: 0 6px 16px rgba(36,99,235,.2); white-space: nowrap; }
+    .stats-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-bottom: 20px; }
+    .stat-card { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: var(--shadow-sm); }
+    .stat-card > span:last-child { display: grid; gap: 2px; }
+    .stat-card small { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+    .stat-card strong { color: var(--navy); font-size: 25px; line-height: 1.2; }
+    .stat-card em { color: var(--muted); font-size: 11px; font-style: normal; }
+    .stat-icon,.action-icon,.subject-icon { display: grid; flex: 0 0 auto; width: 42px; height: 42px; place-items: center; border-radius: 12px; }
+    .teal { background: #e3f8f3; color: #087d68; } .blue { background: #eaf3ff; color: #1c5cb7; } .violet { background: #f0ebff; color: #6b3fa0; } .amber { background: #fff4db; color: #9a6900; }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(280px,.85fr); gap: 18px; align-items: start; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+    .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+    .panel-heading h2 { margin: 3px 0 3px; color: var(--navy); font-size: 17px; letter-spacing: -.02em; }
+    .panel-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+    .text-link { color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .assignments-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 16px; }
+    .assignment-card { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfdff; }
+    .assignment-top { display: flex; align-items: center; justify-content: space-between; }
+    .subject-icon { width: 34px; height: 34px; background: #eaf3ff; color: #1c5cb7; }
+    .assignment-label { color: #8794a6; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+    .ac-subject { overflow: hidden; color: var(--navy); font-size: 15px; text-overflow: ellipsis; }
+    .ac-class { color: var(--muted); font-size: 12px; } .ac-class span { color: #a2afbd; }
+    .ac-perms { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+    .perm { padding: 3px 8px; border-radius: 20px; background: #f0ebff; color: #6b3fa0; font-size: 10px; font-weight: 700; }
+    .ac-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 5px; }
+    .ac-actions a { color: var(--primary); font-size: 11px; font-weight: 700; text-decoration: none; }
+    .ac-actions i { margin-left: 3px; font-size: 9px; }
+    .empty { display: grid; justify-items: center; gap: 8px; padding: 36px 20px; color: var(--muted); text-align: center; }
+    .empty i { color: var(--primary); font-size: 23px; } .empty strong { color: var(--navy); font-size: 14px; }
+    .action-row { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #eff2f6; color: inherit; text-decoration: none; transition: background .15s ease; }
+    .action-row:last-child { border-bottom: 0; } .action-row:hover { background: #f8faff; }
+    .action-icon { width: 36px; height: 36px; border-radius: 10px; }
+    .action-row > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; flex: 1; }
+    .action-row strong { color: var(--navy); font-size: 12px; } .action-row small { color: var(--muted); font-size: 10px; }
+    .action-row > i { color: #9aa8b8; font-size: 11px; }
+    @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 650px) { .welcome { align-items: flex-start; flex-direction: column; padding: 22px; } .stats-row { grid-template-columns: 1fr; gap: 10px; } .assignments-grid { grid-template-columns: 1fr; } .panel-heading { align-items: flex-start; flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { .action-row { transition: none; } }
   `]
 })
 export class TeacherDashboardComponent implements OnInit {
   assignments = signal<any[]>([]);
   loading = signal(true);
+  error = signal<string | null>(null);
   greeting = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening';
 
   get uniqueSubjects(): number { return [...new Set(this.assignments().map((a: any) => a.subject))].length; }
@@ -109,7 +140,7 @@ export class TeacherDashboardComponent implements OnInit {
     if (!this.ctx.schoolId || !this.ctx.academicYearId) { this.loading.set(false); return; }
     this.api.getTeacherAssignments(this.ctx.schoolId, this.ctx.academicYearId).subscribe({
       next: (data) => { this.assignments.set(data); this.loading.set(false); },
-      error: () => this.loading.set(false)
+      error: () => { this.error.set('Could not load your teaching assignments. Please try again later.'); this.loading.set(false); }
     });
   }
 }

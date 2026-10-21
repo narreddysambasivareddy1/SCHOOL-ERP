@@ -23,6 +23,9 @@ public class AcademicOpsService(AppDbContext db, INotificationService notificati
         return date.AddDays(-(iso - 1));
     }
 
+    public static bool IsLessonPlanDeadlinePassed(DateOnly weekStart, TimeOnly deadline, DateTime localNow) =>
+        localNow > WeekStart(weekStart).AddDays(4).ToDateTime(deadline);
+
     public static TimeOnly NowIst() => TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(5.5));
 
     private async Task EnsureSchoolAsync(Guid schoolId, Guid tenantId, CancellationToken ct)
@@ -65,18 +68,28 @@ public class AcademicOpsService(AppDbContext db, INotificationService notificati
         await EnsureSchoolAsync(schoolId, tenantId, ct);
         var s = await db.SchoolAcademicSettings.FirstOrDefaultAsync(x => x.SchoolId == schoolId && x.TenantId == tenantId, ct);
         if (s is not null) return s;
-        s = new SchoolAcademicSetting { TenantId = tenantId, SchoolId = schoolId, DiaryDeadline = new TimeOnly(16, 30) };
+        s = new SchoolAcademicSetting
+        {
+            TenantId = tenantId, SchoolId = schoolId,
+            DiaryDeadline = new TimeOnly(16, 30), WeeklyPlanDeadline = new TimeOnly(18, 0)
+        };
         db.SchoolAcademicSettings.Add(s);
         await db.SaveChangesAsync(ct);
         return s;
     }
 
-    public async Task<object> SaveSettingsAsync(Guid schoolId, Guid tenantId, TimeOnly deadline, CancellationToken ct)
+    public async Task<object> SaveSettingsAsync(
+        Guid schoolId, Guid tenantId, TimeOnly deadline, TimeOnly? weeklyPlanDeadline, CancellationToken ct)
     {
         var s = await SettingsAsync(schoolId, tenantId, ct);
         s.DiaryDeadline = deadline;
+        if (weeklyPlanDeadline is { } planDeadline) s.WeeklyPlanDeadline = planDeadline;
         await db.SaveChangesAsync(ct);
-        return new { diaryDeadline = s.DiaryDeadline.ToString("HH:mm") };
+        return new
+        {
+            diaryDeadline = s.DiaryDeadline.ToString("HH:mm"),
+            weeklyPlanDeadline = s.WeeklyPlanDeadline.ToString("HH:mm")
+        };
     }
 
     public async Task<IReadOnlyList<object>> PeriodsAsync(Guid schoolId, Guid yearId, Guid tenantId, CancellationToken ct) =>
@@ -125,6 +138,21 @@ public class AcademicOpsService(AppDbContext db, INotificationService notificati
         period.Band = band;
         await db.SaveChangesAsync(ct);
         return new { period.Id, period.Name };
+    }
+
+    public async Task DeletePeriodAsync(Guid schoolId, Guid tenantId, Guid yearId, Guid periodId, CancellationToken ct)
+    {
+        await EnsureSchoolYearAsync(schoolId, tenantId, yearId, ct);
+        var period = await db.TimetablePeriods.FirstOrDefaultAsync(p =>
+            p.Id == periodId && p.SchoolId == schoolId && p.TenantId == tenantId &&
+            p.AcademicYearId == yearId, ct)
+            ?? throw new InvalidOperationException("Period not found.");
+        if (await db.TimetableSlots.AnyAsync(s =>
+                s.TenantId == tenantId && s.SchoolId == schoolId && s.AcademicYearId == yearId &&
+                s.PeriodId == periodId, ct))
+            throw new InvalidOperationException("Clear all timetable slots for this period before deleting it.");
+        db.TimetablePeriods.Remove(period);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task<object> GridAsync(Guid schoolId, Guid tenantId, Guid yearId, Guid sectionId, DateOnly? date, CancellationToken ct)
@@ -381,7 +409,8 @@ public class AcademicOpsService(AppDbContext db, INotificationService notificati
     }
 
     public async Task<object> SaveLessonPlanAsync(Guid schoolId, Guid tenantId, Guid yearId, DateOnly weekStart,
-        Guid classId, Guid sectionId, Guid subjectId, Guid employeeId, IReadOnlyList<(int Day, string Topic)> days, string actor, CancellationToken ct)
+        Guid classId, Guid sectionId, Guid subjectId, Guid employeeId, IReadOnlyList<(int Day, string Topic)> days,
+        string actor, bool isAdmin, CancellationToken ct)
     {
         await EnsureSchoolYearAsync(schoolId, tenantId, yearId, ct);
         await EnsureSectionAsync(schoolId, tenantId, classId, sectionId, ct);
@@ -389,6 +418,16 @@ public class AcademicOpsService(AppDbContext db, INotificationService notificati
         if (days.Any(d => d.Day is < 1 or > 6 || (d.Topic?.Length ?? 0) > 2000))
             throw new InvalidOperationException("Topics must be 2,000 characters or fewer and use Monday–Saturday day numbers.");
         weekStart = WeekStart(weekStart);
+        if (!isAdmin)
+        {
+            var settings = await SettingsAsync(schoolId, tenantId, ct);
+            var timeZoneId = await db.Schools.Where(s => s.Id == schoolId && s.TenantId == tenantId)
+                .Select(s => s.TimeZone).FirstAsync(ct);
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+            if (IsLessonPlanDeadlinePassed(weekStart, settings.WeeklyPlanDeadline, localNow))
+                throw new InvalidOperationException("The lesson-plan deadline for this week has passed. Contact a school administrator.");
+        }
         var plan = await db.WeeklyLessonPlans.AsNoTracking().FirstOrDefaultAsync(p =>
             p.TenantId == tenantId && p.SchoolId == schoolId && p.AcademicYearId == yearId &&
             p.WeekStart == weekStart && p.SectionId == sectionId && p.SubjectId == subjectId && p.EmployeeId == employeeId, ct);
