@@ -99,11 +99,23 @@ interface Stat {
           </a>
           @if (canSeeAcademicOps) {
             @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
-          <a routerLink="/substitutions" class="operation-row">
-            <span class="operation-icon amber"><i class="pi pi-users"></i></span>
-            <span class="operation-copy"><strong>{{ ops()?.openSubstitutions ?? '—' }} periods need cover</strong><small>{{ ops()?.onLeave ?? '—' }} teacher(s) on approved leave</small></span>
-            <i class="pi pi-chevron-right"></i>
-          </a>
+            <a routerLink="/substitutions" class="operation-row">
+              <span class="operation-icon amber"><i class="pi pi-users"></i></span>
+              <span class="operation-copy"><strong>{{ ops()?.openSubstitutions ?? '—' }} periods need cover</strong><small>{{ ops()?.onLeave ?? '—' }} teacher(s) on leave · {{ ops()?.presentStaff ?? '—' }} present</small></span>
+              <i class="pi pi-chevron-right"></i>
+            </a>
+            @if (ops()?.availability?.length) {
+              <div class="availability">
+                <div class="availability-heading"><strong>Available substitutes</strong><span>by period</span></div>
+                @for (period of ops()?.availability || []; track period.periodId) {
+                  <div class="availability-row">
+                    <span>{{ period.period }}</span>
+                    <strong>{{ period.free }}</strong>
+                    <small>{{ teacherNames(period) || 'No teachers available' }}</small>
+                  </div>
+                }
+              </div>
+            }
           }
           @if (canSeeDiaryCompliance) {
             @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }

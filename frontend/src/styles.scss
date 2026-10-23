@@ -449,6 +449,95 @@ app-dashboard .quick-grid > a > i:first-child { width: 30px; height: 30px; backg
   app-dashboard .quick-grid.quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+app-teacher-dashboard .welcome,
+app-student-dashboard .welcome,
+app-parent-dashboard .welcome {
+  min-height: 0;
+  margin-bottom: 14px;
+  padding: 17px 20px;
+  border: 1px solid #d5e4ef;
+  border-radius: 12px;
+  background: linear-gradient(105deg, #fff 10%, #f2f8fd 100%);
+  box-shadow: 0 3px 11px rgba(49, 83, 112, .055);
+}
+app-teacher-dashboard .welcome h1,
+app-student-dashboard .welcome h1,
+app-parent-dashboard .welcome h1 { margin: 3px 0; color: #25435d; font-size: 22px; }
+app-teacher-dashboard .welcome p,
+app-student-dashboard .welcome p,
+app-parent-dashboard .welcome p { color: #74889a; font-size: 11px; }
+app-teacher-dashboard .primary-action,
+app-student-dashboard .primary-action,
+app-parent-dashboard .primary-action { padding: 9px 12px; border-radius: 8px; background: #347fb2; box-shadow: none; font-size: 11px; }
+app-teacher-dashboard .stats-row.stats-row,
+app-student-dashboard .stats-row.stats-row,
+app-parent-dashboard .stats-row.stats-row { gap: 10px; margin-bottom: 13px; }
+app-teacher-dashboard .stat-card.stat-card,
+app-student-dashboard .stat-card.stat-card,
+app-parent-dashboard .stat-card.stat-card {
+  min-height: 86px;
+  gap: 11px;
+  padding: 12px;
+  border-color: #d8e5ef;
+  border-radius: 11px;
+  box-shadow: 0 3px 10px rgba(49, 83, 112, .05);
+}
+app-teacher-dashboard .stat-icon.stat-icon,
+app-student-dashboard .stat-icon.stat-icon,
+app-parent-dashboard .stat-icon.stat-icon { width: 34px; height: 34px; border-radius: 9px; }
+app-teacher-dashboard .stat-card strong,
+app-student-dashboard .stat-card strong,
+app-parent-dashboard .stat-card strong { color: #25435d; font-size: 21px; }
+app-teacher-dashboard .stat-card small,
+app-student-dashboard .stat-card small,
+app-parent-dashboard .stat-card small { color: #698196; font-size: 9px; }
+app-teacher-dashboard .stat-card em,
+app-student-dashboard .stat-card em,
+app-parent-dashboard .stat-card em { color: #8093a4; font-size: 9px; }
+app-teacher-dashboard .panel.panel,
+app-student-dashboard .panel.panel,
+app-parent-dashboard .panel.panel { border-color: #d8e5ef; border-radius: 12px; box-shadow: 0 3px 11px rgba(49, 83, 112, .05); }
+app-teacher-dashboard .panel-heading.panel-heading,
+app-student-dashboard .panel-heading.panel-heading,
+app-parent-dashboard .panel-heading.panel-heading { padding: 14px 16px; background: #f2f8fc; }
+app-teacher-dashboard .panel-heading h2,
+app-student-dashboard .panel-heading h2,
+app-parent-dashboard .panel-heading h2 { color: #2b4a64; font-size: 14px; }
+app-teacher-dashboard .panel-heading p,
+app-student-dashboard .panel-heading p,
+app-parent-dashboard .panel-heading p { color: #7b8fa1; font-size: 10px; }
+app-teacher-dashboard .assignment-card.assignment-card { padding: 12px; border-color: #e0eaf2; border-radius: 10px; background: #fbfdff; }
+app-teacher-dashboard .ac-subject { color: #294a65; font-size: 13px; }
+app-teacher-dashboard .action-row.action-row,
+app-student-dashboard .list-row.list-row,
+app-parent-dashboard .list-row.list-row { padding-top: 10px; padding-bottom: 10px; border-bottom-color: #eaf0f5; }
+app-parent-dashboard .children-section.children-section { padding: 13px 15px; border-color: #d8e5ef; border-radius: 11px; box-shadow: 0 3px 10px rgba(49, 83, 112, .045); }
+app-parent-dashboard .child-chip.child-chip { border-color: #d8e5ef; border-radius: 9px; background: #fbfdff; }
+app-parent-dashboard .child-chip.child-chip.active { border-color: #80b4d7; background: #eff7fc; box-shadow: 0 0 0 2px rgba(52, 127, 178, .08); }
+app-parent-dashboard .av.av { background: #e5f1fa; color: #397eae; }
+app-student-dashboard .shortcuts.shortcuts,
+app-parent-dashboard .shortcuts.shortcuts { gap: 8px; margin-bottom: 14px; }
+app-student-dashboard .shortcuts a,
+app-parent-dashboard .shortcuts a { padding: 9px 10px; border-color: #d8e5ef; border-radius: 9px; background: #fff; color: #355670; font-size: 10px; }
+app-student-dashboard .shortcuts a:hover,
+app-parent-dashboard .shortcuts a:hover { border-color: #a9cce4; background: #f5faff; }
+@media (max-width: 650px) {
+  app-teacher-dashboard .stats-row.stats-row,
+  app-student-dashboard .stats-row.stats-row,
+  app-parent-dashboard .stats-row.stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  app-teacher-dashboard .stat-card.stat-card,
+  app-student-dashboard .stat-card.stat-card,
+  app-parent-dashboard .stat-card.stat-card { min-width: 0; align-items: flex-start; }
+  app-teacher-dashboard .stat-card em,
+  app-student-dashboard .stat-card em,
+  app-parent-dashboard .stat-card em { white-space: normal; }
+  app-student-dashboard .welcome,
+  app-parent-dashboard .welcome,
+  app-teacher-dashboard .welcome { padding: 15px; }
+  app-student-dashboard .shortcuts.shortcuts,
+  app-parent-dashboard .shortcuts.shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .skeleton {
   background: linear-gradient(90deg, #eef2f7 25%, #f7f9fc 50%, #eef2f7 75%);
   background-size: 200% 100%;
