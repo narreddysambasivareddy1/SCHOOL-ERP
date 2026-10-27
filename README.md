@@ -10,12 +10,25 @@ Full-stack School ERP built with **Angular 19 + PrimeNG**, **.NET 10 ASP.NET Cor
 cp .env.example .env
 # Edit .env — set POSTGRES_PASSWORD and JWT_SECRET
 
+# One-click startup on Windows
+powershell -ExecutionPolicy Bypass -File .\Start-SchoolERP.ps1
+```
+
+Or manually:
+
+```bash
 docker compose up --build
 ```
 
 - Frontend: http://localhost:8380
 - API: http://localhost:8380/api
 - Swagger: http://localhost:8380/api/swagger (development only)
+- Health: http://localhost:8301/health
+
+Utility scripts:
+- `Start-SchoolERP.ps1` to build and start the stack
+- `Stop-SchoolERP.ps1` to stop the stack
+- `Check-ProjectStatus.ps1` to verify the app health
 
 ---
 

@@ -115,15 +115,16 @@ public static class IntegrationCatalog
         return Unwrap(el);
     }
 
-    private static object? Unwrap(JsonElement el) => el.ValueKind switch
+    private static object Unwrap(JsonElement el) => el.ValueKind switch
     {
-        JsonValueKind.String => el.GetString() ?? "",
+        JsonValueKind.String => el.GetString() ?? string.Empty,
         JsonValueKind.Number => el.TryGetInt64(out var n) ? n : el.GetDouble(),
         JsonValueKind.True => true,
         JsonValueKind.False => false,
         JsonValueKind.Object => MaskElement(el),
         JsonValueKind.Array => el.EnumerateArray().Select(Unwrap).ToArray(),
-        _ => null
+        JsonValueKind.Null or JsonValueKind.Undefined => string.Empty,
+        _ => string.Empty
     };
 
     private static bool IsSecret(string name)

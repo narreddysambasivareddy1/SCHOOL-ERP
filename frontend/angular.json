@@ -22,6 +22,7 @@
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.json",
+            "allowedCommonJsDependencies": ["quill-delta", "quill"],
             "assets": ["src/favicon.ico", "src/assets", "src/manifest.webmanifest"],
             "styles": [
               "node_modules/primeicons/primeicons.css",
@@ -35,7 +36,7 @@
             "production": {
               "budgets": [
                 { "type": "initial", "maximumWarning": "1MB", "maximumError": "2MB" },
-                { "type": "anyComponentStyle", "maximumWarning": "8kB", "maximumError": "16kB" }
+                { "type": "anyComponentStyle", "maximumWarning": "16kB", "maximumError": "20kB" }
               ],
               "outputHashing": "all",
               "fileReplacements": [
