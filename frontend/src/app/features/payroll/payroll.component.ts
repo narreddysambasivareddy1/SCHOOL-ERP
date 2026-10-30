@@ -64,17 +64,18 @@ import { MoneyPipe } from '../../shared/money.pipe';
     }
   `,
   styles: [`
-    h1 { font-size: 22px; margin: 4px 0 8px; color: var(--navy); }
-    .toolbar { margin: 12px 0; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-    header { display: flex; justify-content: space-between; align-items: center; }
-    .nums { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin: 8px 0; }
-    .pill { margin-left: 8px; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #fff2d7; color: #9a6900; }
-    .pill.done { background: #e5f8f1; color: #087d68; }
-    button { border: 0; background: var(--primary); color: white; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 12px; }
-    .ghost { background: white; color: var(--ink); border: 1px solid var(--line); }
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; font-size: 13px; }
-    th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+    h1 { margin: 4px 0; color: var(--navy); font-size: 28px; letter-spacing: -0.03em; }
+    .toolbar { display: flex; align-items: center; margin: 0 0 16px; }
+    .card { background: white; border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .nums { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin: 16px 0; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+    .pill { margin-left: 8px; padding: 4px 8px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-size: 12px; font-weight: 700; }
+    .pill.done { background: var(--success-soft); color: var(--success); }
+    button { height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--primary); color: white; font-size: 14px; font-weight: 650; cursor: pointer; }
+    .ghost { background: white; color: var(--navy); border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; font-size: 14px; }
+    th, td { padding: 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    @media (max-width: 900px) { .nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }
     .ok { background: #e5f8f1; color: #087d68; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
   `]

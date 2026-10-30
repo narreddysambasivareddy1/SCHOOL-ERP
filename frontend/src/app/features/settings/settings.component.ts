@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -24,7 +25,21 @@ import { SchoolContextService } from '../../core/services/school-context.service
         <div class="card"><label>Currency</label><strong>{{ school().currency }}</strong></div>
         <div class="card"><label>Time zone</label><strong>{{ school().timeZone }}</strong></div>
         <div class="card"><label>Language</label><strong>{{ school().defaultLanguage }}</strong></div>
-        <div class="card"><label>Primary colour</label><strong>{{ school().primaryColor || '—' }}</strong></div>
+        <div class="card"><label>School colour</label><strong>{{ school().primaryColor || 'Default campus blue' }}</strong></div>
+      </div>
+      <div class="theme-panel">
+        <h2>Workspace colour</h2>
+        <p>Saved in this browser. It recolours the sidebar, page background, buttons and links. School colour is the default until you pick one.</p>
+        <div class="swatches">
+          @for (preset of theme.presets; track preset.id) {
+            <button type="button" class="swatch" [class.on]="theme.active() === preset.hex" [style.background]="preset.hex"
+              [attr.aria-label]="preset.name" (click)="theme.choose(preset.hex)">{{ preset.name }}</button>
+          }
+        </div>
+        <label class="custom">Custom hex
+          <input type="color" [value]="theme.active()" aria-label="Custom workspace colour" (input)="theme.choose(colorValue($event))" />
+        </label>
+        <button type="button" class="reset" (click)="theme.resetToSchool(school().primaryColor)">Use school colour</button>
       </div>
       <p class="text-muted">Email, SMS, WhatsApp, Google and payment keys live under Integrations. Dummy values are already seeded; swap them when the school provides live credentials.</p>
       <p><a routerLink="/integrations">Open integrations</a></p>
@@ -36,6 +51,15 @@ import { SchoolContextService } from '../../core/services/school-context.service
     label { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }
     a { color: var(--primary); font-size: 13px; }
+    .theme-panel { margin: 8px 0 18px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .theme-panel h2 { margin: 0 0 6px; color: var(--navy); font-size: 18px; }
+    .theme-panel p { margin: 0 0 12px; color: var(--muted); }
+    .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+    .swatch { min-height: 44px; padding: 0 14px; border: 2px solid transparent; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; }
+    .swatch.on { border-color: var(--ink); }
+    .custom { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 13px; font-weight: 650; color: var(--ink); }
+    .custom input { width: 48px; height: 36px; border: 0; background: transparent; cursor: pointer; }
+    .reset { margin-top: 12px; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--primary-soft); color: var(--navy); cursor: pointer; font-weight: 700; }
   `]
 })
 export class SettingsComponent implements OnInit {
@@ -43,7 +67,11 @@ export class SettingsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  constructor(private api: ApiService, public ctx: SchoolContextService) {}
+  constructor(private api: ApiService, public ctx: SchoolContextService, public theme: ThemeService) {}
+
+  colorValue(event: Event) {
+    return (event.target as HTMLInputElement).value;
+  }
 
   ngOnInit() {
     if (!this.ctx.schoolId) { this.loading.set(false); return; }

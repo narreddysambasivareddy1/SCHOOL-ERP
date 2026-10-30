@@ -9,8 +9,13 @@ import { SchoolContextService } from '../../core/services/school-context.service
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="eyebrow">SCHOOL COMMUNICATIONS</div>
-    <h1>Messages & Notifications</h1>
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">SCHOOL COMMUNICATIONS</div>
+        <h1>Messages</h1>
+        <p>Announcements and notification history.</p>
+      </div>
+    </div>
     @if (error()) { <div class="alert">{{ error() }}</div> }
     @if (notice()) { <div class="ok">{{ notice() }}</div> }
 

@@ -16,8 +16,13 @@ interface ActiveTrip { id: string; route: string; vehicle: string; driver: strin
   standalone: true,
   imports: [CommonModule, TableModule, CardModule, TagModule],
   template: `
-    <div class="eyebrow">SCHOOL TRANSPORT</div>
-    <h1 style="color:var(--navy);margin:4px 0 20px">Transport & GPS</h1>
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">SCHOOL TRANSPORT</div>
+        <h1>Transport</h1>
+        <p>Active trips and routes.</p>
+      </div>
+    </div>
 
     <div class="grid-2">
       <p-card header="Active Trips">

@@ -10,7 +10,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
     <nav class="nav">
       <div class="nav-inner">
         <div class="nav-brand">
-          <div class="nav-logo">✦</div>
+          <div class="nav-logo"><i class="pi pi-graduation-cap"></i></div>
           <span>EduCampus</span>
         </div>
         <div class="nav-links">
@@ -84,7 +84,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
         <div class="features-grid">
           @for (f of features; track f.title) {
             <div class="feature-card">
-              <div class="feature-icon" [style.background]="f.bg">{{ f.icon }}</div>
+              <div class="feature-icon" [style.background]="f.bg" [style.color]="f.color"><i [class]="f.icon"></i></div>
               <h3>{{ f.title }}</h3>
               <p>{{ f.desc }}</p>
             </div>
@@ -100,7 +100,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
         <p class="section-sub">Sign in with your school code. Each role sees only what they need.</p>
         <div class="portals-grid">
           <div class="portal-card admin-card">
-            <div class="portal-icon">🏛</div>
+            <div class="portal-icon"><i class="pi pi-building"></i></div>
             <h3>Admin Portal</h3>
             <p>Full school management — students, staff, fees, payroll, analytics and audit logs.</p>
             <ul>
@@ -112,7 +112,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
             <a routerLink="/admin/login" class="portal-btn admin-btn">Sign in as Admin →</a>
           </div>
           <div class="portal-card teacher-card">
-            <div class="portal-icon">👩🏫</div>
+            <div class="portal-icon"><i class="pi pi-briefcase"></i></div>
             <h3>Teacher Portal</h3>
             <p>Class-level tools — mark attendance, assign homework and enter marks for your sections.</p>
             <ul>
@@ -124,7 +124,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
             <a routerLink="/teacher/login" class="portal-btn teacher-btn">Sign in as Teacher →</a>
           </div>
           <div class="portal-card student-card">
-            <div class="portal-icon">🎓</div>
+            <div class="portal-icon"><i class="pi pi-user"></i></div>
             <h3>Student Portal</h3>
             <p>Personal dashboard — attendance record, homework, fee status and exam results.</p>
             <ul>
@@ -136,7 +136,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
             <a routerLink="/student/login" class="portal-btn student-btn">Sign in as Student →</a>
           </div>
           <div class="portal-card parent-card">
-            <div class="portal-icon">⌂</div>
+            <div class="portal-icon"><i class="pi pi-home"></i></div>
             <h3>Parent Portal</h3>
             <p>Family workspace — switch children, follow attendance, homework and fee status.</p>
             <ul>
@@ -148,7 +148,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
             <a routerLink="/parent/login" class="portal-btn parent-btn">Sign in as Parent →</a>
           </div>
           <div class="portal-card teacher-card">
-            <div class="portal-icon">☎</div>
+            <div class="portal-icon"><i class="pi pi-phone"></i></div>
             <h3>Front Office</h3>
             <p>OTP-verified website enquiries, call notes and conversion pipeline.</p>
             <ul>
@@ -170,9 +170,9 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
           <h2 class="light">Ready to transform your school?</h2>
           <p class="section-sub light">Contact our team to schedule a live demo and discuss your school's requirements.</p>
           <div class="contact-list">
-            <div>✉ &nbsp;info&#64;educampus.school</div>
-            <div>📞 &nbsp;+91 98765 43210</div>
-            <div>📍 &nbsp;Available worldwide · Cloud hosted</div>
+            <div><i class="pi pi-envelope"></i> info&#64;educampus.school</div>
+            <div><i class="pi pi-phone"></i> +91 98765 43210</div>
+            <div><i class="pi pi-map-marker"></i> Available worldwide · Cloud hosted</div>
           </div>
         </div>
         <div class="cta-box">
@@ -184,7 +184,7 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-brand">
-          <div class="nav-logo small">✦</div>
+          <div class="nav-logo small"><i class="pi pi-graduation-cap"></i></div>
           <span>EduCampus · International School ERP</span>
         </div>
         <div class="footer-links">
@@ -264,14 +264,15 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
     .feature-card h3 { font-size: 14px; font-weight: 700; color: #17365D; margin: 0 0 8px; }
     .feature-card p { font-size: 12px; color: #718096; margin: 0; line-height: 1.6; }
 
-    .portals { background: white; padding: 96px 24px; }
+    .portals { background: #e7eef6; padding: 96px 24px; }
     .portals-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; }
-    .portal-card { border: 1px solid #e4eaf2; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px; }
+    .portal-card { border: 1px solid #e4eaf2; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px; background: white; }
     .admin-card { border-top: 4px solid #2463eb; }
     .teacher-card { border-top: 4px solid #0F8B8D; }
     .student-card { border-top: 4px solid #4338ca; }
     .parent-card { border-top: 4px solid #F2B544; }
-    .portal-icon { font-size: 36px; }
+    .portal-icon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: #e7eef6; color: #17365D; font-size: 20px; }
+    .contact-list i { margin-right: 8px; }
     .portal-card h3 { font-size: 18px; font-weight: 800; color: #17365D; margin: 0; }
     .portal-card p { font-size: 13px; color: #718096; margin: 0; line-height: 1.6; }
     .portal-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
@@ -317,13 +318,13 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
 export class HomeComponent {
   year = new Date().getFullYear();
   features = [
-    { icon: '🎓', title: 'Student Management', desc: 'Admissions, enrolments, guardian records and complete student lifecycle management.', bg: '#eaf3ff' },
-    { icon: '◷', title: 'Attendance', desc: 'Class-level attendance with Present, Absent, Late and Excused codes. Biometric-ready.', bg: '#fff4db' },
-    { icon: '◎', title: 'Fees & Payments', desc: 'Fee structures, instalment plans, online payments, receipts and reconciliation in the school currency.', bg: '#f0ebff' },
-    { icon: '🚌', title: 'Transport & GPS', desc: 'Route management, vehicle tracking, trip logs and student transport assignments.', bg: '#e3f8f3' },
-    { icon: '👩🏫', title: 'Staff & HRMS', desc: 'Employee records, departments, designations, leave management and payroll runs.', bg: '#fff0f0' },
-    { icon: '📚', title: 'Academics', desc: 'Teacher-subject-section assignments, homework, examinations and mark entry.', bg: '#f0fff4' },
-    { icon: '📊', title: 'Analytics', desc: 'Live dashboards for student strength, attendance trends, fee collection and staff reports.', bg: '#fffbeb' },
-    { icon: '🔒', title: 'Security & Audit', desc: 'JWT auth, role-based access control, full audit trail and multi-tenant isolation.', bg: '#f8f4ff' },
+    { icon: 'pi pi-users', title: 'Student Management', desc: 'Admissions, enrolments, guardian records and complete student lifecycle management.', bg: '#eaf3ff', color: '#1d4e89' },
+    { icon: 'pi pi-check-square', title: 'Attendance', desc: 'Class-level attendance with Present, Absent, Late and Excused codes. Biometric-ready.', bg: '#fff4db', color: '#b45309' },
+    { icon: 'pi pi-wallet', title: 'Fees & Payments', desc: 'Fee structures, instalment plans, online payments, receipts and reconciliation in the school currency.', bg: '#f0ebff', color: '#3730a3' },
+    { icon: 'pi pi-map', title: 'Transport & GPS', desc: 'Route management, vehicle tracking, trip logs and student transport assignments.', bg: '#e3f8f3', color: '#1f6b4a' },
+    { icon: 'pi pi-id-card', title: 'Staff & HRMS', desc: 'Employee records, departments, designations, leave management and payroll runs.', bg: '#fff0f0', color: '#9f1239' },
+    { icon: 'pi pi-book', title: 'Academics', desc: 'Teacher-subject-section assignments, homework, examinations and mark entry.', bg: '#f0fff4', color: '#1f6b4a' },
+    { icon: 'pi pi-chart-bar', title: 'Analytics', desc: 'Live dashboards for student strength, attendance trends, fee collection and staff reports.', bg: '#fffbeb', color: '#b45309' },
+    { icon: 'pi pi-lock', title: 'Security & Audit', desc: 'JWT auth, role-based access control, full audit trail and multi-tenant isolation.', bg: '#f8f4ff', color: '#3730a3' },
   ];
 }

@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { ThemeService } from './theme.service';
 
 export interface SchoolContext {
   tenantId: string;
@@ -21,7 +22,7 @@ export class SchoolContextService {
   private _context = signal<SchoolContext | null>(this.load());
   readonly context = this._context.asReadonly();
 
-  constructor() {
+  constructor(private theme: ThemeService) {
     const ctx = this._context();
     if (ctx) this.applyTheme(ctx);
   }
@@ -46,18 +47,11 @@ export class SchoolContextService {
   clear() {
     this._context.set(null);
     sessionStorage.removeItem(STORAGE_KEY);
-    const root = document.documentElement;
-    root.style.removeProperty('--primary');
-    root.style.removeProperty('--navy');
   }
 
   private applyTheme(ctx: SchoolContext) {
-    const root = document.documentElement;
-    root.lang = (ctx.locale || 'en').split('-')[0];
-    if (ctx.primaryColor) {
-      root.style.setProperty('--primary', ctx.primaryColor);
-      root.style.setProperty('--navy', ctx.primaryColor);
-    }
+    document.documentElement.lang = (ctx.locale || 'en').split('-')[0];
+    this.theme.applySchoolColor(ctx.primaryColor);
   }
 
   private load(): SchoolContext | null {

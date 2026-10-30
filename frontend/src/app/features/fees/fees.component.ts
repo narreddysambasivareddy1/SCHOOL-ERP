@@ -19,8 +19,13 @@ interface Payment { id: string; amount: number; status: string; method: string; 
   standalone: true,
   imports: [CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule, TagModule, CardModule, MoneyPipe],
   template: `
-    <div class="eyebrow">FEES & PAYMENTS</div>
-    <h1 style="color:var(--navy);margin:4px 0 20px">Fee Management</h1>
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">FEES & PAYMENTS</div>
+        <h1>Fee management</h1>
+        <p>Structures, receipts and reconciliation for one student at a time.</p>
+      </div>
+    </div>
 
     <div class="toolbar">
       <input pInputText [(ngModel)]="studentId" placeholder="Enter Student ID to view payments..." style="width:320px" />
@@ -53,7 +58,7 @@ interface Payment { id: string; amount: number; status: string; method: string; 
       </p-card>
     }
   `,
-  styles: [`.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 4px; }`]
+  styles: [`.toolbar { margin-bottom: 0; }`]
 })
 export class FeesComponent {
   payments = signal<Payment[]>([]);

@@ -108,8 +108,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
     h1 { margin: 4px 0; font-size: 22px; color: var(--navy); }
     .toolbar { margin-bottom: 14px; }
-    .person { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 32px; height: 32px; border-radius: 9px; background: #e7efff; color: #28569b; display: grid; place-items: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+    .person { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
     strong { font-size: 12px; }
     small { color: var(--muted); font-size: 10px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }

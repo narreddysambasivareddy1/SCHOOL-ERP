@@ -6,6 +6,7 @@ import { AuthService } from '../core/auth/auth.service';
 import { SchoolContextService } from '../core/services/school-context.service';
 import { ApiService } from '../core/services/api.service';
 import { EnquiryAlertService } from '../core/services/enquiry-alert.service';
+import { ThemeService } from '../core/services/theme.service';
 import { filter } from 'rxjs';
 
 interface NavItem {
@@ -112,6 +113,23 @@ const ALL_NAV: NavItem[] = [
               <div class="menu">
                 <div class="menu-meta">{{ auth.user()?.email }}</div>
                 <div class="menu-meta">{{ ctx.locale }} · {{ ctx.currency }}</div>
+                <div class="theme-block" (click)="$event.stopPropagation()">
+                  <div class="menu-meta">Workspace colour</div>
+                  <div class="swatches" role="listbox" aria-label="Workspace colour">
+                    @for (preset of theme.presets; track preset.id) {
+                      <button type="button" class="swatch" role="option" [class.on]="theme.active() === preset.hex"
+                        [style.background]="preset.hex" [attr.aria-label]="preset.name" [attr.title]="preset.name"
+                        [attr.aria-selected]="theme.active() === preset.hex" (click)="theme.choose(preset.hex)"></button>
+                    }
+                  </div>
+                  <label class="custom-color">Custom
+                    <input type="color" [value]="theme.active()" aria-label="Custom workspace colour"
+                      (input)="theme.choose(colorValue($event))" />
+                  </label>
+                  <button type="button" class="menu-item" (click)="theme.resetToSchool(ctx.context()?.primaryColor)">
+                    Use school colour
+                  </button>
+                </div>
                 <button type="button" class="menu-item" (click)="auth.logout()">
                   <i class="pi pi-sign-out"></i> Sign out
                 </button>
@@ -182,23 +200,23 @@ const ALL_NAV: NavItem[] = [
   `,
   styles: [`
     .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
-    .topbar { height: var(--topbar-h); background: white; border-bottom: 1px solid #d9e5f1; display: flex; align-items: center; gap: 14px; padding: 0 20px; position: sticky; top: 0; z-index: 40; box-shadow: 0 2px 8px rgba(35,73,112,.045); }
+    .topbar { height: var(--topbar-h); background: var(--topbar); border-bottom: 3px solid var(--primary); display: flex; align-items: center; gap: 14px; padding: 0 20px; position: sticky; top: 0; z-index: 40; }
     .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .logo, .logo-img { height: 36px; width: 36px; border-radius: 10px; flex-shrink: 0; }
-    .logo { background: linear-gradient(145deg, #2d7ec1, #59a6dc); display: grid; place-items: center; color: white; }
+    .logo { background: var(--primary); display: grid; place-items: center; color: white; }
     .logo-img { object-fit: cover; border: 1px solid var(--line); }
     .brand strong { display: block; color: var(--navy); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .brand small { color: var(--muted); font-size: 10px; }
-    .search-chip { margin-left: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #f8fafc; border-radius: 9px; padding: 8px 12px; color: var(--muted); font-size: 12px; cursor: pointer; min-width: 190px; transition: border-color 140ms ease, background 140ms ease; }
+    .search-chip { height: 40px; margin-left: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #f8fafc; border-radius: 10px; padding: 0 12px; color: var(--muted); font-size: 14px; cursor: pointer; min-width: 220px; transition: border-color 140ms ease, background 140ms ease; }
     .search-chip:hover { border-color: #b8c7d9; background: white; }
     .search-chip kbd { margin-left: auto; font-size: 10px; border: 1px solid var(--line); background: white; border-radius: 6px; padding: 1px 6px; }
     .route-context { display: grid; gap: 0; min-width: 0; margin-left: 4px; padding-left: 16px; border-left: 1px solid var(--line); line-height: 1.25; }
     .route-context span { color: var(--muted); font-size: 10px; }
     .route-context strong { overflow: hidden; color: var(--navy); font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
     .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    .year-select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; font-size: 12px; background: white; color: var(--ink); }
+    .year-select { height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; font-size: 14px; background: white; color: var(--ink); }
     .user-wrap { position: relative; }
-    .user-btn { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: white; border-radius: 10px; padding: 4px 10px 4px 4px; cursor: pointer; }
+    .user-btn { height: 40px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: white; border-radius: 10px; padding: 0 10px 0 4px; cursor: pointer; }
     .avatar { width: 28px; height: 28px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-size: 10px; font-weight: 800; }
     .user-meta { display: flex; flex-direction: column; align-items: flex-start; }
     .user-name { font-size: 12px; color: var(--ink); font-weight: 600; }
@@ -207,30 +225,36 @@ const ALL_NAV: NavItem[] = [
     .role-badge.teacher { color: #087d68; }
     .role-badge.student { color: #4338ca; }
     .role-badge.parent { color: #9a6900; }
-    .menu { position: absolute; right: 0; top: calc(100% + 8px); width: 220px; background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px; z-index: 30; }
+    .menu { position: absolute; right: 0; top: calc(100% + 8px); width: 260px; background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px; z-index: 30; }
+    .theme-block { margin: 6px 0; padding-top: 6px; border-top: 1px solid var(--line); }
+    .swatches { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 8px 8px; }
+    .swatch { width: 36px; height: 36px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .18); }
+    .swatch.on { border-color: var(--ink); }
+    .custom-color { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 8px 4px; color: var(--muted); font-size: 12px; font-weight: 650; }
+    .custom-color input { width: 44px; height: 32px; padding: 0; border: 0; background: transparent; cursor: pointer; }
     .menu-meta { font-size: 11px; color: var(--muted); padding: 4px 8px; }
     .menu-item { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; }
     .menu-item:hover { background: var(--bg); }
     .icon-btn { border: 1px solid var(--line); background: white; border-radius: 8px; padding: 7px 10px; cursor: pointer; color: var(--navy); }
     .mobile-menu-btn { display: none; }
     .layout { display: flex; flex: 1; min-height: calc(100vh - var(--topbar-h)); }
-    .sidebar { width: var(--sidebar-w); background: #f8fbff; color: #354b62; padding: 12px 10px 16px; border-right: 1px solid #dce7f2; display: flex; flex-direction: column; flex-shrink: 0; overflow-x: hidden; overflow-y: auto; transition: width 180ms ease; }
-    .sidebar-heading { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; color: #7b8fa5; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-    .collapse-btn { width: 28px; height: 28px; flex: none; border: 1px solid #dbe6f1; border-radius: 7px; background: white; color: #617991; cursor: pointer; }
-    .collapse-btn:hover { background: #edf5fc; }
+    .sidebar { width: var(--sidebar-w); background: var(--sidebar); color: var(--sidebar-text); padding: 12px 10px 16px; border-right: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-x: hidden; overflow-y: auto; transition: width 180ms ease; }
+    .sidebar-heading { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; color: var(--sidebar-muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+    .collapse-btn { width: 36px; height: 36px; flex: none; border: 1px solid rgba(255,255,255,.16); border-radius: 8px; background: transparent; color: var(--sidebar-text); cursor: pointer; }
+    .collapse-btn:hover { background: rgba(255,255,255,.08); }
     .sidebar.collapsed { width: var(--sidebar-collapsed-w); }
     .sidebar.collapsed .sidebar-heading { justify-content: center; padding: 0; }
     .sidebar.collapsed .sidebar-heading > span, .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-item span, .sidebar.collapsed .sidebar-footer { display: none; }
-    .nav-label { margin-top: 8px; font-size: 9px; letter-spacing: 1.1px; color: #91a2b4; padding: 13px 12px 6px; text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 11px; min-height: 38px; padding: 8px 12px; border-radius: 8px; color: #52677e; text-decoration: none; font-size: 12px; transition: background 120ms ease, color 120ms ease; }
-    .nav-item:hover { background: #eaf3fb; color: #1f67a6; }
-    .nav-item.active { background: #e2f0fc; color: #1769ad; box-shadow: inset 3px 0 #3b90cf; font-weight: 700; }
-    .nav-icon { width: 18px; flex: none; color: #7294b1; font-size: 14px; text-align: center; }
-    .nav-item.active .nav-icon { color: #247dbb; }
+    .nav-label { margin-top: 8px; font-size: 11px; letter-spacing: 1.1px; color: var(--sidebar-muted); padding: 13px 12px 6px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 8px 12px; border-radius: 8px; color: var(--sidebar-muted); text-decoration: none; font-size: 14px; transition: background 150ms ease, color 150ms ease; }
+    .nav-item:hover { background: rgba(255,255,255,.08); color: white; }
+    .nav-item.active { background: var(--sidebar-active); color: white; box-shadow: none; font-weight: 700; }
+    .nav-icon { width: 18px; flex: none; color: inherit; font-size: 15px; text-align: center; }
+    .nav-item.active .nav-icon { color: white; }
     .sidebar.collapsed .nav-item { justify-content: center; padding-inline: 0; }
     .sidebar.collapsed .nav-icon { font-size: 16px; }
-    .sidebar-footer { margin-top: auto; padding: 14px 12px; color: #8ca0b4; font-size: 10px; }
-    .main-content { flex: 1; min-width: 0; padding: 24px clamp(16px, 2.5vw, 36px); overflow: auto; background: #eaf3fb; }
+    .sidebar-footer { margin-top: auto; padding: 14px 12px; color: var(--sidebar-muted); font-size: 12px; }
+    .main-content { flex: 1; min-width: 0; padding: 24px; overflow: auto; background: var(--canvas); }
     .sidebar-backdrop { display: none; }
     .palette-back { position: fixed; inset: 0; background: rgba(15,39,68,0.35); z-index: 50; display: grid; place-items: start center; padding-top: 12vh; }
     .palette { width: min(560px, calc(100% - 32px)); background: white; border-radius: 16px; box-shadow: 0 24px 80px rgba(15,39,68,0.25); overflow: hidden; }
@@ -266,7 +290,7 @@ export class ShellComponent implements OnInit {
   sidebarOpen = signal(false);
   userMenu = signal(false);
   paletteOpen = signal(false);
-  sidebarCollapsed = signal(true);
+  sidebarCollapsed = signal(false);
   query = signal('');
   currentRoute = signal('');
   years = signal<{ id: string; name: string }[]>([]);
@@ -323,8 +347,13 @@ export class ShellComponent implements OnInit {
     public ctx: SchoolContextService,
     private api: ApiService,
     private router: Router,
-    private enquiryAlerts: EnquiryAlertService
+    private enquiryAlerts: EnquiryAlertService,
+    public theme: ThemeService
   ) {}
+
+  colorValue(event: Event) {
+    return (event.target as HTMLInputElement).value;
+  }
 
   ngOnInit() {
     this.currentRoute.set(this.router.url.split('?')[0]);

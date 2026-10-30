@@ -17,8 +17,13 @@ interface EmployeeListDto { id: string; employeeCode: string; firstName: string;
   standalone: true,
   imports: [CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule, TagModule],
   template: `
-    <div class="eyebrow">HUMAN RESOURCES</div>
-    <h1 style="color:var(--navy);margin:4px 0 20px">Staff & HRMS</h1>
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">HUMAN RESOURCES</div>
+        <h1>Staff & HR</h1>
+        <p>Employees, departments and designations.</p>
+      </div>
+    </div>
     <div class="toolbar">
       <input pInputText [(ngModel)]="search" placeholder="Search employee or department..." (input)="load()" />
     </div>
