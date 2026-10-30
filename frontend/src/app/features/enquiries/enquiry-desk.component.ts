@@ -115,9 +115,10 @@ import { EnquiryAlertService } from '../../core/services/enquiry-alert.service';
     .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .toolbar select { min-width: 160px; }
     .kpis { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
-    .kpis div { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .kpis div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; color: var(--ink); }
     .kpis span { display: block; font-size: 11px; color: var(--muted); font-weight: 700; }
-    .list-pane { min-width: 0; overflow-x: auto; background: white; border: 1px solid var(--line); border-radius: 12px; }
+    .kpis strong { color: var(--ink); font-size: 22px; }
+    .list-pane { min-width: 0; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
     .click-row { cursor: pointer; }
     .modal-root {
       position: fixed; inset: 0; z-index: 4000;
@@ -128,7 +129,8 @@ import { EnquiryAlertService } from '../../core/services/enquiry-alert.service';
     .modal-card {
       width: min(480px, 100%);
       max-height: min(86vh, 720px);
-      background: #fff;
+      background: var(--surface);
+      color: var(--ink);
       border-radius: 16px;
       box-shadow: 0 24px 80px rgba(15, 39, 68, 0.28);
       display: flex; flex-direction: column;
@@ -141,14 +143,14 @@ import { EnquiryAlertService } from '../../core/services/enquiry-alert.service';
     .modal-head h3 { margin: 0 0 4px; font-size: 18px; color: var(--navy); }
     .modal-body { padding: 12px 18px 18px; overflow: auto; }
     .meta { margin: 0; color: var(--muted); font-size: 12px; }
-    .close { border: 0; background: #eef2f7; width: 32px; height: 32px; border-radius: 8px; font-size: 22px; cursor: pointer; line-height: 1; flex-shrink: 0; }
+    .close { border: 0; background: var(--navy2); color: var(--ink); width: 32px; height: 32px; border-radius: 8px; font-size: 22px; cursor: pointer; line-height: 1; flex-shrink: 0; }
     label { display: block; font-size: 11px; font-weight: 700; margin: 12px 0 4px; }
     select, textarea, input[type=date] {
       width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
-      font: inherit; background: white; box-sizing: border-box;
+      font: inherit; background: var(--navy2); color: var(--ink); box-sizing: border-box;
     }
     .btn { margin-top: 10px; width: 100%; background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 9px 12px; cursor: pointer; font: inherit; }
-    .btn.ghost { background: white; color: var(--ink); border: 1px solid var(--line); }
+    .btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
     .act { font-size: 12px; border-bottom: 1px solid var(--line); padding: 8px 0; }
     @media (max-width: 800px) { .kpis { grid-template-columns: 1fr 1fr; } }
   `]

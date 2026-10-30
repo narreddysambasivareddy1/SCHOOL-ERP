@@ -147,11 +147,11 @@ interface Stat {
     .home-bar h1 { margin: 0; color: var(--navy); font-size: 30px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; }
     .home-tools { display: flex; align-items: center; gap: 10px; flex: none; }
     .date-chip, .primary-action, .open-link { display: inline-flex; align-items: center; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 650; text-decoration: none; }
-    .date-chip { gap: 8px; padding: 0 12px; border: 1px solid var(--line); background: white; color: var(--navy); }
+    .date-chip { gap: 8px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); color: var(--navy); }
     .primary-action { gap: 8px; padding: 0 14px; background: var(--primary); color: white; }
     .primary-action:hover { background: var(--primary-hover); }
     .alert-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
-    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .metrics.is-loading { opacity: .72; }
     .metric { display: grid; align-content: start; gap: 8px; min-height: 132px; padding: 18px 20px 16px; border-top: 3px solid var(--line); border-right: 1px solid var(--line); }
     .metric:last-child { border-right: 0; }
@@ -163,18 +163,18 @@ interface Stat {
     .metric strong { color: var(--navy); font-size: 32px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; font-variant-numeric: tabular-nums; }
     .metric-note { color: var(--muted); font-size: 13px; line-height: 1.4; }
     .board { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr); gap: 16px; align-items: stretch; margin-top: 16px; }
-    .panel { display: flex; min-width: 0; flex-direction: column; padding: 20px 22px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+    .panel { display: flex; min-width: 0; flex-direction: column; padding: 20px 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
     .panel-heading h2 { margin: 0; color: var(--navy); font-size: 17px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
     .panel-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
-    .open-link { padding: 0 14px; border: 1px solid var(--line); background: white; color: var(--navy); }
+    .open-link { padding: 0 14px; border: 1px solid var(--line); background: var(--surface); color: var(--navy); }
     .open-link:hover { border-color: var(--primary); color: var(--primary); }
     .today-figure { display: grid; justify-items: end; margin-left: auto; }
     .today-figure strong { color: var(--navy); font-size: 28px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
     .today-figure span { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
     .trend-chart { display: grid; height: 228px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 10px; margin-top: 18px; }
     .trend-day { display: grid; height: 100%; grid-template-rows: minmax(0, 1fr) 22px 18px; justify-items: center; align-items: end; gap: 4px; }
-    .trend-track { display: flex; width: min(36px, 100%); height: 100%; align-items: end; justify-content: center; border-radius: 8px; background: #eef3f8; }
+    .trend-track { display: flex; width: min(36px, 100%); height: 100%; align-items: end; justify-content: center; border-radius: 8px; background: var(--navy2); }
     .trend-bar { display: block; width: 100%; min-height: 4px; border-radius: 8px 8px 2px 2px; background: var(--primary); }
     .trend-day strong { color: var(--navy); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
     .trend-day small { color: var(--muted); font-size: 12px; font-weight: 650; line-height: 1; }

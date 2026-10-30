@@ -32,10 +32,10 @@ import { ApiService } from '../../core/services/api.service';
     }
   `,
   styles: [`
-    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); }
     th, td { text-align: left; padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--line); }
     th { font-size: 11px; text-transform: uppercase; color: var(--muted); background: #f8fafc; }
-    .empty { padding: 24px; text-align: center; color: var(--muted); background: white; border: 1px dashed var(--line); border-radius: 12px; }
+    .empty { padding: 24px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }
   `]
 })

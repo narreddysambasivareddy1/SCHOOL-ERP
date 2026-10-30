@@ -119,11 +119,11 @@ import { SchoolContextService } from '../../core/services/school-context.service
     h1 { font-size: 22px; margin: 4px 0 8px; color: var(--navy); }
     .tabs { display: flex; gap: 8px; margin: 12px 0; }
     .tabs button, .lead, .detail button, .form button { font: inherit; cursor: pointer; }
-    .tabs button { border: 1px solid var(--line); background: white; border-radius: 8px; padding: 6px 10px; }
+    .tabs button { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; }
     .tabs button.on { background: var(--primary); color: white; border-color: transparent; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
     .split { display: grid; grid-template-columns: minmax(0,280px) minmax(0,1fr); gap: 12px; }
-    .lead { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: white; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+    .lead { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px; margin-bottom: 8px; }
     .lead.on { border-color: var(--primary); }
     .lead small { display: block; color: var(--muted); }
     .form label { display: block; font-size: 11px; font-weight: 700; margin: 8px 0 4px; }

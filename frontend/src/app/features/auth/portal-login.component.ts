@@ -151,14 +151,17 @@ const PORTAL_CONFIG: Record<PortalRole, PortalConfig> = {
     .role-hint { display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
     .left-brand { color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 700; }
     .login-right { background: var(--bg); display: grid; place-items: center; padding: 32px; }
-    .login-card { background: white; border: 1px solid var(--line); border-radius: 16px; padding: 40px; width: min(440px, 100%); box-shadow: var(--shadow); }
+    .login-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 40px; width: min(440px, 100%); box-shadow: var(--shadow); color: var(--ink); }
     .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
     .card-icon { width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center; color: white; font-size: 18px; flex-shrink: 0; }
     h1 { margin: 0; font-size: 20px; font-weight: 800; color: var(--navy); }
     .card-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
     .field { margin-bottom: 16px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: #506078; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
-    .field input { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; font-size: 13px; color: var(--ink); outline: none; }
+    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+    .field input { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; font-size: 13px; background: var(--navy2); color: var(--ink); outline: none; }
+    .field input:-webkit-autofill,
+    .field input:-webkit-autofill:hover,
+    .field input:-webkit-autofill:focus { -webkit-text-fill-color: var(--ink); caret-color: var(--ink); box-shadow: 0 0 0 1000px var(--navy2) inset; transition: background-color 9999s ease-out; }
     .field input:focus { border-color: var(--accent); }
     .field input.invalid { border-color: var(--red); }
     .school-chip { margin-top: 6px; font-size: 12px; color: var(--teal); display: flex; align-items: center; gap: 6px; }

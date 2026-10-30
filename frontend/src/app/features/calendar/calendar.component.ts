@@ -22,9 +22,9 @@ import { SchoolContextService } from '../../core/services/school-context.service
     <div class="empty">No events published yet. When the calendar API is connected, trips, clubs and assemblies will appear here with eligibility and consent flags.</div>
   `,
   styles: [`
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
     .card p { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
-    .empty { padding: 24px; text-align: center; color: var(--muted); background: white; border: 1px dashed var(--line); border-radius: 12px; font-size: 13px; }
+    .empty { padding: 24px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; font-size: 13px; }
   `]
 })
 export class CalendarComponent implements OnInit {

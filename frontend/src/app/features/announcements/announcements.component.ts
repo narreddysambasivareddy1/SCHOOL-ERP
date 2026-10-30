@@ -29,9 +29,9 @@ import { SchoolContextService } from '../../core/services/school-context.service
     }
   `,
   styles: [`
-    .empty { padding: 32px; text-align: center; color: var(--muted); background: white; border: 1px dashed var(--line); border-radius: 12px; }
+    .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
     a { font-size: 13px; color: var(--primary); }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
     h3 { margin: 0 0 6px; font-size: 16px; }
     small { color: var(--muted); }
   `]

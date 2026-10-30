@@ -74,7 +74,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
     .welcome p { margin: 0; color: var(--muted); } .welcome .eyebrow span { padding: 0 5px; color: #aab8c8; }
     .primary-action { display: inline-flex; align-items: center; gap: 9px; padding: 12px 16px; border-radius: 10px; background: var(--primary); color: white; text-decoration: none; font-weight: 700; box-shadow: 0 6px 16px rgba(36,99,235,.2); white-space: nowrap; }
     .stats-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-bottom: 14px; }
-    .stat-card { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: var(--shadow-sm); }
+    .stat-card { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .stat-card > span:nth-child(2) { display: grid; min-width: 0; flex: 1; gap: 2px; }
     .stat-card small { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
     .stat-card strong { color: var(--navy); font-size: 24px; line-height: 1.2; }
@@ -83,10 +83,10 @@ import { MoneyPipe } from '../../shared/money.pipe';
     .blue { background: #eaf3ff; color: #1c5cb7; } .teal { background: #e3f8f3; color: #087d68; } .violet { background: #f0ebff; color: #6b3fa0; }
     .stat-card > a { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 8px; background: #f5f8fc; color: var(--muted); text-decoration: none; }
     .shortcuts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
-    .shortcuts a { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: white; color: var(--navy); font-size: 11px; font-weight: 700; text-decoration: none; transition: border-color .15s ease, background .15s ease; }
+    .shortcuts a { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); color: var(--navy); font-size: 11px; font-weight: 700; text-decoration: none; transition: border-color .15s ease, background .15s ease; }
     .shortcuts a:hover { border-color: #b8cbed; background: #fbfdff; } .shortcuts a > i:first-child { color: var(--primary); } .shortcuts a > span { flex: 1; } .shortcuts a > i:last-child { color: #9aa8b8; font-size: 10px; }
     .content-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; align-items: start; }
-    .panel { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: var(--shadow-sm); }
+    .panel { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
     .panel-heading h2 { margin: 2px 0; color: var(--navy); font-size: 16px; } .panel-heading p { margin: 0; color: var(--muted); font-size: 11px; }
     .panel-heading > a { color: var(--primary); font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; }

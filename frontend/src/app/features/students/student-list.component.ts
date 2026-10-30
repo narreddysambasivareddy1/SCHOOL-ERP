@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -44,16 +44,20 @@ import { SchoolContextService } from '../../core/services/school-context.service
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-s>
-        <tr>
+        <tr class="student-row" (click)="openStudent(s)">
           <td>
-            <div class="person">
-              <div class="avatar">{{ s.firstName[0] }}{{ s.lastName[0] }}</div>
+            <button type="button" class="person person-btn" (click)="openStudent(s)">
+              @if (s.photoUrl) {
+                <img class="avatar" [src]="s.photoUrl" alt="" />
+              } @else {
+                <div class="avatar">{{ s.firstName[0] }}{{ s.lastName[0] }}</div>
+              }
               <div><strong>{{ s.firstName }} {{ s.lastName }}</strong><br><small>{{ s.studentCode }}</small></div>
-            </div>
+            </button>
           </td>
           <td>{{ s.className }} · {{ s.sectionName }}</td>
           <td><p-tag [value]="s.status" [severity]="s.status === 'Active' ? 'success' : 'warn'" /></td>
-          <td>
+          <td (click)="$event.stopPropagation()">
             <p-button [label]="s.status === 'Active' ? 'Set inactive' : 'Set active'" [outlined]="true" size="small"
               (onClick)="toggle(s)" />
           </td>
@@ -67,7 +71,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
     </p-table>
 
     <!-- Create Student Dialog -->
-    <p-dialog header="Add student" [(visible)]="showDialog" [modal]="true" [style]="{width:'520px'}" [draggable]="false">
+    <p-dialog header="Add student" [(visible)]="showDialog" [modal]="true" appendTo="body" [style]="{width:'520px'}" [draggable]="false" (onHide)="stopCamera()">
       <form [formGroup]="form" (ngSubmit)="createStudent()">
         <div class="form-grid">
           <div class="field">
@@ -96,6 +100,24 @@ import { SchoolContextService } from '../../core/services/school-context.service
             <p-dropdown [options]="sections()" optionLabel="name" optionValue="id"
               formControlName="sectionId" styleClass="w-full" placeholder="Select section" />
           </div>
+          <div class="field photo-field">
+            <label>Photo</label>
+            <div class="photo-actions">
+              <button type="button" (click)="startCamera()">Open camera</button>
+              <button type="button" (click)="createFile.click()">Upload</button>
+              <input #createFile type="file" accept="image/*" hidden (change)="onPhoto($event)" />
+            </div>
+            @if (cameraOn() && showDialog) {
+              <div class="cam">
+                <video #cam autoplay playsinline muted></video>
+                <div class="photo-actions">
+                  <button type="button" (click)="capture()">Use this photo</button>
+                  <button type="button" (click)="stopCamera()">Close camera</button>
+                </div>
+              </div>
+            }
+            @if (photo()) { <img class="preview" [src]="photo()" alt="Selected student photo" /> }
+          </div>
         </div>
         <div class="dialog-footer">
           <p-button label="Cancel" [outlined]="true" (onClick)="showDialog = false" type="button" />
@@ -103,13 +125,67 @@ import { SchoolContextService } from '../../core/services/school-context.service
         </div>
       </form>
     </p-dialog>
+
+    <p-dialog header="Student profile" [(visible)]="showProfile" [modal]="true" appendTo="body" [style]="{width:'min(560px, calc(100vw - 32px))'}" [draggable]="false" (onHide)="stopCamera()">
+      @if (profileLoading()) {
+        <p>Loading student…</p>
+      } @else if (profile()) {
+        <div class="profile">
+          @if (profile().photoUrl) {
+            <img class="portrait" [src]="profile().photoUrl" alt="" />
+          } @else {
+            <div class="portrait empty">{{ profile().firstName[0] }}{{ profile().lastName[0] }}</div>
+          }
+          <dl>
+            <div><dt>Student ID</dt><dd>{{ profile().studentCode }}</dd></div>
+            <div><dt>First name</dt><dd>{{ profile().firstName }}</dd></div>
+            <div><dt>Last name</dt><dd>{{ profile().lastName }}</dd></div>
+            <div><dt>Date of birth</dt><dd>{{ profile().dateOfBirth }}</dd></div>
+            <div><dt>Status</dt><dd>{{ profile().status }}</dd></div>
+            <div><dt>Class</dt><dd>{{ enrollment(profile())?.className || '—' }}</dd></div>
+            <div><dt>Section</dt><dd>{{ enrollment(profile())?.sectionName || '—' }}</dd></div>
+            <div><dt>Roll number</dt><dd>{{ enrollment(profile())?.rollNumber || '—' }}</dd></div>
+          </dl>
+        </div>
+        @if (!profile().photoUrl) {
+          <div class="photo-actions">
+            <button type="button" (click)="startCamera()">Open camera</button>
+            <button type="button" (click)="profileFile.click()">Upload</button>
+            <input #profileFile type="file" accept="image/*" hidden (change)="onProfilePhoto($event)" />
+          </div>
+        }
+      }
+      @if (cameraOn() && showProfile) {
+        <div class="cam">
+          <video #cam autoplay playsinline muted></video>
+          <div class="photo-actions">
+            <button type="button" (click)="capture()" [disabled]="photoSaving()">Use this photo</button>
+            <button type="button" (click)="stopCamera()">Close camera</button>
+          </div>
+        </div>
+      }
+    </p-dialog>
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
     h1 { margin: 4px 0; font-size: 22px; color: var(--navy); }
     .toolbar { margin-bottom: 14px; }
     .person { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .student-row { cursor: pointer; }
+    .person-btn { border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; padding: 0; }
+    .avatar { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; object-fit: cover; }
+    .photo-field { grid-column: 1 / -1; }
+    .preview, .portrait { width: 96px; height: 96px; object-fit: cover; border-radius: 16px; border: 1px solid var(--line); }
+    .portrait.empty { display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+    .photo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .photo-actions button, .cam button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--navy2); color: var(--ink); border-radius: 8px; padding: 7px 10px; font-size: 12px; font-weight: 700; }
+    .cam { margin-top: 12px; }
+    .cam video { width: 100%; max-height: 220px; background: #070d18; border-radius: 12px; object-fit: cover; }
+    .profile { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; align-items: start; }
+    dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin: 0; }
+    dl div { display: grid; gap: 2px; }
+    dt { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    dd { margin: 0; color: var(--ink); font-size: 15px; }
     strong { font-size: 12px; }
     small { color: var(--muted); font-size: 10px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -118,7 +194,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
     :host ::ng-deep .p-calendar { width: 100%; }
   `]
 })
-export class StudentListComponent implements OnInit {
+export class StudentListComponent implements OnInit, OnDestroy {
   students = signal<any[]>([]);
   total = signal(0);
   loading = signal(false);
@@ -126,6 +202,14 @@ export class StudentListComponent implements OnInit {
   classes = signal<any[]>([]);
   sections = signal<any[]>([]);
   showDialog = false;
+  showProfile = false;
+  profile = signal<any>(null);
+  profileLoading = signal(false);
+  photo = signal<string | null>(null);
+  cameraOn = signal(false);
+  photoSaving = signal(false);
+  cam = viewChild<ElementRef<HTMLVideoElement>>('cam');
+  private stream: MediaStream | null = null;
   search = '';
   private page = 1;
   private pageSize = 25;
@@ -146,6 +230,8 @@ export class StudentListComponent implements OnInit {
     private fb: FormBuilder,
     private msg: MessageService
   ) {}
+
+  ngOnDestroy() { this.stopCamera(); }
 
   ngOnInit() {
     this.load();
@@ -179,7 +265,93 @@ export class StudentListComponent implements OnInit {
 
   openDialog() {
     this.form.reset();
+    this.photo.set(null);
     this.showDialog = true;
+  }
+
+  onPhoto(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.resizePhoto(file).then(url => this.photo.set(url)).catch(() =>
+      this.msg.add({ severity: 'error', summary: 'Photo', detail: 'Could not read that image.' }));
+  }
+
+  onProfilePhoto(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || !this.profile()) return;
+    this.resizePhoto(file).then(url => this.saveStudentPhoto(url)).catch(() =>
+      this.msg.add({ severity: 'error', summary: 'Photo', detail: 'Could not read that image.' }));
+  }
+
+  async startCamera() {
+    this.stopCamera();
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      this.cameraOn.set(true);
+      setTimeout(() => {
+        const video = this.cam()?.nativeElement;
+        if (video && this.stream) video.srcObject = this.stream;
+      }, 50);
+    } catch {
+      this.msg.add({ severity: 'error', summary: 'Camera', detail: 'Camera is not available. Use Upload.' });
+    }
+  }
+
+  stopCamera() {
+    this.stream?.getTracks().forEach(track => track.stop());
+    this.stream = null;
+    this.cameraOn.set(false);
+  }
+
+  capture() {
+    const video = this.cam()?.nativeElement;
+    if (!video) return;
+    const sourceW = video.videoWidth || 640;
+    const sourceH = video.videoHeight || 480;
+    const scale = Math.min(1, 240 / Math.max(sourceW, sourceH));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(sourceW * scale));
+    canvas.height = Math.max(1, Math.round(sourceH * scale));
+    canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const url = canvas.toDataURL('image/jpeg', 0.82);
+    this.stopCamera();
+    if (this.showProfile && this.profile()) this.saveStudentPhoto(url);
+    else this.photo.set(url);
+  }
+
+  private saveStudentPhoto(url: string) {
+    const student = this.profile();
+    if (!student) return;
+    this.photoSaving.set(true);
+    this.api.setStudentPhoto(this.ctx.schoolId, student.id, url).subscribe({
+      next: () => {
+        this.profile.set({ ...student, photoUrl: url });
+        this.photoSaving.set(false);
+        this.load();
+        this.msg.add({ severity: 'success', summary: 'Photo saved', detail: 'Student photo updated.' });
+      },
+      error: () => {
+        this.photoSaving.set(false);
+        this.msg.add({ severity: 'error', summary: 'Photo', detail: 'Could not save this photo.' });
+      }
+    });
+  }
+
+  openStudent(row: any) {
+    this.stopCamera();
+    this.showProfile = true;
+    this.profile.set(null);
+    this.profileLoading.set(true);
+    this.api.getStudent(this.ctx.schoolId, row.id).subscribe({
+      next: student => { this.profile.set(student); this.profileLoading.set(false); },
+      error: () => { this.profileLoading.set(false); this.msg.add({ severity: 'error', summary: 'Student', detail: 'Could not open this student.' }); }
+    });
+  }
+
+  enrollment(student: any) {
+    const rows = student?.enrollments || [];
+    const year = this.ctx.context()?.academicYearName;
+    return rows.find((row: any) => row.academicYear === year) || rows[0];
   }
 
   onClassChange(classId: string) {
@@ -208,7 +380,8 @@ export class StudentListComponent implements OnInit {
       academicYearId: this.ctx.academicYearId,
       classId: v.classId,
       sectionId: v.sectionId,
-      rollNumber: v.rollNumber || null
+      rollNumber: v.rollNumber || null,
+      photoUrl: this.photo()
     };
     this.api.createStudent(this.ctx.schoolId, body).subscribe({
       next: () => {
@@ -221,6 +394,24 @@ export class StudentListComponent implements OnInit {
         this.saving.set(false);
         this.msg.add({ severity: 'error', summary: 'Error', detail: 'Failed to create student.' });
       }
+    });
+  }
+
+  private resizePhoto(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        const scale = Math.min(1, 240 / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.getContext('2d')!.drawImage(image, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      image.onerror = () => { URL.revokeObjectURL(url); reject(); };
+      image.src = url;
     });
   }
 }

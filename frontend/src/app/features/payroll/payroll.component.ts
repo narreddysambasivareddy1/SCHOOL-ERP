@@ -66,14 +66,14 @@ import { MoneyPipe } from '../../shared/money.pipe';
   styles: [`
     h1 { margin: 4px 0; color: var(--navy); font-size: 28px; letter-spacing: -0.03em; }
     .toolbar { display: flex; align-items: center; margin: 0 0 16px; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
     header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .nums { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin: 16px 0; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
     .pill { margin-left: 8px; padding: 4px 8px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-size: 12px; font-weight: 700; }
     .pill.done { background: var(--success-soft); color: var(--success); }
     button { height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--primary); color: white; font-size: 14px; font-weight: 650; cursor: pointer; }
-    .ghost { background: white; color: var(--navy); border: 1px solid var(--line); }
-    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; font-size: 14px; }
+    .ghost { background: var(--surface); color: var(--navy); border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; font-size: 14px; }
     th, td { padding: 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
     @media (max-width: 900px) { .nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }

@@ -34,7 +34,9 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
             .Skip((page - 1) * pageSize).Take(pageSize)
             .Select(e => new EmployeeListDto(
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
-                e.Department!.Name, e.Designation!.Name, e.Status.ToString()))
+                e.Department != null ? e.Department.Name : null,
+                e.Designation != null ? e.Designation.Name : null,
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl))
             .ToListAsync(ct);
 
         return new PagedResult<EmployeeListDto>(items, total, page, pageSize);
@@ -55,6 +57,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
             LastName = request.LastName,
             Email = request.Email,
             Phone = request.Phone,
+            PhotoUrl = CleanPhoto(request.PhotoUrl),
             DepartmentId = request.DepartmentId,
             DesignationId = request.DesignationId,
             JoiningDate = request.JoiningDate,
@@ -66,7 +69,8 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
         await db.SaveChangesAsync(ct);
 
         return new EmployeeListDto(employee.Id, employee.EmployeeCode,
-            employee.FirstName, employee.LastName, null, null, employee.Status.ToString());
+            employee.FirstName, employee.LastName, null, null, employee.Status.ToString(),
+            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl);
     }
 
     public async Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default)
@@ -77,6 +81,23 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
             ?? throw new InvalidOperationException("Employee not found.");
         employee.Status = next;
         await db.SaveChangesAsync(ct);
+    }
+
+    public async Task SetPhotoAsync(Guid id, Guid schoolId, string photoUrl, CancellationToken ct = default)
+    {
+        var photo = CleanPhoto(photoUrl) ?? throw new InvalidOperationException("Choose a photo.");
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id && e.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Employee not found.");
+        employee.PhotoUrl = photo;
+        await db.SaveChangesAsync(ct);
+    }
+
+    private static string? CleanPhoto(string? photo)
+    {
+        if (string.IsNullOrWhiteSpace(photo)) return null;
+        if (!photo.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) || photo.Length > 400_000)
+            throw new InvalidOperationException("Use a small photo, under about 300 KB.");
+        return photo;
     }
 }
 

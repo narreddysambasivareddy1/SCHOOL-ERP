@@ -33,7 +33,12 @@ public class StudentsController(IStudentService studentService, IAuditService au
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
-        var student = await studentService.CreateStudentAsync(request, schoolId, tenantId, actor, ct);
+        StudentDetailDto student;
+        try
+        {
+            student = await studentService.CreateStudentAsync(request, schoolId, tenantId, actor, ct);
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
         await auditService.LogAsync(tenantId, actor, "StudentCreated", "Student", student.Id.ToString(),
             newValues: new { student.StudentCode, student.FirstName, student.LastName });
         return CreatedAtAction(nameof(Get), new { schoolId, id = student.Id }, student);
@@ -47,6 +52,18 @@ public class StudentsController(IStudentService studentService, IAuditService au
         {
             await studentService.SetStatusAsync(id, schoolId, body.Status, ct);
             return Ok(new { id, status = body.Status });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpPost("{id:guid}/photo")]
+    [Authorize(Roles = "SchoolAdmin,AdmissionOfficer")]
+    public async Task<IActionResult> Photo(Guid schoolId, Guid id, [FromBody] SetPhotoRequest body, CancellationToken ct)
+    {
+        try
+        {
+            await studentService.SetPhotoAsync(id, schoolId, body.PhotoUrl, ct);
+            return Ok(new { id });
         }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }

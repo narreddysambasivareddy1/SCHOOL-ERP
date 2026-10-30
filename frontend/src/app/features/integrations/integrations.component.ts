@@ -41,7 +41,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
   `,
   styles: [`
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
     header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .key { font-size: 11px; color: var(--muted); margin: 0; }
     .pill { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #fff2d7; color: #9a6900; }
@@ -51,7 +51,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .chk { font-size: 12px; display: flex; gap: 6px; align-items: center; }
     .row { display: flex; gap: 8px; }
     button { border: 0; background: var(--primary); color: white; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 12px; }
-    .ghost { background: white; color: var(--ink); border: 1px solid var(--line); }
+    .ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; margin-bottom: 12px; }
     .ok { background: #e5f8f1; color: #087d68; padding: 10px; border-radius: 8px; margin-bottom: 12px; }
   `]

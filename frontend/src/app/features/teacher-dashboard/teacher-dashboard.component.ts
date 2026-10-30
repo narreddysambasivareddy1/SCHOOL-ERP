@@ -87,7 +87,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .alert-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 11px 14px; border: 1px solid #f5c97a; border-radius: 10px; background: #fff4e5; color: #7a4f00; font-size: 12px; }
     .primary-action { display: inline-flex; align-items: center; gap: 9px; padding: 12px 16px; border-radius: 10px; background: var(--primary); color: white; text-decoration: none; font-weight: 700; box-shadow: 0 6px 16px rgba(36,99,235,.2); white-space: nowrap; }
     .stats-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-bottom: 20px; }
-    .stat-card { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: var(--shadow-sm); }
+    .stat-card { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .stat-card > span:last-child { display: grid; gap: 2px; }
     .stat-card small { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
     .stat-card strong { color: var(--navy); font-size: 25px; line-height: 1.2; }
@@ -95,13 +95,13 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .stat-icon,.action-icon,.subject-icon { display: grid; flex: 0 0 auto; width: 42px; height: 42px; place-items: center; border-radius: 12px; }
     .teal { background: #e3f8f3; color: #087d68; } .blue { background: #eaf3ff; color: #1c5cb7; } .violet { background: #f0ebff; color: #6b3fa0; } .amber { background: #fff4db; color: #9a6900; }
     .dashboard-grid { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(280px,.85fr); gap: 18px; align-items: start; }
-    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
     .panel-heading h2 { margin: 3px 0 3px; color: var(--navy); font-size: 17px; letter-spacing: -.02em; }
     .panel-heading p { margin: 0; color: var(--muted); font-size: 12px; }
     .text-link { color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
     .assignments-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 16px; }
-    .assignment-card { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fcfdff; }
+    .assignment-card { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
     .assignment-top { display: flex; align-items: center; justify-content: space-between; }
     .subject-icon { width: 34px; height: 34px; background: #eaf3ff; color: #1c5cb7; }
     .assignment-label { color: #8794a6; font-size: 9px; font-weight: 800; letter-spacing: .1em; }

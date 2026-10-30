@@ -71,7 +71,7 @@ interface ReportCard { icon: string; title: string; desc: string; value: string 
     .page-header { margin-bottom: 24px; }
     h1 { margin: 4px 0; font-size: 22px; font-weight: 800; color: var(--navy); }
     .kpi-strip { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 28px; }
-    .kpi-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow); }
+    .kpi-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow); }
     .kpi-card.loading { opacity: 0.6; }
     .kpi-icon { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
     .kpi-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -79,7 +79,7 @@ interface ReportCard { icon: string; title: string; desc: string; value: string 
     .alert-error { background: #fff0f0; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #c0392b; margin-bottom: 20px; }
     .section-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
     .reports-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
-    .report-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; }
+    .report-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; }
     .report-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .report-icon { font-size: 16px; color: var(--primary); }
     .live-badge { font-size: 10px; font-weight: 800; background: #e5f8f1; color: #087d68; padding: 2px 8px; border-radius: 20px; }
@@ -89,7 +89,7 @@ interface ReportCard { icon: string; title: string; desc: string; value: string 
     .report-sub { font-size: 11px; color: var(--teal); }
     @media (max-width: 1024px) { .kpi-strip { grid-template-columns: repeat(2,1fr); } .reports-grid { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 600px) { .kpi-strip { grid-template-columns: 1fr; } .reports-grid { grid-template-columns: 1fr; } }
-    .bars { display: flex; gap: 10px; align-items: flex-end; height: 140px; background: white; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 24px; }
+    .bars { display: flex; gap: 10px; align-items: flex-end; height: 140px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 24px; }
     .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
     .bar { width: 100%; max-width: 36px; background: var(--primary); border-radius: 6px 6px 0 0; min-height: 4px; }
     .bar-col small { font-size: 10px; font-weight: 700; }

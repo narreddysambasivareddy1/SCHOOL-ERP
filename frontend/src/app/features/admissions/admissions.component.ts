@@ -47,10 +47,10 @@ import { SchoolContextService } from '../../core/services/school-context.service
     .toolbar { margin-bottom: 16px; }
     .btn { display: inline-block; background: var(--primary); color: white; text-decoration: none; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; }
     .pipe { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
-    .pipe-card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .pipe-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
     .pipe-card span { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
     .pipe-card strong { font-size: 22px; color: var(--navy); }
-    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); }
     th, td { text-align: left; padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--line); }
     th { font-size: 11px; text-transform: uppercase; color: var(--muted); background: #f8fafc; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }

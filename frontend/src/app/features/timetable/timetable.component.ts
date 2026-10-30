@@ -152,25 +152,25 @@ import { TableModule } from 'primeng/table';
     }
   `,
   styles: [`
-    .tabs { display: flex; gap: 6px; margin: 12px 0 14px; padding: 4px; width: fit-content; border: 1px solid #d7e4ef; border-radius: 10px; background: #f4f9fd; }
+    .tabs { display: flex; gap: 6px; margin: 12px 0 14px; padding: 4px; width: fit-content; border: 1px solid var(--line); border-radius: 10px; background: var(--navy2); }
     .tabs button { font: inherit; cursor: pointer; border: 1px solid transparent; background: transparent; border-radius: 7px; padding: 7px 12px; color: #60798f; font-size: 11px; font-weight: 650; }
-    .tabs button.on { background: white; color: #2677ad; border-color: #dce8f2; box-shadow: 0 1px 4px rgba(42, 81, 113, .08); }
-    .table-action, .clear-slot { border: 1px solid #d7e4ef; border-radius: 6px; background: white; color: #327fb2; padding: 5px 8px; margin: 2px; cursor: pointer; font: inherit; }
+    .tabs button.on { background: var(--surface); color: #2677ad; border-color: #dce8f2; box-shadow: 0 1px 4px rgba(42, 81, 113, .08); }
+    .table-action, .clear-slot { border: 1px solid #d7e4ef; border-radius: 6px; background: var(--surface); color: #327fb2; padding: 5px 8px; margin: 2px; cursor: pointer; font: inherit; }
     .table-action:hover { background: #eff7fc; }
     .table-action.danger, .clear-slot { color: #a44d49; }
-    .card, table { background: white; border: 1px solid #d8e5ef; border-radius: 12px; }
+    .card, table { background: var(--surface); border: 1px solid #d8e5ef; border-radius: 12px; }
     .form { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 3px 12px rgba(49,83,112,.05); }
     .form label, .toolbar label, .grid-cell-controls label { display: grid; gap: 6px; min-width: 0; color: #5b7185; font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
-    .form input, .form select, .toolbar select { width: 100%; min-width: 0; min-height: 38px; font: inherit; padding: 8px; border: 1px solid #d5e2ed; border-radius: 8px; background: white; color: var(--ink); }
+    .form input, .form select, .toolbar select { width: 100%; min-width: 0; min-height: 38px; font: inherit; padding: 8px; border: 1px solid #d5e2ed; border-radius: 8px; background: var(--surface); color: var(--ink); }
     .toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; padding: 13px 15px; box-shadow: 0 3px 12px rgba(49,83,112,.05); }
     table { width: 100%; border-collapse: collapse; }
     th, td { border: 1px solid #e4edf4; padding: 8px; font-size: 11px; min-width: 120px; vertical-align: top; }
     th small { display: block; margin-top: 3px; font-weight: 500; color: #8095a8; }
-    .grid-scroll { width: 100%; max-width: 100%; overflow-x: auto; border: 1px solid #d7e4ef; border-radius: 12px; background: white; box-shadow: 0 3px 12px rgba(49,83,112,.05); }
+    .grid-scroll { width: 100%; max-width: 100%; overflow-x: auto; border: 1px solid #d7e4ef; border-radius: 12px; background: var(--surface); box-shadow: 0 3px 12px rgba(49,83,112,.05); }
     :host ::ng-deep .timetable-grid-table .p-datatable-table { table-layout: fixed; border-collapse: separate; border-spacing: 0; }
     :host ::ng-deep .timetable-grid-table .p-datatable-thead > tr > th { background: #eaf3fa; color: #4d6b84; font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; border-color: #dce8f1; }
     :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > th { background: #f4f8fb; color: #355872; font-size: 11px; font-weight: 750; }
-    :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > td { background: #fff; transition: background-color 120ms ease; }
+    :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > td { background: var(--surface); transition: background-color 120ms ease; }
     :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr:hover > td { background: #f7fbfe; }
     :host ::ng-deep .timetable-grid-table .p-datatable-thead > tr > th:first-child,
     :host ::ng-deep .timetable-grid-table .p-datatable-tbody > tr > th { width: 100px; min-width: 100px; }
@@ -182,13 +182,13 @@ import { TableModule } from 'primeng/table';
     .grid-cell-controls { display: grid; gap: 6px; min-width: 0; }
     .grid-cell-controls select { display: block; width: 100%; min-width: 0; min-height: 34px; padding: 6px 8px; border: 1px solid #dce7f0; border-radius: 7px; background: #fbfdff; color: var(--ink); font: inherit; font-size: 10px; }
     .mobile-days { display: none; }
-    .mobile-day-card { overflow: hidden; background: white; border: 1px solid #d8e5ef; border-radius: 12px; box-shadow: 0 3px 12px rgba(49,83,112,.05); }
+    .mobile-day-card { overflow: hidden; background: var(--surface); border: 1px solid #d8e5ef; border-radius: 12px; box-shadow: 0 3px 12px rgba(49,83,112,.05); }
     .mobile-day-card h2 { margin: 0; padding: 11px 14px; background: #eaf3fa; color: #355872; font-size: 13px; }
     .mobile-period { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 11px 12px; border-top: 1px solid #e9f0f5; }
     .mobile-period > header { display: grid; align-content: start; gap: 3px; color: var(--navy); font-size: 12px; }
     .mobile-period > header small { color: var(--muted); }
     .mobile-period.open { background: #fff9ec; }
-    td.open { background: #fff8e8 !important; }
+    td.open { background: var(--warn-soft) !important; }
     td strong, td small { display: block; }
     .ok { background: #e5f8f1; color: #087d68; padding: 8px; border-radius: 8px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 8px; border-radius: 8px; }

@@ -40,10 +40,10 @@ import { ButtonModule } from 'primeng/button';
     } @empty { <p class="text-muted">No impacted periods on this date.</p> }
   `,
   styles: [`
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 10px 0; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 10px 0; }
     small { display: block; color: var(--muted); }
     .row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-    .row select { flex: 1 1 240px; min-width: min(100%, 240px); min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; }
+    .row select { flex: 1 1 240px; min-width: min(100%, 240px); min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
     input { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
     .ok { background: #e5f8f1; color: #087d68; padding: 8px; border-radius: 8px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 8px; border-radius: 8px; }

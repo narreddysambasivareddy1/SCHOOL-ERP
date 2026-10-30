@@ -197,6 +197,7 @@ public class Employee : TenantEntity
     public string LastName { get; set; } = string.Empty;
     public string? Email { get; set; }
     public string? Phone { get; set; }
+    public string? PhotoUrl { get; set; }
     public Guid? DepartmentId { get; set; }
     public Department? Department { get; set; }
     public Guid? DesignationId { get; set; }

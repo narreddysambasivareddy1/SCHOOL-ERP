@@ -61,15 +61,15 @@ import { AuthService } from '../../core/auth/auth.service';
     }
   `,
   styles: [`
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
     .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
     input { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; min-width: 160px; }
     button { background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
     .list { display: flex; flex-direction: column; gap: 8px; }
-    .item { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .item { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .actions { display: flex; gap: 8px; }
     .item small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
-    .empty { padding: 24px; text-align: center; color: var(--muted); background: white; border: 1px dashed var(--line); border-radius: 12px; }
+    .empty { padding: 24px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px 12px; border-radius: 8px; }
   `]
 })

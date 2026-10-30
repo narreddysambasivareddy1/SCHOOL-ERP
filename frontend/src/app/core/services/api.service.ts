@@ -28,6 +28,7 @@ export class ApiService {
     return this.http.get<PagedResult<any>>(`${this.base}/schools/${schoolId}/students`, { params });
   }
   createStudent(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/students`, body); }
+  getStudent(schoolId: string, id: string) { return this.http.get<any>(`${this.base}/schools/${schoolId}/students/${id}`); }
 
   // Employees
   getEmployees(schoolId: string, page = 1, pageSize = 25, search = ''): Observable<PagedResult<any>> {
@@ -209,8 +210,14 @@ export class ApiService {
   setStudentStatus(schoolId: string, id: string, status: string) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/students/${id}/status`, { status });
   }
+  setStudentPhoto(schoolId: string, id: string, photoUrl: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/students/${id}/photo`, { photoUrl });
+  }
   setEmployeeStatus(schoolId: string, id: string, status: string) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/employees/${id}/status`, { status });
+  }
+  setEmployeePhoto(schoolId: string, id: string, photoUrl: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/employees/${id}/photo`, { photoUrl });
   }
   createTeacherAssignment(schoolId: string, body: any) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/teacher-assignments`, body);

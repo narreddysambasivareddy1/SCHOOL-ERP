@@ -56,12 +56,12 @@ import { AuthService } from '../../core/auth/auth.service';
     }
   `,
   styles: [`
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
     ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; }
     .item { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
     .item small { display: block; color: var(--muted); font-size: 11px; }
     button { background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 6px 10px; margin-left: 6px; cursor: pointer; }
-    .ghost { background: white; color: var(--navy); border: 1px solid var(--line); }
+    .ghost { background: var(--surface); color: var(--navy); border: 1px solid var(--line); }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; margin-bottom: 12px; }
   `]
 })

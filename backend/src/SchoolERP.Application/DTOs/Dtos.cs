@@ -25,14 +25,15 @@ public record StudentDetailDto(
 
 public record CreateStudentRequest(
     string FirstName, string LastName, DateOnly DateOfBirth,
-    Guid AcademicYearId, Guid ClassId, Guid SectionId, string? RollNumber);
+    Guid AcademicYearId, Guid ClassId, Guid SectionId, string? RollNumber, string? PhotoUrl = null);
 
 public record GuardianDto(Guid Id, string FirstName, string LastName, string Relationship, string Phone, bool IsPrimary);
-public record EnrollmentDto(Guid Id, string AcademicYear, string ClassName, string SectionName, DateOnly EffectiveFrom);
+public record EnrollmentDto(Guid Id, string AcademicYear, string ClassName, string SectionName, DateOnly EffectiveFrom, string? RollNumber);
 
 // Employees
-public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status);
-public record CreateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate);
+public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status, string? Email, string? Phone, DateOnly JoiningDate, string? PhotoUrl);
+public record CreateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, string? PhotoUrl = null);
+public record SetPhotoRequest(string PhotoUrl);
 
 // Teacher Assignments
 public record TeacherAssignmentDto(Guid Id, string TeacherName, string SubjectName, string ClassName, string SectionName, bool CanTakeAttendance, bool CanSetHomework, bool CanEnterMarks, bool IsActive);

@@ -62,7 +62,7 @@ public class StudentService(AppDbContext db) : IStudentService
                 sg.Guardian!.Id, sg.Guardian.FirstName, sg.Guardian.LastName,
                 sg.Relationship, sg.Guardian.Phone, sg.IsPrimary)),
             student.Enrollments.Select(e => new EnrollmentDto(
-                e.Id, e.AcademicYear!.Name, e.Class!.Name, e.Section!.Name, e.EffectiveFrom)));
+                e.Id, e.AcademicYear!.Name, e.Class!.Name, e.Section!.Name, e.EffectiveFrom, e.RollNumber)));
     }
 
     public async Task<StudentDetailDto> CreateStudentAsync(
@@ -80,6 +80,7 @@ public class StudentService(AppDbContext db) : IStudentService
             FirstName = request.FirstName,
             LastName = request.LastName,
             DateOfBirth = request.DateOfBirth,
+            PhotoUrl = CleanPhoto(request.PhotoUrl),
             Status = StudentStatus.Active,
             CreatedBy = createdBy
         };
@@ -110,5 +111,22 @@ public class StudentService(AppDbContext db) : IStudentService
             ?? throw new InvalidOperationException("Student not found.");
         student.Status = next;
         await db.SaveChangesAsync(ct);
+    }
+
+    public async Task SetPhotoAsync(Guid id, Guid schoolId, string photoUrl, CancellationToken ct = default)
+    {
+        var photo = CleanPhoto(photoUrl) ?? throw new InvalidOperationException("Choose a photo.");
+        var student = await db.Students.FirstOrDefaultAsync(s => s.Id == id && s.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Student not found.");
+        student.PhotoUrl = photo;
+        await db.SaveChangesAsync(ct);
+    }
+
+    private static string? CleanPhoto(string? photo)
+    {
+        if (string.IsNullOrWhiteSpace(photo)) return null;
+        if (!photo.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) || photo.Length > 400_000)
+            throw new InvalidOperationException("Use a small photo, under about 300 KB.");
+        return photo;
     }
 }

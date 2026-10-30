@@ -132,13 +132,13 @@ import { TableModule } from 'primeng/table';
   `,
   styles: [`
     .filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
-    .deadline-card { display: flex; align-items: end; gap: 12px; margin-bottom: 16px; padding: 14px 18px; background: white; border: 1px solid var(--line); border-radius: 12px; }
+    .deadline-card { display: flex; align-items: end; gap: 12px; margin-bottom: 16px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
     .deadline-card label { display: grid; gap: 7px; color: #475569; font-size: 12px; font-weight: 700; }
     .deadline-card input { min-height: 40px; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
     .filters label, .plan-fields label { display: grid; gap: 7px; min-width: 0; color: #475569; font-size: 12px; font-weight: 700; }
-    .card { min-width: 0; background: white; border: 1px solid var(--line); border-radius: 14px; padding: 18px; box-shadow: 0 2px 8px rgba(15,39,68,.03); }
+    .card { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; box-shadow: 0 2px 8px rgba(15,39,68,.03); }
     .form { display: grid; gap: 18px; margin-bottom: 28px; }
-    input, select { width: 100%; min-width: 0; min-height: 42px; font: inherit; padding: 9px 12px; border-radius: 9px; border: 1px solid #d8e0eb; background: white; color: var(--ink); }
+    input, select { width: 100%; min-width: 0; min-height: 42px; font: inherit; padding: 9px 12px; border-radius: 9px; border: 1px solid #d8e0eb; background: var(--surface); color: var(--ink); }
     input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(36,99,235,.12); }
     .form-heading, .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
     .form-heading h2, .section-heading h2 { margin: 0; color: var(--navy); font-size: 16px; font-weight: 750; }
@@ -151,7 +151,7 @@ import { TableModule } from 'primeng/table';
     .published-plans { margin-top: 26px; }
     .section-heading { margin-bottom: 12px; }
     .plans-mobile { display: none; }
-    .plans-table-scroll { width: 100%; max-width: 100%; overflow-x: auto; background: white; border: 1px solid var(--line); border-radius: 12px; }
+    .plans-table-scroll { width: 100%; max-width: 100%; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
     :host ::ng-deep .weekly-plans-table .p-datatable-table { table-layout: fixed; }
     :host ::ng-deep .weekly-plans-table .p-datatable-thead > tr > th,
     :host ::ng-deep .weekly-plans-table .p-datatable-tbody > tr > td { width: 140px; white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
@@ -160,7 +160,7 @@ import { TableModule } from 'primeng/table';
     :host ::ng-deep .weekly-plans-table .p-datatable-thead > tr > th { padding: 12px; }
     :host ::ng-deep .weekly-plans-table .p-datatable-tbody > tr > td { padding: 12px; line-height: 1.5; }
     small { display: block; margin-top: 4px; color: var(--muted); }
-    .plan-card { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 12px; }
+    .plan-card { overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
     .plan-card header { padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid var(--line); }
     .plan-card header strong { color: var(--navy); }
     .mobile-topic-list { padding: 4px 16px; }
@@ -168,7 +168,7 @@ import { TableModule } from 'primeng/table';
     .mobile-topic:last-child { border-bottom: 0; }
     .mobile-topic span { color: var(--muted); font-size: 11px; font-weight: 700; }
     .mobile-topic p { margin: 0; overflow-wrap: anywhere; }
-    .empty-state { display: grid; justify-items: center; gap: 7px; padding: 32px 16px; background: white; border: 1px dashed #cbd5e1; border-radius: 12px; color: var(--muted); text-align: center; }
+    .empty-state { display: grid; justify-items: center; gap: 7px; padding: 32px 16px; background: var(--surface); border: 1px dashed #cbd5e1; border-radius: 12px; color: var(--muted); text-align: center; }
     .empty-state i { color: var(--primary); font-size: 20px; }
     .empty-state strong { color: var(--navy); font-size: 13px; }
     .ok, .alert { margin-bottom: 12px; padding: 10px 12px; border-radius: 9px; }

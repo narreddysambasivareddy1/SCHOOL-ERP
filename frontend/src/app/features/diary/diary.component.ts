@@ -92,9 +92,9 @@ import { TableModule } from 'primeng/table';
   `,
   styles: [`
     .toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; margin-bottom: 16px; align-items: end; }
-    .toolbar select { width: 100%; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font: inherit; }
+    .toolbar select { width: 100%; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
     .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .card, .slide { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .card, .slide { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
     input { font: inherit; width: 100%; box-sizing: border-box; margin: 6px 0; padding: 8px; border-radius: 8px; border: 1px solid var(--line); }
     .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 12px; margin-top: 16px; }
     .slide header { font-weight: 800; color: var(--navy); }

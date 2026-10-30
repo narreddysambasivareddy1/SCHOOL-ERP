@@ -1,23 +1,23 @@
 :root {
-  --navy: #12263f;
+  --navy: #17365d;
   --navy2: #e7eef6;
-  --teal: #1d4e89;
-  --gold: #c28a2c;
-  --bg: #e6eef6;
-  --canvas: #e4edf6;
-  --ink: #142033;
-  --muted: #3e5164;
-  --line: #d0dbe6;
+  --teal: #0f8b8d;
+  --gold: #f2b544;
+  --bg: #f4f7fb;
+  --canvas: #f4f7fb;
+  --ink: #17365d;
+  --muted: #4d6278;
+  --line: #d7e0ea;
   --white: #fff;
   --red: #dc4c5a;
-  --primary: #1d4e89;
-  --primary-hover: #163d6c;
-  --primary-soft: #e5eef8;
-  --sidebar: #12263f;
-  --sidebar-text: #e7eef6;
-  --sidebar-muted: #b7c6d6;
-  --sidebar-active: #1d4e89;
-  --topbar: #fffcf8;
+  --primary: #17365d;
+  --primary-hover: #122a49;
+  --primary-soft: #e7eef6;
+  --sidebar: #17365d;
+  --sidebar-text: #f4f7fb;
+  --sidebar-muted: #c5d2e2;
+  --sidebar-active: #0f8b8d;
+  --topbar: #ffffff;
   --success: #27856e;
   --success-soft: #e7f5ef;
   --warn: #9a6b21;
@@ -209,7 +209,7 @@ a { color: inherit; }
   padding: 8px 11px;
   border: 1px solid #d5e2ed;
   border-radius: 9px;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   transition: border-color 140ms ease, box-shadow 140ms ease;
 }
@@ -228,10 +228,10 @@ a { color: inherit; }
   overflow: hidden;
   border: 1px solid var(--page-border);
   border-radius: 14px;
-  background: white;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
 }
-.main-content .p-datatable .p-datatable-header { border: 0; background: white; }
+.main-content .p-datatable .p-datatable-header { border: 0; background: var(--surface); }
 .main-content .p-datatable .p-datatable-thead > tr > th,
 .main-content .p-datatable .p-datatable-tbody > tr > td { padding: 16px; vertical-align: middle; }
 .main-content .person { display: flex; align-items: center; gap: 12px; }
@@ -252,7 +252,7 @@ a { color: inherit; }
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 13px;
-  background: white;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
 }
 .main-content table:not(.att-table) th {
@@ -283,8 +283,8 @@ a { color: inherit; }
 .main-content .calendar-card {
   border: 1px solid #d9e6f1;
   border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 4px 14px rgba(47, 85, 117, .065);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 .main-content .card-header.card-header { background: #f5faff; }
 .main-content .card-title.card-title,
@@ -329,13 +329,13 @@ main.main-content .data-table.data-table.data-table tbody tr:hover { background:
 }
 .main-content .pipe-card { padding: 17px; }
 .main-content .pipe-card strong { display: block; margin-top: 5px; font-size: 25px; font-weight: 760; letter-spacing: -.035em; }
-.main-content .session-card { overflow: hidden; background: white; }
+.main-content .session-card { overflow: hidden; background: var(--surface); }
 .main-content .session-header { padding: 17px 20px; background: #f5faff; }
 .main-content .empty-state,
 .main-content .empty {
   border: 1px dashed #cbd7e6;
   border-radius: 14px;
-  background: white;
+  background: var(--surface);
 }
 .main-content .empty-state { padding: 38px 20px; }
 .main-content .empty-icon { color: #438fc3; }
@@ -359,7 +359,7 @@ main.main-content .data-table.data-table.data-table tbody tr:hover { background:
 }
 .main-content .btn-ghost {
   border-color: #d7e3ee;
-  background: white;
+  background: var(--surface);
   color: #41617d;
 }
 .main-content .btn-ghost:hover { border-color: #b7d2e6; background: #f1f8fd; }
@@ -391,7 +391,8 @@ main.main-content .data-table.data-table.data-table tbody tr:hover { background:
 .main-content select:focus,
 .main-content textarea:focus { border-color: #75acd1; box-shadow: var(--focus); }
 
-.p-dialog { overflow: hidden; border: 1px solid var(--page-border); border-radius: 16px; box-shadow: 0 24px 70px rgba(18, 38, 66, .2); }
+.p-dialog-mask { position: fixed !important; inset: 0 !important; display: flex !important; align-items: center; justify-content: center; background: rgba(7, 13, 24, 0.72) !important; z-index: 1200 !important; }
+.p-dialog { position: relative !important; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 24px 70px rgba(0, 0, 0, .45); z-index: 1201; }
 .p-dialog .p-dialog-header { padding: 18px 22px; border-bottom: 1px solid var(--page-border); background: #fbfcfe; color: var(--navy); }
 .p-dialog .p-dialog-content { padding: 22px; }
 .p-dialog .p-dialog-footer { padding: 14px 22px; border-top: 1px solid var(--page-border); background: #fbfcfe; }
@@ -435,7 +436,7 @@ app-student-dashboard .welcome .eyebrow,
 app-parent-dashboard .welcome .eyebrow { color: rgba(255,255,255,.72); }
 app-teacher-dashboard .primary-action,
 app-student-dashboard .primary-action,
-app-parent-dashboard .primary-action { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 10px; background: white; color: var(--primary); box-shadow: none; font-size: 14px; font-weight: 650; }
+app-parent-dashboard .primary-action { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 10px; background: var(--surface); color: var(--primary); box-shadow: none; font-size: 14px; font-weight: 650; }
 app-teacher-dashboard .stats-row.stats-row,
 app-student-dashboard .stats-row.stats-row,
 app-parent-dashboard .stats-row.stats-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
@@ -449,7 +450,7 @@ app-parent-dashboard .stat-card.stat-card {
   padding: 20px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: white;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
 }
 app-teacher-dashboard .stat-icon.stat-icon,
@@ -466,10 +467,10 @@ app-student-dashboard .stat-card em,
 app-parent-dashboard .stat-card em { color: var(--muted); font-size: 13px; font-style: normal; white-space: normal; }
 app-teacher-dashboard .panel.panel,
 app-student-dashboard .panel.panel,
-app-parent-dashboard .panel.panel { border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+app-parent-dashboard .panel.panel { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
 app-teacher-dashboard .panel-heading.panel-heading,
 app-student-dashboard .panel-heading.panel-heading,
-app-parent-dashboard .panel-heading.panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; background: white; }
+app-parent-dashboard .panel-heading.panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; background: var(--surface); }
 app-teacher-dashboard .panel-heading h2,
 app-student-dashboard .panel-heading h2,
 app-parent-dashboard .panel-heading h2 { color: var(--navy); font-size: 18px; font-weight: 700; }
@@ -489,14 +490,14 @@ app-parent-dashboard .list-copy small { color: var(--muted); font-size: 13px; }
 app-teacher-dashboard .action-row.action-row,
 app-student-dashboard .list-row.list-row,
 app-parent-dashboard .list-row.list-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 64px; padding: 12px 20px; }
-app-parent-dashboard .children-section.children-section { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
-app-parent-dashboard .child-chip.child-chip { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+app-parent-dashboard .children-section.children-section { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
+app-parent-dashboard .child-chip.child-chip { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 app-parent-dashboard .child-chip.child-chip.active { border-color: var(--primary); background: var(--primary-soft); }
 app-parent-dashboard .av.av { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: var(--primary-soft); color: var(--primary); }
 app-student-dashboard .shortcuts.shortcuts,
 app-parent-dashboard .shortcuts.shortcuts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
 app-student-dashboard .shortcuts a,
-app-parent-dashboard .shortcuts a { display: grid; grid-template-columns: 20px minmax(0, 1fr) 16px; align-items: center; gap: 12px; min-height: 56px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 16px; background: white; color: var(--navy); font-size: 14px; }
+app-parent-dashboard .shortcuts a { display: grid; grid-template-columns: 20px minmax(0, 1fr) 16px; align-items: center; gap: 12px; min-height: 56px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--navy); font-size: 14px; }
 @media (max-width: 900px) {
   app-teacher-dashboard .stats-row.stats-row,
   app-student-dashboard .stats-row.stats-row,
@@ -555,7 +556,7 @@ app-academics .card.card {
   padding: 20px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: white;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
 }
 .main-content .tabs {
@@ -569,7 +570,7 @@ app-academics .card.card {
   padding: 0 16px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: white;
+  background: var(--surface);
   color: var(--navy);
   font-size: 14px;
   font-weight: 650;
@@ -645,7 +646,7 @@ app-examinations .item {
   padding: 16px 20px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: white;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
 }
 app-examinations .item strong { font-size: 16px; color: var(--navy); }
@@ -661,14 +662,14 @@ app-integrations .card {
   padding: 20px !important;
   border: 1px solid var(--line) !important;
   border-radius: 16px !important;
-  background: white !important;
+  background: var(--surface) !important;
   box-shadow: var(--shadow-sm);
 }
 app-timetable .grid-scroll {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: white;
+  background: var(--surface);
 }
 app-timetable .grid-scroll th,
 app-timetable .grid-scroll td {
@@ -682,3 +683,85 @@ app-academics .map-form {
 }
 app-academics .data-table th,
 app-academics .data-table td { padding: 14px 16px !important; font-size: 14px !important; vertical-align: middle; }
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .main-content { color: var(--ink); }
+html[data-theme="dark"] .main-content :is(
+  .card, .panel, .metric, .page-header, .stat-card, .session-card, .grid-scroll,
+  .item, .child-chip, .children-section, table, .kpi-card, .report-card, .plan-card, .deadline-card
+) {
+  background: var(--surface) !important;
+  color: var(--ink);
+  border-color: var(--line) !important;
+}
+html[data-theme="dark"] .main-content :is(h1, h2, h3, strong, td, th) { color: var(--ink); }
+html[data-theme="dark"] .main-content :is(input, select, textarea) {
+  background: var(--surface-raised) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+html[data-theme="dark"] .p-datatable,
+html[data-theme="dark"] .p-datatable .p-datatable-thead > tr > th,
+html[data-theme="dark"] .p-datatable .p-datatable-tbody > tr > td {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+html[data-theme="dark"] .main-content table:not(.att-table) tbody tr:hover { background: var(--navy2); }
+html[data-theme="dark"] .p-dropdown,
+html[data-theme="dark"] .p-dropdown-panel,
+html[data-theme="dark"] .p-dropdown-items-wrapper,
+html[data-theme="dark"] .p-dropdown-item,
+html[data-theme="dark"] .p-select,
+html[data-theme="dark"] .p-select-overlay,
+html[data-theme="dark"] .p-menu,
+html[data-theme="dark"] .p-menu .p-menuitem-content,
+html[data-theme="dark"] .p-menu .p-menuitem-link,
+html[data-theme="dark"] .p-dialog,
+html[data-theme="dark"] .p-dialog .p-dialog-header,
+html[data-theme="dark"] .p-dialog .p-dialog-content,
+html[data-theme="dark"] .p-dialog .p-dialog-footer,
+html[data-theme="dark"] .p-paginator,
+html[data-theme="dark"] .main-content .p-datatable .p-paginator {
+  background: #121a2b !important;
+  color: #e8eef7 !important;
+  border-color: #243044 !important;
+}
+html[data-theme="dark"] :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]) {
+  background: #182236 !important;
+  color: #e8eef7 !important;
+  border-color: #243044 !important;
+}
+html[data-theme="dark"] :is(input, select, textarea):-webkit-autofill,
+html[data-theme="dark"] :is(input, select, textarea):-webkit-autofill:hover,
+html[data-theme="dark"] :is(input, select, textarea):-webkit-autofill:focus {
+  -webkit-text-fill-color: #e8eef7 !important;
+  caret-color: #e8eef7;
+  box-shadow: 0 0 0 1000px #182236 inset !important;
+}
+html[data-theme="dark"] .main-content :is(
+  .kpis > div, .list-pane, .pipe-card, .lead, .slide, .stat-card, .panel, .card,
+  .assignment-card, .plan-card, .deadline-card, .empty-state, .empty-card, .children-section,
+  .child-chip, .mobile-day-card, .grid-scroll, .page-header, .report-card, .kpi-card,
+  .calendar-card, .theme-panel, .modal-card, .session-card, .plans-table-scroll, table, thead th,
+  .att-table, .att-table thead th, .data-table thead th
+) {
+  background: #121a2b !important;
+  color: #e8eef7 !important;
+  border-color: #243044 !important;
+}
+html[data-theme="dark"] .p-tag { background: #1a2740 !important; color: #e8eef7 !important; }
+html[data-theme="dark"] .p-tag-success { background: #12352c !important; color: #3dbe9a !important; }
+html[data-theme="dark"] .p-tag-info { background: #15283f !important; color: #9ec5ff !important; }
+html[data-theme="dark"] .p-tag-warn,
+html[data-theme="dark"] .p-tag-warning { background: #3a2d12 !important; color: #f2b544 !important; }
+html[data-theme="dark"] .p-tag-danger { background: #3a1c22 !important; color: #f07178 !important; }
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] .login-card h1 { color: var(--ink); }
+html[data-theme="dark"] .p-dropdown-item.p-highlight,
+html[data-theme="dark"] .p-dropdown-item:hover,
+html[data-theme="dark"] .p-menuitem-link:hover,
+html[data-theme="dark"] .p-select-option:hover {
+  background: #1a2740 !important;
+  color: #f4f7fb !important;
+}

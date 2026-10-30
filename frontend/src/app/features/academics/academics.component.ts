@@ -142,7 +142,7 @@ interface Assignment {
   styles: [`
     .page-header { margin-bottom: 24px; }
     h1 { margin: 4px 0; font-size: 22px; font-weight: 800; color: var(--navy); }
-    .card { background: white; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--line); gap: 12px; flex-wrap: wrap; }
     .card-title { font-size: 14px; font-weight: 700; color: var(--navy); }
     .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -162,7 +162,7 @@ interface Assignment {
     .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .badge-success { background: #e5f8f1; color: #087d68; }
     .badge-inactive { background: #f1f5f9; color: #64748b; }
-    .deactivate { border: 1px solid #fecaca; border-radius: 6px; background: #fff; color: #b91c1c; padding: 6px 9px; cursor: pointer; font: inherit; }
+    .deactivate { border: 1px solid #fecaca; border-radius: 6px; background: var(--surface); color: #b91c1c; padding: 6px 9px; cursor: pointer; font: inherit; }
     .loading-row { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
     .alert-error { margin: 16px 20px; background: #fff0f0; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #c0392b; }
     .ok { margin: 12px 20px 0; background: #e5f8f1; color: #087d68; padding: 8px 12px; border-radius: 8px; font-size: 12px; }

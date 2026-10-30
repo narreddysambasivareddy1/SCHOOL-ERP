@@ -28,8 +28,12 @@ import { ThemeService } from '../../core/services/theme.service';
         <div class="card"><label>School colour</label><strong>{{ school().primaryColor || 'Default campus blue' }}</strong></div>
       </div>
       <div class="theme-panel">
-        <h2>Workspace colour</h2>
-        <p>Saved in this browser. It recolours the sidebar, page background, buttons and links. School colour is the default until you pick one.</p>
+        <h2>Appearance</h2>
+        <p>Light uses navy, teal and gold. Dark keeps the same accent. The colour you pick is saved in this browser.</p>
+        <div class="mode-switch" role="group" aria-label="Appearance">
+          <button type="button" [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')">Light</button>
+          <button type="button" [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')">Dark</button>
+        </div>
         <div class="swatches">
           @for (preset of theme.presets; track preset.id) {
             <button type="button" class="swatch" [class.on]="theme.active() === preset.hex" [style.background]="preset.hex"
@@ -47,7 +51,10 @@ import { ThemeService } from '../../core/services/theme.service';
   `,
   styles: [`
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 280px; margin-bottom: 14px; }
+    .mode-switch button { height: 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); cursor: pointer; font-weight: 650; }
+    .mode-switch button.on { background: var(--primary); border-color: var(--primary); color: white; }
     label { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; }
     a { color: var(--primary); font-size: 13px; }

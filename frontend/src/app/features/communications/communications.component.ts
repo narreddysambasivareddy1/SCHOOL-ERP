@@ -56,7 +56,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
   styles: [`
     h1 { color: var(--navy); margin: 4px 0 20px; font-size: 22px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
     label { display: block; font-size: 11px; font-weight: 700; margin: 10px 0 5px; color: #506078; }
     input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
     .ch { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; }

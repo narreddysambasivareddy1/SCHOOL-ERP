@@ -122,15 +122,15 @@ const CHILD_KEY = 'erp_active_child';
     .welcome p { margin: 0; color: var(--muted); } .welcome .eyebrow span { padding: 0 5px; color: #aab8c8; }
     .primary-action { display: inline-flex; align-items: center; gap: 9px; padding: 12px 16px; border-radius: 10px; background: var(--primary); color: white; text-decoration: none; font-weight: 700; box-shadow: 0 6px 16px rgba(36,99,235,.2); white-space: nowrap; }
     .alert-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 11px 14px; border: 1px solid #f5c97a; border-radius: 10px; background: #fff4e5; color: #7a4f00; font-size: 12px; }
-    .empty-card { display: grid; justify-items: center; padding: 54px 24px; border: 1px dashed #cdd8e6; border-radius: 16px; background: white; color: var(--muted); text-align: center; }
+    .empty-card { display: grid; justify-items: center; padding: 54px 24px; border: 1px dashed #cdd8e6; border-radius: 16px; background: var(--surface); color: var(--muted); text-align: center; }
     .empty-icon { display: grid; width: 54px; height: 54px; place-items: center; border-radius: 16px; background: #eaf3ff; color: var(--primary); font-size: 22px; }
     .empty-card h2 { margin: 14px 0 5px; color: var(--navy); font-size: 18px; } .empty-card p { max-width: 430px; margin: 0; font-size: 12px; line-height: 1.6; }
-    .children-section { margin-bottom: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .children-section { margin-bottom: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
     .section-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .section-heading h2 { margin: 2px 0 0; color: var(--navy); font-size: 15px; }
     .child-count { padding: 4px 9px; border-radius: 20px; background: #f3f6fa; color: var(--muted); font-size: 10px; font-weight: 700; }
     .child-switcher { display: flex; gap: 9px; flex-wrap: wrap; }
-    .child-chip { display: flex; flex: 1 1 220px; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; background: #fcfdff; cursor: pointer; text-align: left; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+    .child-chip { display: flex; flex: 1 1 220px; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); cursor: pointer; text-align: left; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
     .child-chip.active { border-color: #8eb1ef; background: #f5f9ff; box-shadow: 0 0 0 2px rgba(36,99,235,.08); }
     .child-chip:hover { border-color: #b8cbed; } .child-chip:focus-visible { outline: 3px solid rgba(36,99,235,.3); outline-offset: 2px; }
     .av { display: grid; flex: 0 0 auto; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: #fff4db; color: #9a6900; font-size: 11px; font-weight: 800; }
@@ -139,7 +139,7 @@ const CHILD_KEY = 'erp_active_child';
     .child-chip small { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
     .selected-mark { color: var(--primary); font-size: 15px; }
     .stats-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 13px; margin-bottom: 13px; }
-    .stat-card { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: white; box-shadow: var(--shadow-sm); }
+    .stat-card { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .stat-card > span:nth-child(2) { display: grid; min-width: 0; flex: 1; gap: 2px; }
     .stat-card small { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; }
     .stat-card strong { overflow: hidden; color: var(--navy); font-size: 21px; text-overflow: ellipsis; white-space: nowrap; }
@@ -148,10 +148,10 @@ const CHILD_KEY = 'erp_active_child';
     .blue { background: #eaf3ff; color: #1c5cb7; } .violet { background: #f0ebff; color: #6b3fa0; } .teal { background: #e3f8f3; color: #087d68; }
     .stat-card > a { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 8px; background: #f5f8fc; color: var(--muted); text-decoration: none; }
     .shortcuts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; margin-bottom: 18px; }
-    .shortcuts a { display: flex; align-items: center; gap: 9px; padding: 11px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--navy); font-size: 10px; font-weight: 700; text-decoration: none; }
+    .shortcuts a { display: flex; align-items: center; gap: 9px; padding: 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--navy); font-size: 10px; font-weight: 700; text-decoration: none; }
     .shortcuts a > i:first-child { color: var(--primary); } .shortcuts a > span { flex: 1; } .shortcuts a > i:last-child { color: #9aa8b8; font-size: 9px; }
     .content-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; align-items: start; }
-    .panel { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: var(--shadow-sm); }
+    .panel { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 17px 18px; border-bottom: 1px solid var(--line); }
     .panel-heading h2 { margin: 2px 0; color: var(--navy); font-size: 15px; } .panel-heading p { margin: 0; color: var(--muted); font-size: 10px; }
     .panel-heading > a { color: var(--primary); font-size: 10px; font-weight: 700; text-decoration: none; white-space: nowrap; } .panel-heading > a i { margin-left: 2px; font-size: 9px; }

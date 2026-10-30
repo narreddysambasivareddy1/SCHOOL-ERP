@@ -114,6 +114,11 @@ const ALL_NAV: NavItem[] = [
                 <div class="menu-meta">{{ auth.user()?.email }}</div>
                 <div class="menu-meta">{{ ctx.locale }} · {{ ctx.currency }}</div>
                 <div class="theme-block" (click)="$event.stopPropagation()">
+                  <div class="menu-meta">Appearance</div>
+                  <div class="mode-switch" role="group" aria-label="Appearance">
+                    <button type="button" [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')">Light</button>
+                    <button type="button" [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')">Dark</button>
+                  </div>
                   <div class="menu-meta">Workspace colour</div>
                   <div class="swatches" role="listbox" aria-label="Workspace colour">
                     @for (preset of theme.presets; track preset.id) {
@@ -207,16 +212,16 @@ const ALL_NAV: NavItem[] = [
     .logo-img { object-fit: cover; border: 1px solid var(--line); }
     .brand strong { display: block; color: var(--navy); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .brand small { color: var(--muted); font-size: 10px; }
-    .search-chip { height: 40px; margin-left: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #f8fafc; border-radius: 10px; padding: 0 12px; color: var(--muted); font-size: 14px; cursor: pointer; min-width: 220px; transition: border-color 140ms ease, background 140ms ease; }
-    .search-chip:hover { border-color: #b8c7d9; background: white; }
-    .search-chip kbd { margin-left: auto; font-size: 10px; border: 1px solid var(--line); background: white; border-radius: 6px; padding: 1px 6px; }
+    .search-chip { height: 40px; margin-left: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 0 12px; color: var(--muted); font-size: 14px; cursor: pointer; min-width: 220px; transition: border-color 140ms ease, background 140ms ease; }
+    .search-chip:hover { border-color: var(--primary); background: var(--surface); }
+    .search-chip kbd { margin-left: auto; font-size: 10px; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 1px 6px; color: var(--muted); }
     .route-context { display: grid; gap: 0; min-width: 0; margin-left: 4px; padding-left: 16px; border-left: 1px solid var(--line); line-height: 1.25; }
     .route-context span { color: var(--muted); font-size: 10px; }
     .route-context strong { overflow: hidden; color: var(--navy); font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
     .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    .year-select { height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; font-size: 14px; background: white; color: var(--ink); }
+    .year-select { height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; font-size: 14px; background: var(--surface); color: var(--ink); }
     .user-wrap { position: relative; }
-    .user-btn { height: 40px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: white; border-radius: 10px; padding: 0 10px 0 4px; cursor: pointer; }
+    .user-btn { height: 40px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 0 10px 0 4px; cursor: pointer; }
     .avatar { width: 28px; height: 28px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-size: 10px; font-weight: 800; }
     .user-meta { display: flex; flex-direction: column; align-items: flex-start; }
     .user-name { font-size: 12px; color: var(--ink); font-weight: 600; }
@@ -225,7 +230,10 @@ const ALL_NAV: NavItem[] = [
     .role-badge.teacher { color: #087d68; }
     .role-badge.student { color: #4338ca; }
     .role-badge.parent { color: #9a6900; }
-    .menu { position: absolute; right: 0; top: calc(100% + 8px); width: 260px; background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px; z-index: 30; }
+    .menu { position: absolute; right: 0; top: calc(100% + 8px); width: 260px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px; z-index: 30; }
+    .mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px 8px 8px; }
+    .mode-switch button { height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); cursor: pointer; font-weight: 650; }
+    .mode-switch button.on { background: var(--primary); border-color: var(--primary); color: white; }
     .theme-block { margin: 6px 0; padding-top: 6px; border-top: 1px solid var(--line); }
     .swatches { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 8px 8px; }
     .swatch { width: 36px; height: 36px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .18); }
@@ -235,7 +243,7 @@ const ALL_NAV: NavItem[] = [
     .menu-meta { font-size: 11px; color: var(--muted); padding: 4px 8px; }
     .menu-item { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; }
     .menu-item:hover { background: var(--bg); }
-    .icon-btn { border: 1px solid var(--line); background: white; border-radius: 8px; padding: 7px 10px; cursor: pointer; color: var(--navy); }
+    .icon-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; cursor: pointer; color: var(--navy); }
     .mobile-menu-btn { display: none; }
     .layout { display: flex; flex: 1; min-height: calc(100vh - var(--topbar-h)); }
     .sidebar { width: var(--sidebar-w); background: var(--sidebar); color: var(--sidebar-text); padding: 12px 10px 16px; border-right: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-x: hidden; overflow-y: auto; transition: width 180ms ease; }
@@ -249,6 +257,14 @@ const ALL_NAV: NavItem[] = [
     .nav-item { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 8px 12px; border-radius: 8px; color: var(--sidebar-muted); text-decoration: none; font-size: 14px; transition: background 150ms ease, color 150ms ease; }
     .nav-item:hover { background: rgba(255,255,255,.08); color: white; }
     .nav-item.active { background: var(--sidebar-active); color: white; box-shadow: none; font-weight: 700; }
+    :host-context(html[data-theme="dark"]) .nav-item.active {
+      background: #1a2740;
+      color: #f4f7fb;
+      box-shadow: inset 3px 0 0 var(--gold);
+    }
+    :host-context(html[data-theme="dark"]) .nav-item:hover { background: rgba(255,255,255,.06); color: #f4f7fb; }
+    :host-context(html[data-theme="dark"]) .menu-item { background: transparent; color: var(--ink); }
+    :host-context(html[data-theme="dark"]) .menu-item:hover { background: #1a2740; }
     .nav-icon { width: 18px; flex: none; color: inherit; font-size: 15px; text-align: center; }
     .nav-item.active .nav-icon { color: white; }
     .sidebar.collapsed .nav-item { justify-content: center; padding-inline: 0; }
@@ -257,9 +273,9 @@ const ALL_NAV: NavItem[] = [
     .main-content { flex: 1; min-width: 0; padding: 24px; overflow: auto; background: var(--canvas); }
     .sidebar-backdrop { display: none; }
     .palette-back { position: fixed; inset: 0; background: rgba(15,39,68,0.35); z-index: 50; display: grid; place-items: start center; padding-top: 12vh; }
-    .palette { width: min(560px, calc(100% - 32px)); background: white; border-radius: 16px; box-shadow: 0 24px 80px rgba(15,39,68,0.25); overflow: hidden; }
+    .palette { width: min(560px, calc(100% - 32px)); background: var(--surface); color: var(--ink); border-radius: 16px; box-shadow: 0 24px 80px rgba(15,39,68,0.25); overflow: hidden; }
     .palette-input { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-    .palette-input input { border: 0; outline: none; flex: 1; font-size: 15px; box-shadow: none; }
+    .palette-input input { border: 0; outline: none; flex: 1; font-size: 15px; box-shadow: none; background: transparent; color: var(--ink); }
     .palette-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 16px; border: 0; background: none; cursor: pointer; font-size: 13px; }
     .palette-item:hover { background: var(--bg); }
     .palette-item small { margin-left: auto; color: var(--muted); }

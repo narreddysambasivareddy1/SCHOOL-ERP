@@ -39,11 +39,11 @@ import { ApiService } from '../../core/services/api.service';
     </form>
   `,
   styles: [`
-    .box { background: white; border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+    .box { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
     label { display: block; font-size: 11px; font-weight: 700; margin: 10px 0 4px; }
     input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px; box-sizing: border-box; }
     button { margin-top: 12px; margin-right: 8px; background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
-    .ghost { background: white; color: var(--ink); border: 1px solid var(--line); }
+    .ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 8px; border-radius: 8px; }
     .ok { background: #e5f8f1; color: #087d68; padding: 8px; border-radius: 8px; }
   `]

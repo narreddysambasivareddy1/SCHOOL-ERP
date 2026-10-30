@@ -149,18 +149,18 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
   styles: [`
     .page-header { margin-bottom: 24px; }
     h1 { margin: 4px 0; font-size: 22px; font-weight: 800; color: var(--navy); }
-    .filter-bar { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .filter-bar { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
     .filter-group { display: flex; flex-direction: column; gap: 5px; }
     .filter-group label { font-size: 11px; font-weight: 700; color: #506078; text-transform: uppercase; letter-spacing: 0.4px; }
-    select, input[type=date] { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; font-size: 13px; color: var(--ink); background: white; outline: none; min-width: 140px; }
+    select, input[type=date] { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; font-size: 13px; color: var(--ink); background: var(--surface); outline: none; min-width: 140px; }
     select:focus, input[type=date]:focus { border-color: #2463eb; }
     select:disabled { background: #f4f7fb; color: var(--muted); }
     .btn-primary { height: 36px; padding: 0 18px; background: #2463eb; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-ghost { height: 34px; padding: 0 14px; background: white; color: var(--navy); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-ghost { height: 34px; padding: 0 14px; background: var(--surface); color: var(--navy); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
     .btn-ghost:hover { background: #f4f7fb; }
     .alert-error { background: #fff0f0; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #c0392b; margin-bottom: 16px; }
-    .session-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .session-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
     .session-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 10px; }
     .session-title { font-size: 14px; font-weight: 700; color: var(--navy); }
     .session-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -179,7 +179,7 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
     .muted { color: var(--muted); font-size: 12px; }
     .muted-sm { font-size: 12px; color: var(--muted); }
     .status-pills { display: flex; gap: 4px; flex-wrap: wrap; }
-    .pill { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--line); background: white; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--muted); }
+    .pill { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); font-size: 11px; font-weight: 600; cursor: pointer; color: var(--muted); }
     .pill.active.pill-present { background: #e5f8f1; color: #087d68; border-color: #087d68; }
     .pill.active.pill-absent { background: #fdecea; color: #c0392b; border-color: #c0392b; }
     .pill.active.pill-late { background: #fff4db; color: #9a6900; border-color: #f5c97a; }

@@ -62,16 +62,16 @@ import { AuthService } from '../../core/auth/auth.service';
   `,
   styles: [`
     .sub, p { margin: 0 0 16px; }
-    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 10px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 700; color: var(--muted); }
     input, select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; font-size: 13px; }
     button { align-self: flex-start; background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 700; cursor: pointer; }
     .list { display: flex; flex-direction: column; gap: 8px; }
-    .item { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+    .item { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
     .item small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
     .empty, .alert { padding: 14px; border-radius: 10px; font-size: 13px; }
-    .empty { background: white; border: 1px dashed var(--line); color: var(--muted); text-align: center; }
+    .empty { background: var(--surface); border: 1px dashed var(--line); color: var(--muted); text-align: center; }
     .alert { background: var(--warn-soft); color: var(--warn); }
     @media (max-width: 700px) { .row { grid-template-columns: 1fr; } }
   `]
