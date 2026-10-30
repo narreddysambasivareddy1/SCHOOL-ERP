@@ -19,13 +19,12 @@ interface Stat {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <header class="dashboard-heading">
+    <header class="home-bar">
       <div>
-        <div class="eyebrow">SCHOOL ERP / {{ ctx.context()?.academicYearName || 'ACADEMIC YEAR' }}</div>
-        <h1>Overview</h1>
-        <p>{{ ctx.context()?.schoolName }} · Welcome back, {{ user()?.firstName }}</p>
+        <p class="kicker">{{ ctx.context()?.schoolName || 'School' }} · {{ ctx.context()?.academicYearName || 'Academic year' }}</p>
+        <h1>Good {{ greeting }}, {{ user()?.firstName }}</h1>
       </div>
-      <div class="heading-actions">
+      <div class="home-tools">
         <span class="date-chip"><i class="pi pi-calendar"></i> {{ todayLabel }}</span>
         @if (canCreateAdmission) {
           <a routerLink="/admissions" class="primary-action"><i class="pi pi-plus"></i> New admission</a>
@@ -37,25 +36,28 @@ interface Stat {
       <div class="alert-banner" role="alert"><i class="pi pi-exclamation-circle"></i> Could not load dashboard statistics — {{ error() }}</div>
     }
 
-    <section class="stats-grid" aria-label="School overview">
+    <section class="metrics" aria-label="School overview" [class.is-loading]="loading()">
       @for (stat of stats(); track stat.label) {
-        <article class="stat-card" [class.is-loading]="loading()">
-          <span [class]="'stat-icon ' + stat.tone"><i [class]="stat.icon"></i></span>
-          <span class="stat-label">{{ stat.label }}</span>
-          <strong class="stat-value">{{ loading() ? '—' : stat.value }}</strong>
-          <span class="stat-sub">{{ stat.sub }}</span>
+        <article class="metric" [attr.data-tone]="stat.tone">
+          <span class="metric-label">{{ stat.label }}</span>
+          <strong>{{ loading() ? '—' : stat.value }}</strong>
+          <span class="metric-note">{{ stat.sub }}</span>
         </article>
       }
     </section>
 
-    <section class="dashboard-content">
-      <article class="panel attendance-panel">
+    <section class="board">
+      <article class="panel">
         <div class="panel-heading">
           <div>
-            <h2>Attendance report</h2>
-            <p>Daily present or late rate from recorded sessions</p>
+            <h2>Attendance this week</h2>
+            <p>Present or late, from marked sessions</p>
           </div>
-          <a routerLink="/attendance" aria-label="Open attendance"><i class="pi pi-arrow-up-right"></i></a>
+          <div class="today-figure">
+            <strong>{{ loading() ? '—' : (attendanceMarked() ? attendancePct() + '%' : '—') }}</strong>
+            <span>{{ attendanceMarked() ? 'Today' : 'Not marked' }}</span>
+          </div>
+          <a routerLink="/attendance" class="open-link">Open</a>
         </div>
         @if (loading()) {
           <div class="chart-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
@@ -63,165 +65,156 @@ interface Stat {
           <div class="trend-chart" role="img" aria-label="Daily attendance trend for the last seven days">
             @for (point of attendanceTrend(); track point.date) {
               <div class="trend-day" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
-                <div class="trend-bar-wrap"><span class="trend-bar" [style.height.%]="point.pct"></span></div>
-                <strong>{{ point.pct }}%</strong>
+                <div class="trend-track"><span class="trend-bar" [style.height.%]="point.pct"></span></div>
+                <strong>{{ point.pct }}</strong>
                 <small>{{ point.date | date:'EEE' }}</small>
               </div>
             }
           </div>
         } @else {
-          <div class="empty-chart"><i class="pi pi-chart-bar"></i><span>No attendance trend has been recorded this week.</span></div>
+          <div class="empty-chart"><i class="pi pi-chart-bar"></i><span>No attendance has been recorded this week.</span></div>
         }
       </article>
 
-      <article class="panel operations-panel">
+      <article class="panel">
         <div class="panel-heading">
           <div>
-            <h2>Today’s activity</h2>
-            <p>Admissions, finance and school operations</p>
+            <h2>Needs attention</h2>
+            <p>Open work for today</p>
           </div>
         </div>
         @if (loading()) {
           <div class="operation-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
         } @else {
-          <a routerLink="/enquiries" class="operation-row">
-            <span class="operation-icon violet"><i class="pi pi-inbox"></i></span>
-            <span class="operation-copy"><strong>{{ enquiryNew() }} new enquiries</strong><small>{{ enquiryOpen() }} open for follow-up</small></span>
-            <i class="pi pi-chevron-right"></i>
-          </a>
-          <a routerLink="/fees" class="operation-row">
-            <span class="operation-icon teal"><i class="pi pi-wallet"></i></span>
-            <span class="operation-copy"><strong>{{ locale.formatMoney(feeTotal()) }} collected</strong><small>Successful payments this month</small></span>
-            <i class="pi pi-chevron-right"></i>
-          </a>
-          @if (canSeeAcademicOps) {
-            @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
-            <a routerLink="/substitutions" class="operation-row">
-              <span class="operation-icon amber"><i class="pi pi-users"></i></span>
-              <span class="operation-copy"><strong>{{ ops()?.openSubstitutions ?? '—' }} periods need cover</strong><small>{{ ops()?.onLeave ?? '—' }} teacher(s) on leave · {{ ops()?.presentStaff ?? '—' }} present</small></span>
-              <i class="pi pi-chevron-right"></i>
+          <div class="queue">
+            <a routerLink="/enquiries">
+              <span>New enquiries</span>
+              <strong>{{ enquiryNew() }}</strong>
+              <small>{{ enquiryOpen() }} still open</small>
             </a>
-            @if (ops()?.availability?.length) {
-              <div class="availability">
-                <div class="availability-heading"><strong>Available substitutes</strong><span>by period</span></div>
-                @for (period of ops()?.availability || []; track period.periodId) {
-                  <div class="availability-row">
-                    <span>{{ period.period }}</span>
-                    <strong>{{ period.free }}</strong>
-                    <small>{{ teacherNames(period) || 'No teachers available' }}</small>
-                  </div>
-                }
-              </div>
+            <a routerLink="/fees">
+              <span>Fees collected</span>
+              <strong>{{ locale.formatMoney(feeTotal()) }}</strong>
+              <small>This month</small>
+            </a>
+            @if (canSeeAcademicOps) {
+              <a routerLink="/substitutions">
+                <span>Periods to cover</span>
+                <strong>{{ ops()?.openSubstitutions ?? '—' }}</strong>
+                <small>{{ ops()?.onLeave ?? '—' }} on leave · {{ ops()?.presentStaff ?? '—' }} present</small>
+              </a>
             }
-          }
-          @if (canSeeDiaryCompliance) {
-            @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }
-            <a routerLink="/diary" class="operation-row">
-              <span class="operation-icon blue"><i class="pi pi-book"></i></span>
-              <span class="operation-copy"><strong>{{ diarySubmitted() }} submitted · {{ diaryPending() }} pending</strong><small>Daily class diary compliance</small></span>
-              <i class="pi pi-chevron-right"></i>
-            </a>
-          }
+            @if (canSeeDiaryCompliance) {
+              <a routerLink="/diary">
+                <span>Diary pending</span>
+                <strong>{{ diaryPending() }}</strong>
+                <small>{{ diarySubmitted() }} submitted today</small>
+              </a>
+            }
+          </div>
+          @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
+          @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }
         }
       </article>
     </section>
 
-    <section class="quick-links">
-      <div class="section-heading">
-        <div><h2>Quick access</h2><p>Frequently used areas</p></div>
-      </div>
-      <div class="quick-grid">
-        @if (canSeeStudents) {
-          <a routerLink="/students"><i class="pi pi-users"></i><span><strong>Students</strong><small>Records and enrolments</small></span><i class="pi pi-arrow-up-right"></i></a>
-        }
-        @if (canSeeStaff) {
-          <a routerLink="/staff"><i class="pi pi-id-card"></i><span><strong>Staff & HR</strong><small>Employees and teams</small></span><i class="pi pi-arrow-up-right"></i></a>
-        }
-        @if (canSeeTimetable) {
-          <a routerLink="/timetable"><i class="pi pi-table"></i><span><strong>Timetable</strong><small>Classes and periods</small></span><i class="pi pi-arrow-up-right"></i></a>
-        }
-        @if (canSeeAnalytics) {
-          <a routerLink="/analytics"><i class="pi pi-chart-bar"></i><span><strong>Analytics</strong><small>Reports and insights</small></span><i class="pi pi-arrow-up-right"></i></a>
-        }
-      </div>
-    </section>
+    @if (canSeeAcademicOps && ops()?.availability?.length) {
+      <section class="panel cover-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Free teachers</h2>
+            <p>Who can cover a period today</p>
+          </div>
+          <a routerLink="/substitutions" class="open-link">Assign</a>
+        </div>
+        <div class="cover-table">
+          <div class="cover-head"><span>Period</span><span>Free</span><span>Teachers</span></div>
+          @for (period of ops()?.availability || []; track period.periodId) {
+            <div class="cover-row">
+              <span>{{ period.period }}</span>
+              <strong>{{ period.free }}</strong>
+              <small>{{ teacherNames(period) || 'No teachers available' }}</small>
+            </div>
+          }
+        </div>
+      </section>
+    }
   `,
   styles: [`
     :host { display: block; }
-    .dashboard-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 16px 24px; margin: 0 0 24px; padding: 24px; border-radius: 16px; background: linear-gradient(120deg, var(--sidebar), var(--primary)); color: white; }
-    .dashboard-heading h1 { margin: 4px 0; color: white; font-size: 32px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
-    .dashboard-heading p { margin: 0; color: rgba(255,255,255,.84); font-size: 15px; line-height: 1.5; }
-    .dashboard-heading .eyebrow { color: rgba(255,255,255,.72); }
-    .heading-actions { display: flex; align-items: center; gap: 12px; }
-    .date-chip, .primary-action { display: inline-flex; align-items: center; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 650; }
-    .date-chip { gap: 8px; padding: 0 12px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.12); color: white; }
-    .primary-action { gap: 8px; padding: 0 14px; background: white; color: var(--primary); text-decoration: none; }
-    .primary-action:hover { background: var(--primary-soft); }
+    .home-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin: 0 0 20px; }
+    .kicker { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; line-height: 1.4; text-transform: uppercase; }
+    .home-bar h1 { margin: 0; color: var(--navy); font-size: 30px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; }
+    .home-tools { display: flex; align-items: center; gap: 10px; flex: none; }
+    .date-chip, .primary-action, .open-link { display: inline-flex; align-items: center; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 650; text-decoration: none; }
+    .date-chip { gap: 8px; padding: 0 12px; border: 1px solid var(--line); background: white; color: var(--navy); }
+    .primary-action { gap: 8px; padding: 0 14px; background: var(--primary); color: white; }
+    .primary-action:hover { background: var(--primary-hover); }
     .alert-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
-    .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
-    .stat-card { display: grid; align-content: start; gap: 8px; min-height: 156px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
-    .stat-card.is-loading { opacity: .72; }
-    .stat-icon, .operation-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; font-size: 16px; }
-    .blue { background: #eaf1ff; color: #245fc4; }
-    .teal { background: #e4f6f2; color: #087d68; }
-    .amber { background: #fff3dc; color: #996300; }
-    .violet { background: #f0ecff; color: #6847b7; }
-    .stat-label { color: var(--muted); font-size: 13px; font-weight: 650; line-height: 1.3; }
-    .stat-value { color: var(--navy); font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; font-variant-numeric: tabular-nums; }
-    .stat-sub { color: var(--muted); font-size: 13px; line-height: 1.4; }
-    .dashboard-content { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .85fr); gap: 16px; align-items: stretch; margin-top: 16px; }
-    .panel { display: flex; min-width: 0; flex-direction: column; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
-    .panel-heading, .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .panel-heading h2, .section-heading h2 { margin: 0; color: var(--navy); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
-    .panel-heading p, .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
-    .panel-heading > a { display: grid; width: 40px; height: 40px; flex: none; place-items: center; border: 1px solid var(--line); border-radius: 10px; color: var(--navy); text-decoration: none; }
-    .trend-chart { display: grid; height: 220px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 12px; margin-top: 20px; }
-    .trend-day { display: grid; height: 100%; grid-template-rows: minmax(0, 1fr) 20px 20px; justify-items: center; align-items: end; }
-    .trend-bar-wrap { display: flex; width: 100%; height: 100%; align-items: end; justify-content: center; border-bottom: 1px solid var(--line); }
-    .trend-bar { display: block; width: 16px; min-height: 4px; border-radius: 6px 6px 0 0; background: var(--primary); }
-    .trend-day strong, .trend-day small { font-size: 12px; font-variant-numeric: tabular-nums; line-height: 20px; }
-    .trend-day strong { color: var(--navy); font-weight: 700; }
-    .trend-day small { color: var(--muted); }
-    .chart-loading { display: grid; height: 220px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 12px; margin-top: 20px; }
-    .chart-loading .skeleton { height: 60%; }
-    .empty-chart { display: grid; flex: 1; min-height: 220px; align-content: center; justify-items: center; gap: 8px; color: var(--muted); font-size: 14px; text-align: center; }
-    .operation-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 16px; align-items: center; gap: 12px; min-height: 64px; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
-    .operation-row:last-of-type { border-bottom: 0; }
-    .operation-row:hover { margin-inline: -8px; padding-inline: 8px; border-radius: 10px; background: var(--primary-soft); }
-    .operation-copy { display: grid; min-width: 0; gap: 2px; }
-    .operation-copy strong { overflow: hidden; color: var(--navy); font-size: 14px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-    .operation-copy small { overflow: hidden; color: var(--muted); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-    .operation-row > i { color: var(--muted); font-size: 12px; }
-    .availability { margin-top: 8px; }
-    .availability-heading { display: flex; align-items: center; justify-content: space-between; min-height: 36px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-    .availability-row { display: grid; grid-template-columns: 48px 36px minmax(0, 1fr); align-items: center; gap: 12px; }
-    .availability-heading strong, .availability-heading span { font: inherit; color: inherit; }
-    .availability-heading span { text-align: left; }
-    .availability-row { min-height: 36px; border-top: 1px solid var(--line); font-size: 14px; }
-    .availability-row > span, .availability-row > strong { color: var(--navy); font-weight: 700; font-variant-numeric: tabular-nums; }
-    .availability-row > small { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+    .metrics.is-loading { opacity: .72; }
+    .metric { display: grid; align-content: start; gap: 8px; min-height: 132px; padding: 18px 20px 16px; border-top: 3px solid var(--line); border-right: 1px solid var(--line); }
+    .metric:last-child { border-right: 0; }
+    .metric[data-tone="blue"] { border-top-color: #245fc4; }
+    .metric[data-tone="teal"] { border-top-color: #087d68; }
+    .metric[data-tone="amber"] { border-top-color: #b45309; }
+    .metric[data-tone="violet"] { border-top-color: #6847b7; }
+    .metric-label { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; line-height: 1.3; text-transform: uppercase; }
+    .metric strong { color: var(--navy); font-size: 32px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .metric-note { color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .board { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr); gap: 16px; align-items: stretch; margin-top: 16px; }
+    .panel { display: flex; min-width: 0; flex-direction: column; padding: 20px 22px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow-sm); }
+    .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .panel-heading h2 { margin: 0; color: var(--navy); font-size: 17px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
+    .panel-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .open-link { padding: 0 14px; border: 1px solid var(--line); background: white; color: var(--navy); }
+    .open-link:hover { border-color: var(--primary); color: var(--primary); }
+    .today-figure { display: grid; justify-items: end; margin-left: auto; }
+    .today-figure strong { color: var(--navy); font-size: 28px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+    .today-figure span { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .trend-chart { display: grid; height: 228px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 10px; margin-top: 18px; }
+    .trend-day { display: grid; height: 100%; grid-template-rows: minmax(0, 1fr) 22px 18px; justify-items: center; align-items: end; gap: 4px; }
+    .trend-track { display: flex; width: min(36px, 100%); height: 100%; align-items: end; justify-content: center; border-radius: 8px; background: #eef3f8; }
+    .trend-bar { display: block; width: 100%; min-height: 4px; border-radius: 8px 8px 2px 2px; background: var(--primary); }
+    .trend-day strong { color: var(--navy); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+    .trend-day small { color: var(--muted); font-size: 12px; font-weight: 650; line-height: 1; }
+    .chart-loading { display: grid; height: 228px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 10px; margin-top: 18px; }
+    .chart-loading .skeleton { height: 55%; border-radius: 8px; }
+    .empty-chart { display: grid; flex: 1; min-height: 200px; align-content: center; justify-items: center; gap: 8px; color: var(--muted); font-size: 14px; text-align: center; }
+    .queue { display: grid; margin-top: 8px; }
+    .queue a { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 16px; min-height: 64px; padding: 10px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+    .queue a:last-child { border-bottom: 0; }
+    .queue a:hover span { color: var(--primary); }
+    .queue a > span { color: var(--navy); font-size: 14px; font-weight: 650; }
+    .queue a > strong { color: var(--navy); font-size: 18px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; text-align: right; }
+    .queue a > small { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
     .inline-error { margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: var(--danger-soft); color: var(--danger); font-size: 13px; }
-    .quick-links { margin-top: 24px; }
-    .section-heading { margin-bottom: 12px; }
-    .quick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-    .quick-grid > a { display: grid; grid-template-columns: 40px minmax(0, 1fr) 16px; align-items: center; gap: 12px; min-height: 76px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: white; color: var(--primary); text-decoration: none; box-shadow: var(--shadow-sm); }
-    .quick-grid > a > i:first-child { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: var(--primary-soft); font-size: 16px; }
-    .quick-grid > a > span { display: grid; min-width: 0; gap: 2px; }
-    .quick-grid > a > span strong { color: var(--navy); font-size: 14px; }
-    .quick-grid > a > span small { color: var(--muted); font-size: 13px; }
-    .quick-grid > a > i:last-child { color: var(--muted); font-size: 12px; }
-    .skeleton { display: block; }
+    .cover-panel { margin-top: 16px; }
+    .cover-table { margin-top: 12px; }
+    .cover-head, .cover-row { display: grid; grid-template-columns: 140px 72px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 44px; }
+    .cover-head { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+    .cover-row { border-bottom: 1px solid var(--line); font-size: 14px; }
+    .cover-row:last-child { border-bottom: 0; }
+    .cover-row > span, .cover-row > strong { color: var(--navy); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .cover-row > small { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+    .skeleton { display: block; border-radius: 8px; background: #e7eef6; }
     .operation-loading { display: grid; gap: 12px; margin-top: 16px; }
-    .operation-loading .skeleton { height: 56px; }
+    .operation-loading .skeleton { height: 52px; }
     @media (max-width: 1100px) {
-      .stats-grid, .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .dashboard-content { grid-template-columns: minmax(0, 1fr); }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric:nth-child(2) { border-right: 0; }
+      .metric:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
+      .board { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 720px) {
-      .dashboard-heading { grid-template-columns: minmax(0, 1fr); align-items: start; padding: 20px; }
-      .heading-actions { flex-wrap: wrap; }
-      .stats-grid, .quick-grid { grid-template-columns: minmax(0, 1fr); }
-      .dashboard-heading h1 { font-size: 26px; }
+      .home-bar { flex-direction: column; align-items: flex-start; }
+      .home-tools { flex-wrap: wrap; }
+      .metrics { grid-template-columns: minmax(0, 1fr); }
+      .metric { border-right: 0; border-bottom: 1px solid var(--line); }
+      .metric:last-child { border-bottom: 0; }
+      .home-bar h1 { font-size: 26px; }
+      .cover-head, .cover-row { grid-template-columns: 1fr 48px; }
+      .cover-head span:last-child, .cover-row small { grid-column: 1 / -1; }
     }
   `]
 })
