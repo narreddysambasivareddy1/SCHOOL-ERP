@@ -18,138 +18,161 @@ interface Stat {
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  template: `
-    <header class="welcome">
-      <div>
-        <p class="welcome-kicker">{{ ctx.context()?.schoolName || 'School' }} · {{ ctx.context()?.academicYearName || 'Academic year' }}</p>
-        <h1>Good {{ greeting }}, {{ user()?.firstName }}</h1>
-        <p class="welcome-date">{{ todayLabel }}</p>
-      </div>
-      @if (canCreateAdmission) {
-        <a routerLink="/admissions" class="primary-action"><i class="pi pi-plus"></i> New admission</a>
-      }
-    </header>
 
-    @if (error()) {
-      <div class="alert-banner" role="alert"><i class="pi pi-exclamation-circle"></i> Could not load dashboard statistics — {{ error() }}</div>
-    }
-
-    <section class="kpis" aria-label="School overview" [class.is-loading]="loading()">
-      @for (stat of stats(); track stat.label) {
-        @if (stat.link) {
-          <a class="kpi" [routerLink]="stat.link">
-            <ng-container *ngTemplateOutlet="kpiBody; context: { $implicit: stat }" />
-          </a>
-        } @else {
-          <article class="kpi">
-            <ng-container *ngTemplateOutlet="kpiBody; context: { $implicit: stat }" />
-          </article>
-        }
-      }
-    </section>
-    <ng-template #kpiBody let-stat>
-      <span class="kpi-icon" aria-hidden="true"><i [class]="stat.icon"></i></span>
-      <span class="kpi-copy">
-        <span class="kpi-label">{{ stat.label }}</span>
-        <strong>{{ loading() ? '—' : stat.value }}</strong>
-        <span class="kpi-note">{{ stat.sub }}</span>
-      </span>
-    </ng-template>
-
-    <section class="board">
-      <article class="panel">
-        <div class="panel-heading">
-          <div>
-            <h2>Attendance this week</h2>
-            <p>Present or late, from marked sessions</p>
-          </div>
-          <div class="today-figure">
-            <strong>{{ loading() ? '—' : (attendanceMarked() ? attendancePct() + '%' : '—') }}</strong>
-            <span>{{ attendanceMarked() ? 'Today' : 'Not marked' }}</span>
-          </div>
-          <a routerLink="/attendance" class="open-link">Open</a>
+  template: \`
+    <div class="dashboard-v2">
+      <header class="dash-intro">
+        <div class="intro-copy">
+          <div class="intro-overline"><span class="live-dot"></span> SCHOOL OPERATIONS <span class="overline-divider">/</span> {{ ctx.context()?.academicYearName || 'Academic year' }}</div>
+          <h1>Good {{ greeting }}, {{ user()?.firstName }}.</h1>
+          <p>Your school at a glance. Here is what needs your attention today.</p>
+          <div class="intro-date"><i class="pi pi-calendar"></i> {{ todayLabel }}</div>
         </div>
-        @if (loading()) {
-          <div class="chart-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
-        } @else if (attendanceTrend().length) {
-          <div class="trend-chart" role="img" aria-label="Daily attendance trend for the last seven days">
-            @for (point of attendanceTrend(); track point.date; let last = $last) {
-              <div class="trend-day" [class.is-latest]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
-                <div class="trend-track"><span class="trend-bar" [style.height.%]="point.pct"></span></div>
-                <strong>{{ point.pct }}</strong>
-                <small>{{ point.date | date:'EEE' }}</small>
+        <div class="intro-actions">
+          <div class="school-chip"><i class="pi pi-building"></i><span>{{ ctx.context()?.schoolName || 'Your school' }}</span></div>
+          @if (canCreateAdmission) {
+            <a routerLink="/admissions" class="intro-primary"><i class="pi pi-plus"></i> Create admission</a>
+          }
+        </div>
+        <div class="intro-orbit orbit-one"></div>
+        <div class="intro-orbit orbit-two"></div>
+      </header>
+
+      @if (error()) {
+        <div class="alert-banner" role="alert"><i class="pi pi-exclamation-circle"></i> Could not load dashboard statistics — {{ error() }}</div>
+      }
+
+      <section class="metric-strip" aria-label="School overview" [class.is-loading]="loading()">
+        @for (stat of stats(); track stat.label; let i = $index) {
+          @if (stat.link) {
+            <a class="metric-tile" [class]="'metric-tile metric-tone-' + i" [routerLink]="stat.link">
+              <span class="metric-symbol"><i [class]="stat.icon"></i></span>
+              <span class="metric-content">
+                <span class="metric-label">{{ stat.label }}</span>
+                <strong>{{ loading() ? '—' : stat.value }}</strong>
+                <small>{{ stat.sub }}</small>
+              </span>
+              <i class="pi pi-arrow-up-right metric-arrow"></i>
+            </a>
+          } @else {
+            <article class="metric-tile" [class]="'metric-tile metric-tone-' + i">
+              <span class="metric-symbol"><i [class]="stat.icon"></i></span>
+              <span class="metric-content">
+                <span class="metric-label">{{ stat.label }}</span>
+                <strong>{{ loading() ? '—' : stat.value }}</strong>
+                <small>{{ stat.sub }}</small>
+              </span>
+            </article>
+          }
+        }
+      </section>
+
+      <div class="workbench-heading">
+        <div><span class="section-overline">LIVE OVERVIEW</span><h2>Today's operations</h2></div>
+        <span class="updated-label"><span class="live-dot"></span> Live school data</span>
+      </div>
+
+      <section class="workbench">
+        <article class="attendance-feature">
+          <div class="feature-heading">
+            <div>
+              <span class="feature-kicker">ATTENDANCE MONITOR</span>
+              <h3>Weekly attendance</h3>
+              <p>Daily student attendance across the current week</p>
+            </div>
+            <a routerLink="/attendance" class="feature-link">View attendance <i class="pi pi-arrow-up-right"></i></a>
+          </div>
+          <div class="attendance-summary">
+            <div class="attendance-number">
+              <strong>{{ loading() ? '—' : (attendanceMarked() ? attendancePct() + '%' : '—') }}</strong>
+              <span>{{ attendanceMarked() ? 'Marked today' : 'Attendance not marked' }}</span>
+            </div>
+            <div class="attendance-state" [class.state-pending]="!attendanceMarked()">
+              <i [class]="attendanceMarked() ? 'pi pi-check-circle' : 'pi pi-clock'"></i>
+              {{ attendanceMarked() ? 'Daily register updated' : 'Awaiting attendance entry' }}
+            </div>
+          </div>
+          @if (loading()) {
+            <div class="v2-chart-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
+          } @else if (attendanceTrend().length) {
+            <div class="v2-chart" role="img" aria-label="Daily attendance trend for the last seven days">
+              <div class="chart-guides"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+              <div class="chart-columns">
+                @for (point of attendanceTrend(); track point.date; let last = $last) {
+                  <div class="chart-column" [class.chart-column-current]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
+                    <div class="chart-bar-track"><span class="chart-bar-fill" [style.height.%]="point.pct"></span></div>
+                    <strong>{{ point.pct }}<small>%</small></strong>
+                    <span class="chart-day">{{ point.date | date:'EEE' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="v2-empty"><i class="pi pi-chart-line"></i><strong>No attendance data yet</strong><span>Attendance records will appear here once sessions are marked.</span></div>
+          }
+          <div class="feature-foot"><span><i class="pi pi-info-circle"></i> Based on marked attendance sessions</span><a routerLink="/attendance">Open register <i class="pi pi-arrow-right"></i></a></div>
+        </article>
+
+        <aside class="action-center">
+          <div class="action-heading">
+            <div><span class="feature-kicker">PRIORITY QUEUE</span><h3>Action center</h3><p>Items that may need follow-up</p></div>
+            <span class="action-count">{{ (enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0 }}</span>
+          </div>
+          @if (loading()) {
+            <div class="operation-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
+          } @else {
+            <div class="action-list">
+              <a routerLink="/enquiries" class="action-item">
+                <span class="action-symbol action-blue"><i class="pi pi-inbox"></i></span>
+                <span class="action-detail"><strong>New enquiries</strong><small>{{ enquiryOpen() }} still open</small></span>
+                <span class="action-value">{{ enquiryNew() }}</span><i class="pi pi-chevron-right action-chevron"></i>
+              </a>
+              <a routerLink="/fees" class="action-item">
+                <span class="action-symbol action-green"><i class="pi pi-wallet"></i></span>
+                <span class="action-detail"><strong>Fees collected</strong><small>Successful payments this month</small></span>
+                <span class="action-value action-money">{{ locale.formatMoney(feeTotal()) }}</span><i class="pi pi-chevron-right action-chevron"></i>
+              </a>
+              @if (canSeeAcademicOps) {
+                <a routerLink="/substitutions" class="action-item">
+                  <span class="action-symbol action-amber"><i class="pi pi-users"></i></span>
+                  <span class="action-detail"><strong>Periods to cover</strong><small>{{ ops()?.onLeave ?? '—' }} on leave · {{ ops()?.presentStaff ?? '—' }} present</small></span>
+                  <span class="action-value">{{ ops()?.openSubstitutions ?? '—' }}</span><i class="pi pi-chevron-right action-chevron"></i>
+                </a>
+              }
+              @if (canSeeDiaryCompliance) {
+                <a routerLink="/diary" class="action-item">
+                  <span class="action-symbol action-violet"><i class="pi pi-book"></i></span>
+                  <span class="action-detail"><strong>Diary pending</strong><small>{{ diarySubmitted() }} submitted today</small></span>
+                  <span class="action-value">{{ diaryPending() }}</span><i class="pi pi-chevron-right action-chevron"></i>
+                </a>
+              }
+            </div>
+          }
+          @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
+          @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }
+          <div class="action-footer"><i class="pi pi-shield"></i><span>Role-based access · Your permissions are applied</span></div>
+        </aside>
+      </section>
+
+      @if (canSeeAcademicOps && ops()?.availability?.length) {
+        <section class="teacher-availability">
+          <div class="availability-heading">
+            <div><span class="feature-kicker">STAFFING</span><h3>Teacher availability</h3><p>Available staff for period coverage today</p></div>
+            <a routerLink="/substitutions" class="feature-link">Manage cover <i class="pi pi-arrow-up-right"></i></a>
+          </div>
+          <div class="availability-grid">
+            @for (period of ops()?.availability || []; track period.periodId) {
+              <div class="availability-item">
+                <span class="period-label">{{ period.period }}</span>
+                <strong>{{ period.free }} <small>free</small></strong>
+                <span class="teacher-names">{{ teacherNames(period) || 'No teachers available' }}</span>
               </div>
             }
           </div>
-        } @else {
-          <div class="empty-chart"><i class="pi pi-chart-bar"></i><span>No attendance has been recorded this week.</span></div>
-        }
-      </article>
-
-      <article class="panel">
-        <div class="panel-heading">
-          <div>
-            <h2>Needs attention</h2>
-            <p>Open work for today</p>
-          </div>
-        </div>
-        @if (loading()) {
-          <div class="operation-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
-        } @else {
-          <div class="queue">
-            <a routerLink="/enquiries">
-              <span class="work-icon" aria-hidden="true"><i class="pi pi-inbox"></i></span>
-              <span class="work-copy"><span>New enquiries</span><small>{{ enquiryOpen() }} still open</small></span>
-              <strong>{{ enquiryNew() }}</strong>
-            </a>
-            <a routerLink="/fees">
-              <span class="work-icon" aria-hidden="true"><i class="pi pi-wallet"></i></span>
-              <span class="work-copy"><span>Fees collected</span><small>This month</small></span>
-              <strong>{{ locale.formatMoney(feeTotal()) }}</strong>
-            </a>
-            @if (canSeeAcademicOps) {
-              <a routerLink="/substitutions">
-                <span class="work-icon" aria-hidden="true"><i class="pi pi-users"></i></span>
-                <span class="work-copy"><span>Periods to cover</span><small>{{ ops()?.onLeave ?? '—' }} on leave · {{ ops()?.presentStaff ?? '—' }} present</small></span>
-                <strong>{{ ops()?.openSubstitutions ?? '—' }}</strong>
-              </a>
-            }
-            @if (canSeeDiaryCompliance) {
-              <a routerLink="/diary">
-                <span class="work-icon" aria-hidden="true"><i class="pi pi-book"></i></span>
-                <span class="work-copy"><span>Diary pending</span><small>{{ diarySubmitted() }} submitted today</small></span>
-                <strong>{{ diaryPending() }}</strong>
-              </a>
-            }
-          </div>
-          @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
-          @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }
-        }
-      </article>
-    </section>
-
-    @if (canSeeAcademicOps && ops()?.availability?.length) {
-      <section class="panel cover-panel">
-        <div class="panel-heading">
-          <div>
-            <h2>Free teachers</h2>
-            <p>Who can cover a period today</p>
-          </div>
-          <a routerLink="/substitutions" class="open-link">Assign</a>
-        </div>
-        <div class="cover-table">
-          <div class="cover-head"><span>Period</span><span>Free</span><span>Teachers</span></div>
-          @for (period of ops()?.availability || []; track period.periodId) {
-            <div class="cover-row">
-              <span>{{ period.period }}</span>
-              <strong>{{ period.free }}</strong>
-              <small>{{ teacherNames(period) || 'No teachers available' }}</small>
-            </div>
-          }
-        </div>
-      </section>
-    }
-  `,
+        </section>
+      }
+    </div>
+  \`,
   styles: [`
     :host { display: block; }
     .welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin: 0 0 18px; }
@@ -327,6 +350,135 @@ interface Stat {
     @media (max-width: 390px) {
       .kpis { grid-template-columns: minmax(0, 1fr); }
     }
+
+
+    /* A+D structural dashboard redesign */
+    .dashboard-v2 { display:grid; gap:22px; width:100%; color:var(--ink); }
+    .dash-intro { position:relative; isolation:isolate; display:flex; align-items:center; justify-content:space-between; gap:28px; min-height:210px; overflow:hidden; padding:30px 36px; border-radius:22px; background:linear-gradient(112deg,#172b4d 0%,#213f70 58%,#354f8c 100%); color:#fff; box-shadow:0 16px 38px rgba(22,43,77,.16); }
+    .intro-copy,.intro-actions { position:relative; z-index:2; }
+    .intro-overline { display:flex; align-items:center; gap:9px; color:#c7d6f3; font-size:10px; font-weight:800; letter-spacing:.13em; }
+    .live-dot { display:inline-block; width:7px; height:7px; flex:none; border-radius:50%; background:#43d6a2; box-shadow:0 0 0 4px rgba(67,214,162,.13); }
+    .overline-divider { opacity:.5; }
+    .intro-copy h1 { margin:15px 0 7px; color:#fff; font-size:clamp(30px,3vw,42px); font-weight:760; letter-spacing:-.05em; line-height:1.08; }
+    .intro-copy > p { margin:0; color:#d1def2; font-size:14px; }
+    .intro-date { display:flex; align-items:center; gap:8px; margin-top:22px; color:#b9c9e3; font-size:12px; font-weight:600; }
+    .intro-actions { display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+    .school-chip { display:flex; align-items:center; gap:9px; max-width:260px; padding:10px 13px; border:1px solid rgba(255,255,255,.18); border-radius:12px; background:rgba(255,255,255,.09); color:#e8effb; font-size:12px; font-weight:650; backdrop-filter:blur(8px); }
+    .school-chip span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .intro-primary { display:inline-flex; align-items:center; gap:9px; height:44px; padding:0 17px; border-radius:11px; background:#fff; color:#203d70; text-decoration:none; font-size:13px; font-weight:800; box-shadow:0 7px 18px rgba(0,0,0,.14); transition:transform .16s ease,box-shadow .16s ease; }
+    .intro-primary:hover { transform:translateY(-2px); box-shadow:0 11px 22px rgba(0,0,0,.2); }
+    .intro-orbit { position:absolute; z-index:1; border:1px solid rgba(255,255,255,.10); border-radius:50%; pointer-events:none; }
+    .orbit-one { width:390px; height:390px; right:9%; top:-250px; }
+    .orbit-two { width:290px; height:290px; right:1%; bottom:-225px; }
+    .metric-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; }
+    .metric-tile { position:relative; display:flex; align-items:center; gap:14px; min-width:0; min-height:112px; padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:inherit; text-decoration:none; box-shadow:0 3px 14px rgba(24,43,75,.035); transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease; }
+    a.metric-tile:hover { transform:translateY(-3px); border-color:var(--primary); box-shadow:0 12px 25px rgba(24,43,75,.08); }
+    .metric-symbol { display:grid; place-items:center; width:43px; height:43px; flex:none; border-radius:13px; background:#edf1ff; color:#5265c9; font-size:17px; }
+    .metric-tone-1 .metric-symbol { background:#e9f7f1; color:#168563; }
+    .metric-tone-2 .metric-symbol { background:#fff4e5; color:#b8791c; }
+    .metric-tone-3 .metric-symbol { background:#f1edff; color:#7656bd; }
+    .metric-content { display:grid; min-width:0; gap:3px; }
+    .metric-label { color:var(--muted); font-size:11px; font-weight:750; letter-spacing:.02em; }
+    .metric-content strong { overflow:hidden; color:var(--ink); font-size:clamp(22px,2vw,29px); font-weight:780; letter-spacing:-.045em; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; }
+    .metric-content small { overflow:hidden; color:var(--muted); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+    .metric-arrow { position:absolute; top:15px; right:15px; color:#a0aabd; font-size:11px; opacity:0; transition:opacity .15s ease; }
+    a.metric-tile:hover .metric-arrow { opacity:1; }
+    .workbench-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin:3px 2px -7px; }
+    .section-overline,.feature-kicker { display:block; color:var(--primary); font-size:9px; font-weight:850; letter-spacing:.14em; }
+    .workbench-heading h2 { margin:5px 0 0; color:var(--ink); font-size:21px; font-weight:780; letter-spacing:-.035em; }
+    .updated-label { display:flex; align-items:center; gap:8px; padding-bottom:3px; color:var(--muted); font-size:11px; font-weight:650; }
+    .workbench { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(320px,.9fr); gap:15px; align-items:stretch; }
+    .attendance-feature,.action-center,.teacher-availability { min-width:0; border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:0 4px 18px rgba(24,43,75,.04); }
+    .attendance-feature { display:flex; flex-direction:column; padding:24px 25px 17px; }
+    .feature-heading,.availability-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .feature-heading h3,.action-heading h3,.availability-heading h3 { margin:6px 0 0; color:var(--ink); font-size:17px; font-weight:780; letter-spacing:-.025em; }
+    .feature-heading p,.action-heading p,.availability-heading p { margin:5px 0 0; color:var(--muted); font-size:11px; }
+    .feature-link { display:inline-flex; align-items:center; gap:8px; flex:none; color:var(--primary); font-size:11px; font-weight:750; text-decoration:none; }
+    .feature-link:hover { text-decoration:underline; }
+    .attendance-summary { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:22px; padding:13px 15px; border:1px solid var(--line); border-radius:13px; background:var(--canvas); }
+    .attendance-number { display:grid; gap:1px; }
+    .attendance-number strong { color:var(--ink); font-size:26px; font-weight:820; letter-spacing:-.05em; line-height:1.1; }
+    .attendance-number span { color:var(--muted); font-size:10px; font-weight:650; }
+    .attendance-state { display:flex; align-items:center; gap:7px; color:#138461; font-size:10px; font-weight:750; }
+    .attendance-state.state-pending { color:#b7791f; }
+    .v2-chart { position:relative; display:grid; grid-template-columns:34px minmax(0,1fr); height:218px; margin-top:17px; }
+    .chart-guides { display:flex; flex-direction:column; justify-content:space-between; padding:0 0 28px; color:var(--muted); font-size:9px; }
+    .chart-columns { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:12px; align-items:stretch; padding:0 4px; background:repeating-linear-gradient(to bottom,transparent 0,transparent 47px,var(--line) 48px,transparent 49px); }
+    .chart-column { display:grid; grid-template-rows:minmax(0,1fr) 17px 18px; justify-items:center; align-items:end; gap:4px; min-width:0; }
+    .chart-bar-track { display:flex; align-items:flex-end; justify-content:center; width:min(34px,100%); height:100%; overflow:hidden; border-radius:8px 8px 3px 3px; background:var(--canvas); }
+    .chart-bar-fill { display:block; width:100%; min-height:3px; border-radius:7px 7px 2px 2px; background:linear-gradient(180deg,#9aa9e9,#687bcf); transition:height .3s ease; }
+    .chart-column-current .chart-bar-fill { background:linear-gradient(180deg,var(--primary),color-mix(in srgb,var(--primary) 72%,#7188e8)); }
+    .chart-column > strong { color:var(--ink); font-size:10px; font-weight:800; }
+    .chart-column > strong small { color:var(--muted); font-size:8px; }
+    .chart-day { color:var(--muted); font-size:10px; font-weight:650; }
+    .feature-foot { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; padding-top:13px; border-top:1px solid var(--line); color:var(--muted); font-size:9px; }
+    .feature-foot span,.feature-foot a { display:flex; align-items:center; gap:6px; }
+    .feature-foot a { color:var(--primary); font-size:10px; font-weight:750; text-decoration:none; }
+    .v2-empty { display:grid; flex:1; min-height:190px; align-content:center; justify-items:center; gap:7px; color:var(--muted); text-align:center; }
+    .v2-empty i { color:var(--primary); font-size:25px; }
+    .v2-empty strong { color:var(--ink); font-size:13px; }
+    .v2-empty span { font-size:10px; }
+    .action-center { display:flex; flex-direction:column; padding:23px 20px 15px; }
+    .action-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .action-count { display:grid; place-items:center; width:31px; height:31px; border-radius:10px; background:var(--primary-soft); color:var(--primary); font-size:13px; font-weight:850; }
+    .action-list { display:grid; gap:8px; margin:19px 0 13px; }
+    .action-item { display:grid; grid-template-columns:35px minmax(0,1fr) auto 10px; align-items:center; gap:10px; min-height:61px; padding:8px 9px; border:1px solid var(--line); border-radius:12px; color:inherit; text-decoration:none; transition:border-color .15s ease,background .15s ease,transform .15s ease; }
+    .action-item:hover { transform:translateX(2px); border-color:var(--primary); background:var(--canvas); }
+    .action-symbol { display:grid; place-items:center; width:35px; height:35px; border-radius:11px; font-size:13px; }
+    .action-blue { background:#edf1ff; color:#5366c9; }
+    .action-green { background:#e9f7f1; color:#168563; }
+    .action-amber { background:#fff4e5; color:#b8791c; }
+    .action-violet { background:#f1edff; color:#7656bd; }
+    .action-detail { display:grid; min-width:0; gap:3px; }
+    .action-detail strong { overflow:hidden; color:var(--ink); font-size:10px; font-weight:800; text-overflow:ellipsis; white-space:nowrap; }
+    .action-detail small { overflow:hidden; color:var(--muted); font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+    .action-value { color:var(--ink); font-size:12px; font-weight:820; font-variant-numeric:tabular-nums; }
+    .action-money { font-size:10px; }
+    .action-chevron { color:#a0aabd; font-size:9px; }
+    .action-footer { display:flex; align-items:center; gap:7px; margin-top:auto; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:9px; }
+    .action-footer i { color:#168563; }
+    .teacher-availability { padding:22px 24px; }
+    .availability-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-top:17px; }
+    .availability-item { display:grid; gap:5px; min-width:0; padding:13px 14px; border:1px solid var(--line); border-radius:12px; background:var(--canvas); }
+    .period-label { color:var(--muted); font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .availability-item > strong { color:var(--ink); font-size:19px; font-weight:820; }
+    .availability-item > strong small { color:var(--muted); font-size:10px; font-weight:600; }
+    .teacher-names { overflow:hidden; color:var(--muted); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+    .dashboard-v2 .alert-banner { margin:0; }
+    .dashboard-v2 .inline-error { margin:0 0 8px; padding:9px 11px; border-radius:9px; background:var(--danger-soft); color:var(--danger); font-size:11px; }
+    .dashboard-v2 .operation-loading { display:grid; gap:8px; margin:18px 0; }
+    .dashboard-v2 .operation-loading .skeleton { height:61px; border-radius:12px; }
+    .dashboard-v2 .skeleton { background:linear-gradient(90deg,var(--navy2),color-mix(in srgb,var(--navy2) 55%,white),var(--navy2)); }
+    html[data-theme="dark"] .dash-intro { background:linear-gradient(112deg,#101a2d 0%,#192b49 58%,#263b66 100%); box-shadow:0 16px 38px rgba(0,0,0,.22); }
+    html[data-theme="dark"] .intro-primary { background:#e8eefb; color:#172b4d; }
+    html[data-theme="dark"] .metric-tile,html[data-theme="dark"] .attendance-feature,html[data-theme="dark"] .action-center,html[data-theme="dark"] .teacher-availability { background:var(--surface); border-color:var(--line); }
+    html[data-theme="dark"] .attendance-summary,html[data-theme="dark"] .availability-item { background:var(--surface-raised); }
+    html[data-theme="dark"] .chart-bar-track { background:var(--surface-raised); }
+    @media(max-width:1150px) {
+      .metric-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .workbench { grid-template-columns:minmax(0,1fr); }
+      .action-center { min-height:0; }
+    }
+    @media(max-width:700px) {
+      .dashboard-v2 { gap:16px; }
+      .dash-intro { align-items:flex-start; flex-direction:column; gap:20px; min-height:0; padding:23px 21px; border-radius:17px; }
+      .intro-copy h1 { font-size:29px; }
+      .intro-actions { align-items:flex-start; flex-direction:row; flex-wrap:wrap; }
+      .school-chip { max-width:190px; }
+      .metric-strip { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+      .metric-tile { min-height:100px; gap:10px; padding:13px 11px; border-radius:13px; }
+      .metric-symbol { width:35px; height:35px; border-radius:10px; font-size:14px; }
+      .metric-content strong { font-size:21px; }
+      .metric-content small { font-size:9px; }
+      .workbench-heading h2 { font-size:19px; }
+      .attendance-feature,.action-center,.teacher-availability { padding:18px 15px 13px; border-radius:15px; }
+      .feature-heading { flex-direction:column; }
+      .attendance-summary { align-items:flex-start; flex-direction:column; }
+      .chart-columns { gap:6px; }
+      .chart-bar-track { width:min(26px,100%); }
+      .feature-foot { align-items:flex-start; flex-direction:column; }
+    }
+    @media(max-width:390px) { .metric-strip { grid-template-columns:minmax(0,1fr); } }
 
   `]
 })
