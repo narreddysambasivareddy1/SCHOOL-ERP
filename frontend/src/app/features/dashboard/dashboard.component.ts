@@ -19,7 +19,7 @@ interface Stat {
   standalone: true,
   imports: [CommonModule, RouterLink],
 
-  template: \`
+  template: `
     <div class="dashboard-v2">
       <header class="dash-intro">
         <div class="intro-copy">
@@ -172,7 +172,7 @@ interface Stat {
         </section>
       }
     </div>
-  \`,
+  `,
   styles: [`
     :host { display: block; }
     .welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin: 0 0 18px; }
