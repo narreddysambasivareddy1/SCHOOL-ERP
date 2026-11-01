@@ -1062,3 +1062,47 @@ html[data-theme="dark"] .main-content .p-datatable .p-paginator {
     }
     @media(max-width:390px) { .metric-strip { grid-template-columns:minmax(0,1fr); } }
 
+
+
+
+/* Visual refinement pass: improve dashboard hierarchy and reduce hero dominance */
+.dashboard-v2 { gap:19px; }
+.dash-intro {
+  min-height:178px; padding:25px 32px; border-radius:19px;
+  box-shadow:0 12px 30px rgba(22,43,77,.13);
+}
+.intro-copy h1 { margin-top:12px; font-size:clamp(29px,2.7vw,37px); }
+.intro-copy > p { font-size:13px; }
+.intro-date { margin-top:17px; }
+.school-chip { padding:9px 12px; font-size:11px; }
+.intro-primary { height:41px; padding-inline:15px; font-size:12px; }
+.metric-strip { gap:12px; }
+.metric-tile { min-height:101px; padding:15px 16px; border-radius:14px; }
+.metric-symbol { width:40px; height:40px; border-radius:12px; }
+.metric-content { gap:4px; }
+.metric-label { font-size:10px; letter-spacing:.035em; text-transform:uppercase; }
+.metric-content strong { font-size:clamp(23px,1.9vw,27px); }
+.metric-content small { font-size:10px; }
+.workbench-heading { margin-top:1px; }
+.workbench-heading h2 { font-size:20px; }
+.workbench { gap:13px; }
+.attendance-feature { padding:21px 22px 15px; }
+.action-center { padding:21px 18px 14px; }
+.feature-heading h3,.action-heading h3,.availability-heading h3 { font-size:16px; }
+.attendance-summary { margin-top:17px; padding:11px 14px; }
+.v2-chart { height:196px; margin-top:14px; }
+.chart-columns { gap:10px; }
+.chart-bar-track { width:min(30px,100%); }
+.action-list { margin-top:15px; gap:7px; }
+.action-item { min-height:57px; padding:7px 8px; }
+.action-symbol { width:33px; height:33px; }
+.teacher-availability { padding:20px 22px; }
+@media(max-width:700px) {
+  .dash-intro { min-height:0; padding:21px 19px; }
+  .intro-copy h1 { font-size:28px; }
+  .metric-tile { min-height:94px; padding:12px 10px; }
+  .metric-symbol { width:34px; height:34px; }
+  .attendance-feature,.action-center,.teacher-availability { padding:17px 14px 12px; }
+  .v2-chart { height:184px; }
+}
+
