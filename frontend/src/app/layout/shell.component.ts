@@ -372,6 +372,41 @@ const ALL_NAV: NavItem[] = [
       .main-content { padding: 18px 14px; }
     }
 
+
+    /* Refinement pass: compact enterprise navigation */
+    .topbar { height:68px; padding-inline:24px; gap:18px; }
+    .layout { min-height:calc(100vh - 68px); }
+    .brand { min-width:220px; }
+    .search-chip { flex-basis:360px; height:40px; }
+    .route-context { padding-left:18px; }
+    .topbar-right { gap:10px; }
+    .year-select { height:40px; }
+    .sidebar { width:248px; padding:18px 13px 16px; }
+    .sidebar-heading { min-height:38px; margin-bottom:5px; }
+    .nav-label { margin-top:15px; padding:8px 12px 7px; }
+    .nav-item {
+      position:relative; min-height:41px; margin:2px 0; padding:8px 12px;
+      border-radius:9px; font-size:13px; font-weight:580;
+    }
+    .nav-item.active {
+      background:color-mix(in srgb,var(--primary) 9%,var(--surface));
+      color:var(--primary); font-weight:760;
+    }
+    .nav-item.active::before {
+      content:""; position:absolute; left:-1px; top:9px; bottom:9px;
+      width:3px; border-radius:0 4px 4px 0; background:var(--primary);
+    }
+    .nav-item.active .nav-icon { color:var(--primary); }
+    .nav-item:hover { transform:translateX(1px); }
+    .sidebar-footer { font-size:10px; letter-spacing:.04em; }
+    .main-content { padding:24px clamp(20px,2.6vw,40px); }
+    @media(max-width:768px) {
+      .topbar { height:64px; }
+      .layout { min-height:calc(100vh - 64px); }
+      .sidebar { top:64px; }
+      .main-content { padding:16px 12px; }
+    }
+
   `]
 })
 export class ShellComponent implements OnInit {
