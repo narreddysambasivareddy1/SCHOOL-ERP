@@ -795,88 +795,6 @@ body {
   letter-spacing: -.005em;
 }
 
-app-shell .topbar {
-  min-height: var(--topbar-h);
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--topbar) 94%, transparent);
-  box-shadow: 0 2px 12px rgba(21, 39, 69, .035);
-  backdrop-filter: blur(14px);
-}
-
-app-shell .brand strong {
-  color: var(--ink);
-  font-size: 14px;
-  letter-spacing: -.02em;
-}
-
-app-shell .logo,
-app-shell .logo-img {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-}
-
-app-shell .search-chip,
-app-shell .year-select,
-app-shell .user-btn {
-  border-color: var(--line);
-  border-radius: 11px;
-  background: var(--surface);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, .025);
-}
-
-app-shell .search-chip { min-width: 230px; }
-app-shell .search-chip:hover,
-app-shell .year-select:hover,
-app-shell .user-btn:hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--line)); }
-
-app-shell .sidebar {
-  padding: 16px 12px 18px;
-  background: var(--sidebar);
-  box-shadow: 5px 0 24px rgba(17, 31, 57, .045);
-}
-
-app-shell .sidebar-heading {
-  min-height: 48px;
-  padding-inline: 12px;
-  letter-spacing: .075em;
-}
-
-app-shell .nav-label {
-  margin-top: 14px;
-  padding: 12px 13px 7px;
-  font-size: 10px;
-  letter-spacing: .12em;
-}
-
-app-shell .nav-item {
-  min-height: 43px;
-  margin: 2px 0;
-  padding: 9px 13px;
-  border: 1px solid transparent;
-  border-radius: 11px;
-  font-size: 13px;
-  font-weight: 560;
-}
-
-app-shell .nav-item .nav-icon { font-size: 15px; opacity: .9; }
-app-shell .nav-item:hover {
-  background: rgba(255,255,255,.075);
-  color: #fff;
-}
-app-shell .nav-item.active {
-  border-color: rgba(255,255,255,.10);
-  background: var(--sidebar-active);
-  box-shadow: 0 5px 14px rgba(8, 20, 42, .14);
-  color: #fff;
-}
-app-shell .sidebar.collapsed .nav-item { border-radius: 12px; }
-
-app-shell .main-content {
-  padding: clamp(16px, 2.2vw, 30px);
-  background: var(--canvas);
-}
-
 .main-content .page-header:not(.welcome) {
   padding: clamp(18px, 2vw, 26px);
   border-color: var(--line);
@@ -896,8 +814,8 @@ app-shell .main-content {
   font-size: 14px;
 }
 
-.main-content .toolbar,
-.main-content .filter-bar {
+.main-content .toolbar.toolbar,
+.main-content .filter-bar.filter-bar {
   gap: 12px;
   padding: 14px 16px;
   border-color: var(--line);
@@ -921,13 +839,13 @@ app-shell .main-content {
 
 .main-content .card.card,
 .main-content form.card,
-.main-content .panel,
+.main-content .panel.panel,
 .main-content .map-card.map-card,
-.main-content .report-card,
-.main-content .kpi-card,
-.main-content .plan-card,
-.main-content .deadline-card,
-.main-content .calendar-card {
+.main-content .report-card.report-card,
+.main-content .kpi-card.kpi-card,
+.main-content .plan-card.plan-card,
+.main-content .deadline-card.deadline-card,
+.main-content .calendar-card.calendar-card {
   border: 1px solid var(--line);
   border-radius: 17px;
   background: var(--surface);
@@ -935,8 +853,8 @@ app-shell .main-content {
 }
 
 .main-content .card.card:hover,
-.main-content .report-card:hover,
-.main-content .kpi-card:hover {
+.main-content .report-card.report-card:hover,
+.main-content .kpi-card.kpi-card:hover {
   border-color: color-mix(in srgb, var(--primary) 22%, var(--line));
 }
 
@@ -995,89 +913,16 @@ app-shell .main-content {
   transform: translateY(-1px);
 }
 
-.main-content .tabs { gap: 7px; }
-.main-content .tabs button {
+.main-content .tabs.tabs { gap: 7px; }
+.main-content .tabs.tabs button {
   border-radius: 10px;
   background: var(--surface);
   color: var(--muted);
 }
-.main-content .tabs button.on {
+.main-content .tabs.tabs button.on {
   box-shadow: 0 3px 9px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
-app-dashboard .home-bar { margin-bottom: 22px; }
-app-dashboard .home-bar h1 {
-  color: var(--ink);
-  font-size: clamp(27px, 2.5vw, 34px);
-  letter-spacing: -.05em;
-}
-app-dashboard .kicker {
-  color: var(--primary);
-  font-size: 10px;
-  letter-spacing: .12em;
-}
-app-dashboard .metrics {
-  gap: 14px;
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-app-dashboard .metric {
-  min-height: 138px;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-top: 3px solid var(--line);
-  border-right: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-}
-app-dashboard .metric:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--primary) 28%, var(--line));
-  box-shadow: var(--shadow);
-}
-app-dashboard .metric-label {
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: .09em;
-}
-app-dashboard .metric strong {
-  color: var(--ink);
-  font-size: clamp(27px, 2.3vw, 34px);
-}
-app-dashboard .metric-note { color: var(--muted); }
-app-dashboard .board { gap: 18px; margin-top: 18px; }
-app-dashboard .panel {
-  padding: 22px;
-  border-color: var(--line);
-  border-radius: 17px;
-  box-shadow: var(--shadow-sm);
-}
-app-dashboard .panel-heading h2 { color: var(--ink); font-size: 17px; }
-app-dashboard .panel-heading p { color: var(--muted); }
-app-dashboard .trend-track { background: #edf2fa; }
-app-dashboard .trend-bar { border-radius: 8px 8px 3px 3px; }
-app-dashboard .queue a { border-bottom-color: var(--line); }
-app-dashboard .queue a > span,
-app-dashboard .queue a > strong { color: var(--ink); }
-
-@media (max-width: 768px) {
-  app-shell .main-content { padding: 16px 12px; }
-  app-shell .topbar { box-shadow: 0 2px 10px rgba(21, 39, 69, .045); }
-  app-dashboard .metric { min-height: 118px; padding: 16px; }
-  app-dashboard .panel { padding: 17px; }
-}
-
-html[data-theme="dark"] body,
-html[data-theme="dark"] app-shell .main-content { background: var(--canvas); }
-html[data-theme="dark"] app-shell .topbar {
-  border-bottom-color: var(--line);
-  background: var(--topbar);
-}
 html[data-theme="dark"] .main-content .p-datatable .p-datatable-thead > tr > th,
 html[data-theme="dark"] .main-content table:not(.att-table) th {
   background: var(--surface-raised) !important;
@@ -1085,9 +930,4 @@ html[data-theme="dark"] .main-content table:not(.att-table) th {
 }
 html[data-theme="dark"] .main-content .p-datatable .p-paginator {
   background: var(--surface) !important;
-}
-html[data-theme="dark"] app-dashboard .trend-track { background: var(--navy2); }
-html[data-theme="dark"] app-dashboard .metric {
-  border-color: var(--line);
-  background: var(--surface);
 }

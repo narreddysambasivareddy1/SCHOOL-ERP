@@ -4,7 +4,7 @@ describe('paletteFromHex', () => {
   it('keeps the chosen colour as the primary token on the light shell', () => {
     const palette = paletteFromHex('#1D4E89');
     expect(palette?.['--primary']).toBe('#1d4e89');
-    expect(palette?.['--canvas']).toBe('#f4f7fb');
+    expect(palette?.['--canvas']).toBe('#f5f7fc');
     expect(palette?.['--surface']).toBe('#ffffff');
     expect(palette?.['--teal']).toBe('#0f8b8d');
     expect(palette?.['--gold']).toBe('#f2b544');
