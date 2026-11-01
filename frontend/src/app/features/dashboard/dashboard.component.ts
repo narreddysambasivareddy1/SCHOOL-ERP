@@ -38,7 +38,8 @@ interface Stat {
 
     <section class="metrics" aria-label="School overview" [class.is-loading]="loading()">
       @for (stat of stats(); track stat.label) {
-        <article class="metric" [attr.data-tone]="stat.tone">
+        <article class="metric">
+          <span class="metric-icon" aria-hidden="true"><i [class]="stat.icon"></i></span>
           <span class="metric-label">{{ stat.label }}</span>
           <strong>{{ loading() ? '—' : stat.value }}</strong>
           <span class="metric-note">{{ stat.sub }}</span>
@@ -63,8 +64,8 @@ interface Stat {
           <div class="chart-loading"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
         } @else if (attendanceTrend().length) {
           <div class="trend-chart" role="img" aria-label="Daily attendance trend for the last seven days">
-            @for (point of attendanceTrend(); track point.date) {
-              <div class="trend-day" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
+            @for (point of attendanceTrend(); track point.date; let last = $last) {
+              <div class="trend-day" [class.is-latest]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
                 <div class="trend-track"><span class="trend-bar" [style.height.%]="point.pct"></span></div>
                 <strong>{{ point.pct }}</strong>
                 <small>{{ point.date | date:'EEE' }}</small>
@@ -143,23 +144,20 @@ interface Stat {
   styles: [`
     :host { display: block; }
     .home-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin: 0 0 20px; }
-    .kicker { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; line-height: 1.4; text-transform: uppercase; }
-    .home-bar h1 { margin: 0; color: var(--navy); font-size: 30px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; }
+    .kicker { margin: 0 0 6px; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.4; }
+    .home-bar h1 { margin: 0; color: var(--navy); font-size: 32px; font-weight: 650; letter-spacing: -0.04em; line-height: 1.1; }
     .home-tools { display: flex; align-items: center; gap: 10px; flex: none; }
     .date-chip, .primary-action, .open-link { display: inline-flex; align-items: center; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 650; text-decoration: none; }
     .date-chip { gap: 8px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); color: var(--navy); }
     .primary-action { gap: 8px; padding: 0 14px; background: var(--primary); color: white; }
     .primary-action:hover { background: var(--primary-hover); }
     .alert-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
-    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
     .metrics.is-loading { opacity: .72; }
-    .metric { display: grid; align-content: start; gap: 8px; min-height: 132px; padding: 18px 20px 16px; border-top: 3px solid var(--line); border-right: 1px solid var(--line); }
-    .metric:last-child { border-right: 0; }
-    .metric[data-tone="blue"] { border-top-color: #245fc4; }
-    .metric[data-tone="teal"] { border-top-color: #087d68; }
-    .metric[data-tone="amber"] { border-top-color: #b45309; }
-    .metric[data-tone="violet"] { border-top-color: #6847b7; }
-    .metric-label { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; line-height: 1.3; text-transform: uppercase; }
+    .metric { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; column-gap: 12px; row-gap: 4px; min-height: 124px; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-sm); }
+    .metric-icon { grid-row: span 3; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); color: var(--teal); font-size: 16px; }
+    .metric-label, .metric strong, .metric-note { grid-column: 2; }
+    .metric-label { color: var(--muted); font-size: 13px; font-weight: 650; line-height: 1.3; }
     .metric strong { color: var(--navy); font-size: 32px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; font-variant-numeric: tabular-nums; }
     .metric-note { color: var(--muted); font-size: 13px; line-height: 1.4; }
     .board { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr); gap: 16px; align-items: stretch; margin-top: 16px; }
@@ -172,19 +170,19 @@ interface Stat {
     .today-figure { display: grid; justify-items: end; margin-left: auto; }
     .today-figure strong { color: var(--navy); font-size: 28px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
     .today-figure span { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-    .trend-chart { display: grid; height: 228px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 10px; margin-top: 18px; }
-    .trend-day { display: grid; height: 100%; grid-template-rows: minmax(0, 1fr) 22px 18px; justify-items: center; align-items: end; gap: 4px; }
-    .trend-track { display: flex; width: min(36px, 100%); height: 100%; align-items: end; justify-content: center; border-radius: 8px; background: var(--navy2); }
-    .trend-bar { display: block; width: 100%; min-height: 4px; border-radius: 8px 8px 2px 2px; background: var(--primary); }
+    .trend-chart { display: grid; height: 228px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 14px; margin-top: 22px; padding-top: 8px; border-bottom: 1px solid var(--line); }
+    .trend-day { display: grid; height: 100%; grid-template-rows: minmax(0, 1fr) 22px 18px; justify-items: center; align-items: end; gap: 6px; }
+    .trend-track { display: flex; width: min(28px, 100%); height: 100%; align-items: end; justify-content: center; background: transparent; }
+    .trend-bar { display: block; width: 100%; min-height: 4px; border-radius: 8px 8px 0 0; background: var(--navy); }
+    .trend-day.is-latest .trend-bar { background: var(--teal); }
     .trend-day strong { color: var(--navy); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
     .trend-day small { color: var(--muted); font-size: 12px; font-weight: 650; line-height: 1; }
     .chart-loading { display: grid; height: 228px; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: 10px; margin-top: 18px; }
     .chart-loading .skeleton { height: 55%; border-radius: 8px; }
     .empty-chart { display: grid; flex: 1; min-height: 200px; align-content: center; justify-items: center; gap: 8px; color: var(--muted); font-size: 14px; text-align: center; }
-    .queue { display: grid; margin-top: 8px; }
-    .queue a { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 16px; min-height: 64px; padding: 10px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
-    .queue a:last-child { border-bottom: 0; }
-    .queue a:hover span { color: var(--primary); }
+    .queue { display: grid; gap: 8px; margin-top: 16px; }
+    .queue a { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 16px; min-height: 68px; padding: 10px 14px; border-radius: 14px; background: var(--canvas); color: inherit; text-decoration: none; }
+    .queue a:hover { background: var(--primary-soft); }
     .queue a > span { color: var(--navy); font-size: 14px; font-weight: 650; }
     .queue a > strong { color: var(--navy); font-size: 18px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; text-align: right; }
     .queue a > small { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
@@ -202,16 +200,12 @@ interface Stat {
     .operation-loading .skeleton { height: 52px; }
     @media (max-width: 1100px) {
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .metric:nth-child(2) { border-right: 0; }
-      .metric:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
       .board { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 720px) {
       .home-bar { flex-direction: column; align-items: flex-start; }
       .home-tools { flex-wrap: wrap; }
       .metrics { grid-template-columns: minmax(0, 1fr); }
-      .metric { border-right: 0; border-bottom: 1px solid var(--line); }
-      .metric:last-child { border-bottom: 0; }
       .home-bar h1 { font-size: 26px; }
       .cover-head, .cover-row { grid-template-columns: 1fr 48px; }
       .cover-head span:last-child, .cover-row small { grid-column: 1 / -1; }

@@ -247,16 +247,16 @@ const ALL_NAV: NavItem[] = [
     .mobile-menu-btn { display: none; }
     .layout { display: flex; flex: 1; min-height: calc(100vh - var(--topbar-h)); }
     .sidebar { width: var(--sidebar-w); background: var(--sidebar); color: var(--sidebar-text); padding: 12px 10px 16px; border-right: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-x: hidden; overflow-y: auto; transition: width 180ms ease; }
-    .sidebar-heading { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; color: var(--sidebar-muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+    .sidebar-heading { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; color: var(--sidebar-text); font-size: 13px; font-weight: 650; letter-spacing: 0; white-space: nowrap; }
     .collapse-btn { width: 36px; height: 36px; flex: none; border: 1px solid rgba(255,255,255,.16); border-radius: 8px; background: transparent; color: var(--sidebar-text); cursor: pointer; }
     .collapse-btn:hover { background: rgba(255,255,255,.08); }
     .sidebar.collapsed { width: var(--sidebar-collapsed-w); }
     .sidebar.collapsed .sidebar-heading { justify-content: center; padding: 0; }
     .sidebar.collapsed .sidebar-heading > span, .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-item span, .sidebar.collapsed .sidebar-footer { display: none; }
-    .nav-label { margin-top: 8px; font-size: 11px; letter-spacing: 1.1px; color: var(--sidebar-muted); padding: 13px 12px 6px; text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 8px 12px; border-radius: 8px; color: var(--sidebar-muted); text-decoration: none; font-size: 14px; transition: background 150ms ease, color 150ms ease; }
+    .nav-label { margin-top: 10px; font-size: 12px; letter-spacing: 0; font-weight: 650; color: var(--sidebar-muted); padding: 14px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 11px; min-height: 42px; padding: 8px 12px; border-radius: 12px; color: var(--sidebar-muted); text-decoration: none; font-size: 14px; transition: background 150ms ease, color 150ms ease; }
     .nav-item:hover { background: rgba(255,255,255,.08); color: white; }
-    .nav-item.active { background: var(--sidebar-active); color: white; box-shadow: none; font-weight: 700; }
+    .nav-item.active { background: rgba(255,255,255,.14); color: white; box-shadow: inset 3px 0 0 var(--gold); font-weight: 650; }
     :host-context(html[data-theme="dark"]) .nav-item.active {
       background: #1a2740;
       color: #f4f7fb;
