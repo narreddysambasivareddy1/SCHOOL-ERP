@@ -301,6 +301,77 @@ const ALL_NAV: NavItem[] = [
       .sidebar-backdrop:not([hidden]) { display: block; position: fixed; inset: var(--topbar-h) 0 0; z-index: 30; width: 100%; border: 0; background: rgba(15,39,68,.38); }
       .main-content { padding: 16px 12px; }
     }
+
+    /* Premium A+D application shell */
+    :host { color: var(--ink); }
+    .app-shell { background: var(--canvas); }
+    .topbar {
+      height: 76px; padding: 0 28px; gap: 20px;
+      background: var(--surface); border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 12px rgba(24, 43, 75, .025);
+    }
+    .brand { min-width: 236px; gap: 12px; }
+    .logo, .logo-img { width: 40px; height: 40px; border-radius: 13px; }
+    .logo { box-shadow: 0 5px 12px color-mix(in srgb, var(--primary) 22%, transparent); }
+    .brand strong { max-width: 205px; color: var(--ink); font-size: 14px; font-weight: 750; letter-spacing: -.02em; }
+    .brand small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .search-chip {
+      flex: 0 1 390px; min-width: 190px; height: 42px; margin-left: 0;
+      border-radius: 12px; background: var(--canvas); border-color: transparent;
+      color: var(--muted); padding: 0 14px;
+    }
+    .search-chip:hover { border-color: var(--line); background: var(--surface); }
+    .search-chip kbd { padding: 3px 7px; border-radius: 6px; background: var(--surface); }
+    .route-context { margin-left: 0; padding-left: 20px; gap: 2px; }
+    .route-context span { font-size: 11px; font-weight: 600; }
+    .route-context strong { color: var(--ink); font-size: 14px; font-weight: 700; }
+    .topbar-right { gap: 12px; }
+    .year-select { height: 42px; border-radius: 11px; padding: 0 34px 0 12px; background: var(--canvas); border-color: var(--line); font-size: 13px; }
+    .user-btn { height: 44px; gap: 10px; border: 1px solid transparent; border-radius: 12px; background: transparent; padding: 0 8px 0 4px; }
+    .user-btn:hover { background: var(--canvas); border-color: var(--line); }
+    .avatar { width: 34px; height: 34px; border-radius: 11px; font-size: 11px; }
+    .user-name { font-size: 13px; font-weight: 700; }
+    .role-badge { margin-top: 1px; font-size: 10px; font-weight: 600; color: var(--muted); }
+    .layout { min-height: calc(100vh - 76px); }
+    .sidebar {
+      width: 264px; padding: 22px 14px 18px; background: var(--surface);
+      border-right: 1px solid var(--line);
+    }
+    .sidebar-heading { min-height: 42px; padding: 0 10px 10px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .collapse-btn { width: 30px; height: 30px; border-radius: 9px; }
+    .nav-label { margin-top: 18px; padding: 7px 12px 8px; color: #8b98aa; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .nav-item {
+      min-height: 43px; margin: 2px 0; padding: 9px 12px; gap: 12px;
+      border-radius: 11px; color: #66758a; font-size: 13px; font-weight: 560;
+    }
+    .nav-item:hover { background: var(--canvas); color: var(--ink); }
+    .nav-item.active {
+      background: var(--primary-soft); color: var(--primary);
+      box-shadow: none; font-weight: 750;
+    }
+    .nav-item.active .nav-icon { color: var(--primary); }
+    .nav-icon { width: 19px; font-size: 16px; }
+    .sidebar-footer { margin: 20px 4px 0; padding: 14px 10px 2px; border-top: 1px solid var(--line); color: #98a4b5; font-size: 11px; }
+    .main-content { padding: 30px clamp(20px, 3vw, 48px); background: var(--canvas); }
+    .main-content > router-outlet + * { display: block; width: 100%; max-width: 1560px; margin-inline: auto; }
+    .menu { width: 286px; border-radius: 16px; padding: 10px; box-shadow: 0 18px 55px rgba(24,43,75,.16); }
+    .palette { border: 1px solid var(--line); border-radius: 18px; }
+    .palette-input { padding: 17px 18px; }
+    .palette-item { min-height: 44px; border-radius: 9px; }
+    @media (max-width: 1100px) {
+      .brand { min-width: 190px; }
+      .search-chip { flex-basis: 48px; }
+    }
+    @media (max-width: 768px) {
+      .topbar { height: 66px; padding: 0 12px; gap: 10px; }
+      .brand { min-width: 0; flex: 1; }
+      .brand strong { max-width: 150px; }
+      .search-chip { flex: none; width: 40px; min-width: 40px; height: 40px; }
+      .layout { min-height: calc(100vh - 66px); }
+      .sidebar { top: 66px; width: min(292px, calc(100vw - 48px)); padding: 18px 14px; }
+      .main-content { padding: 18px 14px; }
+    }
+
   `]
 })
 export class ShellComponent implements OnInit {
