@@ -353,6 +353,127 @@ interface Stat {
 
 
     
+
+    /* Executive dashboard composition — clear hierarchy and purposeful information density */
+    .dashboard-v2 {
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      gap: 22px;
+      color: #17243b;
+    }
+    .dash-intro {
+      position: relative;
+      min-height: 206px;
+      align-items: center;
+      padding: 31px 36px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 86% 18%,rgba(139,158,255,.30),transparent 25%),
+        radial-gradient(circle at 100% 100%,rgba(41,178,178,.17),transparent 34%),
+        linear-gradient(112deg,#14264a 0%,#243f79 58%,#3e55a9 100%);
+      box-shadow: 0 16px 36px rgba(24,43,85,.16);
+    }
+    .dash-intro::before {
+      content: "";
+      position: absolute;
+      width: 330px;
+      height: 330px;
+      right: 8%;
+      top: -205px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 50%;
+      box-shadow: 0 0 0 34px rgba(255,255,255,.035),0 0 0 70px rgba(255,255,255,.025);
+      pointer-events: none;
+    }
+    .intro-copy,.intro-actions { position: relative; z-index: 1; }
+    .intro-overline { color: #bdcaff; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+    .intro-copy h1 { margin: 13px 0 8px; color: #fff; font-size: clamp(30px,3vw,40px); font-weight: 780; letter-spacing: -.045em; }
+    .intro-copy > p { margin: 0; color: #d0daf1; font-size: 13px; }
+    .intro-date { margin-top: 19px; color: #c1cdec; font-size: 11px; }
+    .school-chip { border: 1px solid rgba(255,255,255,.23); background: rgba(255,255,255,.10); color: #f2f5ff; backdrop-filter: blur(8px); }
+    .intro-primary { border: 1px solid rgba(255,255,255,.18); border-radius: 10px; background: #fff; color: #263f8e; font-weight: 760; box-shadow: 0 7px 18px rgba(8,18,48,.16); }
+    .intro-primary:hover { background: #edf1ff; transform: translateY(-1px); }
+    .metric-strip { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+    .metric-tile {
+      position: relative;
+      min-height: 132px;
+      padding: 19px;
+      gap: 14px;
+      border: 1px solid #e6eaf2;
+      border-radius: 15px;
+      background: #fff;
+      box-shadow: 0 4px 15px rgba(22,38,68,.035);
+      transition: transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    }
+    a.metric-tile:hover { transform: translateY(-3px); border-color: #cbd4fa; box-shadow: 0 13px 26px rgba(30,49,93,.09); }
+    .metric-symbol { width: 43px; height: 43px; border-radius: 12px; background: #edf0ff; color: #435bd4; font-size: 16px; }
+    .metric-tone-1 .metric-symbol { background: #e9f7f1; color: #168568; }
+    .metric-tone-2 .metric-symbol { background: #fff4e6; color: #b7791f; }
+    .metric-tone-3 .metric-symbol { background: #f2edff; color: #7656c7; }
+    .metric-content { gap: 5px; }
+    .metric-label { color: #78859b; font-size: 10px; font-weight: 800; letter-spacing: .075em; text-transform: uppercase; }
+    .metric-content strong { color: #1c2d4b; font-size: clamp(25px,2vw,31px); font-weight: 790; letter-spacing: -.045em; }
+    .metric-content small { color: #8995a8; font-size: 10px; }
+    .metric-arrow { color: #9aa6ba; }
+    .workbench-heading { margin: 4px 0 -4px; }
+    .section-overline,.feature-kicker { color: #71809a; font-size: 9px; font-weight: 850; letter-spacing: .13em; }
+    .workbench-heading h2 { margin-top: 5px; color: #1b2b49; font-size: 22px; font-weight: 780; letter-spacing: -.035em; }
+    .updated-label { padding: 7px 10px; border: 1px solid #dcefe7; border-radius: 20px; background: #f0faf5; color: #218260; font-size: 10px; font-weight: 700; }
+    .workbench { grid-template-columns: minmax(0,1.55fr) minmax(330px,.9fr); gap: 15px; }
+    .attendance-feature,.action-center,.teacher-availability {
+      border: 1px solid #e6eaf2;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(22,38,68,.035);
+    }
+    .attendance-feature { padding: 24px 25px 17px; }
+    .action-center { padding: 23px 20px 16px; }
+    .feature-heading h3,.action-heading h3,.availability-heading h3 { margin: 6px 0 4px; color: #20314f; font-size: 17px; font-weight: 780; letter-spacing: -.025em; }
+    .feature-heading p,.action-heading p,.availability-heading p { color: #8793a7; font-size: 11px; }
+    .feature-link { color: #465dcc; font-size: 11px; font-weight: 750; }
+    .attendance-summary { border: 1px solid #e9edf5; border-radius: 12px; background: #f8f9fd; }
+    .attendance-number strong { color: #253d82; font-size: 29px; font-weight: 800; letter-spacing: -.04em; }
+    .attendance-number span { color: #7c899e; font-size: 10px; }
+    .attendance-state { color: #168568; font-size: 10px; font-weight: 750; }
+    .attendance-state.state-pending { color: #a66c1d; }
+    .v2-chart { height: 210px; }
+    .chart-guides { color: #9aa5b6; font-size: 9px; }
+    .chart-bar-track { width: min(34px,100%); border-radius: 8px 8px 3px 3px; background: #edf0f7; }
+    .chart-bar-fill { border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg,#8192ed,#465dcc); }
+    .chart-column-current .chart-bar-fill { background: linear-gradient(180deg,#29b69d,#13866f); }
+    .chart-column strong { color: #52617a; font-size: 10px; }
+    .chart-day { color: #8a96a9; font-size: 9px; }
+    .feature-foot { border-top: 1px solid #edf0f5; color: #8793a7; font-size: 9px; }
+    .feature-foot a { color: #465dcc; font-weight: 750; }
+    .action-count { display: grid; place-items: center; min-width: 30px; height: 30px; border-radius: 9px; background: #edf0ff; color: #435bd4; font-size: 12px; font-weight: 800; }
+    .action-list { gap: 8px; }
+    .action-item { min-height: 61px; padding: 9px 10px; border: 1px solid #e9edf4; border-radius: 11px; background: #fff; }
+    .action-item:hover { border-color: #cbd4fa; background: #f8f9ff; }
+    .action-detail strong { color: #2a3954; font-size: 11px; font-weight: 750; }
+    .action-detail small { color: #8b97a9; font-size: 9px; }
+    .action-value { color: #25395f; font-size: 13px; font-weight: 800; }
+    .action-chevron { color: #a4afbf; font-size: 10px; }
+    .action-footer { color: #8b97a9; font-size: 9px; }
+    .teacher-availability { padding: 22px 25px; }
+    .availability-item { border: 1px solid #e9edf4; border-radius: 11px; background: #f8f9fd; }
+    .availability-item > strong { color: #24385f; }
+    html[data-theme="dark"] .dash-intro { background: linear-gradient(112deg,#111d35,#1b3260 58%,#30458d); }
+    html[data-theme="dark"] .metric-tile,html[data-theme="dark"] .attendance-feature,html[data-theme="dark"] .action-center,html[data-theme="dark"] .teacher-availability { background: var(--surface); border-color: var(--line); }
+    @media(max-width:1150px) { .workbench { grid-template-columns:minmax(0,1fr); } }
+    @media(max-width:700px) {
+      .dash-intro { min-height:0; padding:23px 20px; border-radius:16px; }
+      .intro-copy h1 { font-size:28px; }
+      .metric-strip { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+      .metric-tile { min-height:105px; padding:13px 11px; }
+      .metric-symbol { width:35px; height:35px; }
+      .workbench-heading h2 { font-size:19px; }
+      .attendance-feature,.action-center,.teacher-availability { padding:17px 14px 13px; }
+    }
+    @media(max-width:390px) { .metric-strip { grid-template-columns:minmax(0,1fr); } }
+
   `]
 })
 export class DashboardComponent implements OnInit {
