@@ -407,6 +407,138 @@ const ALL_NAV: NavItem[] = [
       .main-content { padding:16px 12px; }
     }
 
+
+    /* International SaaS shell — coherent frame, navigation and responsive workspace */
+    .app-shell {
+      min-height: 100vh;
+      background: #f4f6fb;
+      color: #17243b;
+      font-family: Inter, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 70px;
+      padding: 0 28px;
+      gap: 22px;
+      background: rgba(255,255,255,.97);
+      border-bottom: 1px solid #e6eaf2;
+      box-shadow: 0 2px 10px rgba(19,34,61,.035);
+      backdrop-filter: blur(14px);
+    }
+    .brand { min-width: 228px; gap: 12px; }
+    .logo, .logo-img { width: 39px; height: 39px; border-radius: 12px; }
+    .logo { background: linear-gradient(145deg,#536be8,#3348b8); box-shadow: 0 5px 13px rgba(67,91,212,.24); }
+    .brand strong { color: #17243b; font-size: 14px; font-weight: 760; letter-spacing: -.025em; }
+    .brand small { display: block; margin-top: 3px; color: #8490a5; font-size: 10px; font-weight: 600; }
+    .search-chip {
+      flex: 0 1 380px; height: 40px; min-width: 190px; margin: 0;
+      padding: 0 13px; border: 1px solid #e8ecf4; border-radius: 10px;
+      background: #f7f8fc; color: #738098; font-size: 12px;
+    }
+    .search-chip:hover { border-color: #cbd4fa; background: #fff; }
+    .search-chip kbd { padding: 3px 7px; border: 1px solid #e5e9f1; border-radius: 6px; background: #fff; color: #8b96a9; }
+    .route-context { padding-left: 20px; border-color: #e8ecf3; }
+    .route-context span { color: #8994a7; font-size: 10px; font-weight: 600; }
+    .route-context strong { color: #263650; font-size: 13px; font-weight: 750; }
+    .topbar-right { gap: 11px; }
+    .year-select { height: 39px; border: 1px solid #e6eaf2; border-radius: 9px; background: #fff; color: #43516a; font-size: 12px; }
+    .user-btn { height: 42px; padding: 0 9px 0 4px; gap: 9px; border: 1px solid transparent; border-radius: 10px; background: transparent; }
+    .user-btn:hover { border-color: #e8ecf3; background: #f7f8fc; }
+    .avatar { width: 32px; height: 32px; border-radius: 10px; background: #e9edff; color: #4057cb; font-size: 11px; }
+    .user-name { color: #263650; font-size: 12px; font-weight: 720; }
+    .role-badge { margin-top: 2px; color: #8792a5; font-size: 9px; }
+    .layout { min-height: calc(100vh - 70px); }
+    .sidebar {
+      width: 258px;
+      padding: 19px 13px 16px;
+      background: #111d35;
+      border: 0;
+      border-right: 1px solid #263653;
+      box-shadow: 5px 0 24px rgba(17,29,53,.06);
+    }
+    .sidebar-heading {
+      min-height: 39px;
+      margin: 0 2px 9px;
+      padding: 0 9px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      color: #f3f6ff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+    .collapse-btn { width: 29px; height: 29px; border-color: rgba(255,255,255,.16); border-radius: 8px; color: #b7c4dc; }
+    .collapse-btn:hover { background: rgba(255,255,255,.10); color: #fff; }
+    .nav-label {
+      margin-top: 17px;
+      padding: 8px 11px 7px;
+      color: #8797b4;
+      font-size: 9px;
+      font-weight: 850;
+      letter-spacing: .13em;
+    }
+    .nav-item {
+      position: relative;
+      min-height: 41px;
+      margin: 2px 0;
+      padding: 8px 11px;
+      gap: 12px;
+      border-radius: 9px;
+      color: #c0cadd;
+      font-size: 12px;
+      font-weight: 570;
+      transition: background .16s ease, color .16s ease, transform .16s ease;
+    }
+    .nav-item .nav-icon { width: 18px; color: #9eacc5; font-size: 14px; }
+    .nav-item:hover { background: rgba(255,255,255,.085); color: #fff; transform: translateX(2px); }
+    .nav-item:hover .nav-icon { color: #dce4ff; }
+    .nav-item.active {
+      background: linear-gradient(100deg,rgba(91,112,231,.32),rgba(91,112,231,.14));
+      color: #fff;
+      box-shadow: inset 3px 0 0 #93a2ff;
+      font-weight: 750;
+    }
+    .nav-item.active .nav-icon { color: #b7c2ff; }
+    .sidebar-footer {
+      margin: 18px 4px 0;
+      padding: 14px 10px 2px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: #8493af;
+      font-size: 10px;
+      letter-spacing: .04em;
+    }
+    .main-content {
+      min-width: 0;
+      padding: 27px clamp(20px, 2.8vw, 42px) 42px;
+      background: #f4f6fb;
+    }
+    .main-content > router-outlet + * { width: 100%; max-width: 1600px; margin-inline: auto; }
+    .menu {
+      width: 286px;
+      padding: 10px;
+      border: 1px solid #e6eaf2;
+      border-radius: 14px;
+      box-shadow: 0 20px 55px rgba(19,34,61,.18);
+    }
+    .palette-back { background: rgba(12,23,43,.48); backdrop-filter: blur(4px); }
+    .palette { border: 1px solid #e5e9f2; border-radius: 16px; box-shadow: 0 24px 80px rgba(12,23,43,.24); }
+    .palette-input { padding: 16px 18px; }
+    .palette-item { min-height: 43px; border-radius: 8px; color: #34435d; }
+    .palette-item:hover { background: #f1f3fb; color: #344bc1; }
+    @media (max-width: 1100px) {
+      .brand { min-width: 190px; }
+      .search-chip { flex-basis: 230px; }
+    }
+    @media (max-width: 768px) {
+      .topbar { height: 64px; padding: 0 12px; gap: 9px; }
+      .brand { min-width: 0; flex: 1; }
+      .brand strong { max-width: 150px; }
+      .layout { min-height: calc(100vh - 64px); }
+      .sidebar { top: 64px; width: min(292px, calc(100vw - 48px)); }
+      .main-content { padding: 17px 13px 28px; }
+    }
+
   `]
 })
 export class ShellComponent implements OnInit {
