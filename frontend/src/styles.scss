@@ -1377,3 +1377,163 @@ html[data-theme="dark"] .main-content select, html[data-theme="dark"] .main-cont
 .sidebar .nav-item.active .nav-icon { color: #d3dcff !important; }
 .sidebar .collapse-btn { color: #e0e7f3 !important; }
 .sidebar .sidebar-footer { color: #aebbd2 !important; }
+
+
+/* =========================================================
+   GLOBAL SAAS REDIRECTION — light editorial workspace
+   Replaces the previous dark-sidebar / dark-hero direction.
+   Presentation only: no routes, data, APIs or workflows changed.
+   ========================================================= */
+:root {
+  --canvas: #f6f8fc;
+  --bg: #f6f8fc;
+  --surface: #ffffff;
+  --surface-raised: #fbfcfe;
+  --ink: #182230;
+  --muted: #66758a;
+  --line: #e7ebf2;
+  --primary: #635bdb;
+  --primary-hover: #5148c8;
+  --primary-soft: #f0efff;
+  --sidebar: #ffffff;
+  --sidebar-text: #263247;
+  --sidebar-muted: #718096;
+  --topbar: rgba(255,255,255,.94);
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.035), 0 4px 14px rgba(16,24,40,.035);
+  --shadow: 0 12px 34px rgba(16,24,40,.08);
+  --radius: 12px;
+  --radius-lg: 16px;
+}
+html, body { background: var(--canvas) !important; color: var(--ink); }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: -.012em; }
+
+/* Clean white application frame */
+.topbar {
+  height: 68px !important; padding: 0 26px !important; gap: 20px !important;
+  background: rgba(255,255,255,.96) !important; border-bottom: 1px solid #e9edf3 !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,.025) !important; backdrop-filter: blur(18px);
+}
+.brand strong { color: #172033 !important; font-size: 13px !important; font-weight: 750 !important; }
+.brand small { color: #8994a5 !important; }
+.logo { background: #635bdb !important; border-radius: 11px !important; box-shadow: none !important; }
+.search-chip {
+  min-width: 240px !important; height: 38px !important; border-radius: 9px !important;
+  background: #f7f8fb !important; border: 1px solid #edf0f5 !important; color: #8490a2 !important;
+}
+.search-chip kbd { background: #fff !important; border-color: #e8ebf1 !important; }
+.route-context { border-left-color: #edf0f4 !important; }
+.route-context span { color: #98a2b2 !important; }
+.route-context strong { color: #29364a !important; }
+.year-select, .user-btn { background: #fff !important; border-color: #e8ecf2 !important; border-radius: 9px !important; }
+.avatar { background: #efeeff !important; color: #635bdb !important; }
+.user-name { color: #29364a !important; }
+
+/* Light, compact, high-clarity navigation */
+.sidebar {
+  width: 248px !important; background: #fff !important; color: #344054 !important;
+  border-right: 1px solid #e9edf3 !important; box-shadow: none !important;
+  padding: 17px 12px 16px !important;
+}
+.sidebar-heading { color: #8a95a6 !important; font-size: 9px !important; letter-spacing: .12em !important; }
+.collapse-btn { border-color: #edf0f5 !important; color: #7d899a !important; }
+.nav-label { color: #9aa4b2 !important; font-size: 9px !important; letter-spacing: .12em !important; }
+.sidebar .nav-item {
+  min-height: 39px !important; margin: 2px 0 !important; border-radius: 8px !important;
+  color: #59677b !important; font-size: 12px !important; font-weight: 550 !important;
+  box-shadow: none !important;
+}
+.sidebar .nav-item .nav-icon { color: #8995a6 !important; }
+.sidebar .nav-item:hover { background: #f6f7fb !important; color: #344054 !important; }
+.sidebar .nav-item.active {
+  color: #574fc9 !important; background: #f0efff !important;
+  box-shadow: inset 2px 0 0 #635bdb !important; font-weight: 700 !important;
+}
+.sidebar .nav-item.active .nav-icon { color: #635bdb !important; }
+.sidebar-footer { border-top: 1px solid #f0f2f6 !important; color: #a0a9b6 !important; }
+.main-content { padding: 28px 32px 42px !important; background: #f6f8fc !important; }
+
+/* Modern neutral page headers and cards */
+.main-content .page-header:not(.welcome) {
+  background: #fff !important; border: 1px solid #e9edf3 !important;
+  border-radius: 13px !important; box-shadow: none !important;
+  padding: 21px 24px !important;
+}
+.main-content .page-header:not(.welcome) h1 {
+  color: #182230 !important; font-size: 25px !important; font-weight: 740 !important;
+  letter-spacing: -.045em !important;
+}
+.main-content .page-header:not(.welcome) p { color: #778397 !important; }
+.main-content .card, .main-content .panel, .main-content .report-card,
+.main-content .kpi-card, .main-content .deadline-card, .main-content .plan-card,
+.main-content .calendar-card, .main-content .session-card, .main-content .pipe-card {
+  background: #fff !important; border: 1px solid #e9edf3 !important;
+  border-radius: 13px !important; box-shadow: 0 1px 2px rgba(16,24,40,.025) !important;
+}
+.main-content .toolbar, .main-content .filter-bar {
+  background: #fff !important; border: 1px solid #e9edf3 !important;
+  border-radius: 11px !important; box-shadow: none !important;
+}
+.main-content input:not([type=checkbox]):not([type=radio]):not([type=file]),
+.main-content select, .main-content textarea, .p-inputtext, .p-select, .p-dropdown {
+  border: 1px solid #e4e8ef !important; border-radius: 8px !important;
+  background: #fff !important; color: #29364a !important; box-shadow: none !important;
+}
+.main-content input:focus, .main-content select:focus, .main-content textarea:focus,
+.p-inputtext:focus { border-color: #aaa5f1 !important; box-shadow: 0 0 0 3px rgba(99,91,219,.10) !important; }
+.main-content .p-datatable, .main-content table:not(.att-table) {
+  border: 1px solid #e9edf3 !important; border-radius: 12px !important; box-shadow: none !important;
+}
+.main-content .p-datatable .p-datatable-thead > tr > th,
+.main-content table:not(.att-table) th {
+  background: #f8f9fb !important; color: #7e8999 !important;
+  border-color: #edf0f4 !important; font-size: 10px !important; letter-spacing: .055em !important;
+}
+.main-content .p-datatable .p-datatable-tbody > tr > td,
+.main-content table:not(.att-table) td { color: #39465a; border-color: #eff1f5 !important; }
+.main-content .p-datatable .p-datatable-tbody > tr:hover,
+.main-content table:not(.att-table) tbody tr:hover { background: #fafaff !important; }
+
+/* Dashboard: replace the oversized dark hero with a calm workspace intro */
+.dashboard-v2 { gap: 20px !important; }
+.dashboard-v2 .dash-intro {
+  min-height: 0 !important; padding: 24px 28px !important;
+  color: #1d2939 !important; background: #fff !important;
+  border: 1px solid #e9edf3 !important; border-radius: 14px !important;
+  box-shadow: none !important;
+}
+.dashboard-v2 .intro-copy h1 { color: #182230 !important; font-size: clamp(27px,2.4vw,34px) !important; font-weight: 760 !important; letter-spacing: -.05em !important; }
+.dashboard-v2 .intro-copy > p, .dashboard-v2 .intro-date { color: #7a8798 !important; }
+.dashboard-v2 .school-chip { background: #f5f4ff !important; color: #5b53c8 !important; border: 1px solid #e9e7ff !important; }
+.dashboard-v2 .intro-primary { background: #635bdb !important; color: #fff !important; border-radius: 8px !important; box-shadow: none !important; }
+.dashboard-v2 .metric-tile, .dashboard-v2 .attendance-feature,
+.dashboard-v2 .action-center, .dashboard-v2 .teacher-availability {
+  background: #fff !important; border: 1px solid #e9edf3 !important;
+  border-radius: 13px !important; box-shadow: 0 1px 2px rgba(16,24,40,.025) !important;
+}
+.dashboard-v2 .metric-tile { min-height: 108px !important; }
+.dashboard-v2 .metric-content strong { color: #182230 !important; }
+.dashboard-v2 .workbench-heading h2, .dashboard-v2 .feature-heading h3,
+.dashboard-v2 .action-heading h3, .dashboard-v2 .availability-heading h3 { color: #253247 !important; }
+.dashboard-v2 .attendance-summary, .dashboard-v2 .availability-item { background: #f8f9fc !important; border: 1px solid #edf0f4 !important; }
+.dashboard-v2 .chart-bar-track { background: #eef0f5 !important; }
+.dashboard-v2 .skeleton { background: linear-gradient(90deg,#edf0f5,#f7f8fa,#edf0f5) !important; }
+
+/* Respect the selected dark theme without forcing it on light mode */
+html[data-theme="dark"] .sidebar { background: #171f31 !important; border-color: #293449 !important; }
+html[data-theme="dark"] .sidebar .nav-item { color: #c4ccda !important; }
+html[data-theme="dark"] .sidebar .nav-item.active { background: #29264f !important; color: #c9c5ff !important; }
+html[data-theme="dark"] .dashboard-v2 .dash-intro { background: #1b2638 !important; border-color: #303c50 !important; }
+html[data-theme="dark"] .dashboard-v2 .intro-copy h1,
+html[data-theme="dark"] .dashboard-v2 .metric-content strong { color: #f2f4f8 !important; }
+html[data-theme="dark"] .dashboard-v2 .intro-copy > p,
+html[data-theme="dark"] .dashboard-v2 .intro-date { color: #aab5c5 !important; }
+
+@media (max-width: 1100px) {
+  .main-content { padding: 22px 20px 32px !important; }
+}
+@media (max-width: 760px) {
+  .topbar { height: 62px !important; }
+  .sidebar { background: #fff !important; }
+  .main-content { padding: 17px 13px 28px !important; }
+  .dashboard-v2 .dash-intro { padding: 20px !important; }
+}
