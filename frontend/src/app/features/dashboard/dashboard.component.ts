@@ -61,7 +61,7 @@ interface Stat {
               <div>
                 <span class="section-kicker">ATTENDANCE INTELLIGENCE</span>
                 <h3>Attendance at a glance</h3>
-                <p>Student attendance recorded across the last seven days</p>
+                <p>Student attendance recorded over the most recent seven days available</p>
               </div>
               <a routerLink="/attendance" class="subtle-link">Open attendance <i class="pi pi-arrow-up-right"></i></a>
             </div>
@@ -80,7 +80,7 @@ interface Stat {
             } @else if (attendanceTrend().length) {
               <div class="trend-chart" role="img" aria-label="Daily attendance trend for the last seven days">
                 <div class="trend-axis"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
-                <div class="trend-columns">
+                <div class="trend-columns" [style.grid-template-columns]="'repeat(' + attendanceTrend().length + ', minmax(0, 1fr))'">
                   @for (point of attendanceTrend(); track point.date; let last = $last) {
                     <div class="trend-day" [class.latest]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
                       <div class="trend-track"><span [style.height.%]="point.pct"></span></div>
@@ -142,7 +142,7 @@ interface Stat {
                 @if (canSeeDiaryCompliance) {
                   <a routerLink="/diary" class="focus-item">
                     <span class="focus-symbol diary"><i class="pi pi-book"></i></span>
-                    <span class="focus-text"><strong>Class diary pending</strong><small>{{ diarySubmitted() }} submitted today</small></span>
+                    <span class="focus-text"><strong>Class diary pending</strong><small>{{ diaryPending() }} awaiting · {{ diarySubmitted() }} submitted today</small></span>
                     <b>{{ diaryPending() }}</b><i class="pi pi-chevron-right"></i>
                   </a>
                 }
@@ -185,12 +185,12 @@ interface Stat {
     .metric-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 30px;border:1px solid #e8eaf0;border-radius:11px;background:#fff;box-shadow:0 2px 8px rgba(27,35,60,.025)}
     .metric{position:relative;min-width:0;padding:16px 19px;border-right:1px solid #edf0f4}
     .metric:last-child{border-right:0}
-    .metric-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#788197;font-size:10px;font-weight:650}
+    .metric-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#68738a;font-size:11px;font-weight:680}
     .metric-label i{color:#8994c9;font-size:13px}
     .metric>strong{display:block;margin:10px 0 3px;color:#252b40;font-size:25px;font-weight:770;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
     .metric>small{display:block;color:#969caf;font-size:9px}
-    .metric>a{position:absolute;right:17px;bottom:17px;color:#4b60bf;font-size:9px;font-weight:750;text-decoration:none;opacity:0}
-    .metric:hover>a{opacity:1}
+    .metric>a{position:absolute;right:17px;bottom:17px;color:#4b60bf;font-size:9px;font-weight:750;text-decoration:none;opacity:.9}
+    .metric>a:focus-visible,.metric:hover>a{opacity:1;outline-offset:3px}
     .content-heading{display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 13px}
     .content-heading h2{margin:6px 0 0;color:#252b40;font-size:18px;font-weight:750;letter-spacing:-.035em}
     .updated-indicator{display:flex;align-items:center;gap:8px;color:#7d879b;font-size:9px}
@@ -200,7 +200,7 @@ interface Stat {
     .attendance-feature,.staff-feature,.focus-card,.shortcut-card{min-width:0;padding:19px;border:1px solid #e7eaf0;border-radius:11px;background:#fff;box-shadow:0 2px 8px rgba(27,35,60,.025)}
     .feature-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
     .feature-top h3,.focus-heading h3,.shortcut-card h3{margin:6px 0 4px;color:#252b40;font-size:15px;font-weight:750;letter-spacing:-.025em}
-    .feature-top p{margin:0;color:#8c94a7;font-size:10px}
+    .feature-top p{margin:0;color:#737e94;font-size:11px}
     .subtle-link{display:inline-flex;align-items:center;gap:7px;flex:none;margin-top:5px;color:#465dbb;text-decoration:none;font-size:9px;font-weight:750}
     .attendance-summary{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:18px 0 12px;padding:14px 16px;border-radius:9px;background:#f6f7fb}
     .attendance-number{display:flex;align-items:baseline;gap:11px;min-width:0}
@@ -222,7 +222,7 @@ interface Stat {
     .focus-card{padding:19px 17px}
     .focus-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
     .focus-count{display:grid;width:30px;height:30px;place-items:center;border-radius:9px;background:#f0f2fc;color:#4b60b9;font-size:11px;font-weight:800}
-    .focus-intro{margin:6px 0 9px;color:#9098aa;font-size:10px;line-height:1.5}
+    .focus-intro{margin:6px 0 9px;color:#788398;font-size:11px;line-height:1.5}
     .focus-items{display:grid}
     .focus-item{display:flex;align-items:center;gap:9px;min-width:0;padding:13px 0;border-top:1px solid #eff1f5;color:inherit;text-decoration:none}
     .focus-item:hover .focus-text strong{color:#465dbb}
@@ -230,7 +230,7 @@ interface Stat {
     .focus-symbol.enquiries{background:#edf3ff;color:#5477c7}.focus-symbol.finance{background:#eaf6f1;color:#21866c}.focus-symbol.staffing{background:#fff4e7;color:#b17b35}.focus-symbol.diary{background:#f0effb;color:#7667b5}
     .focus-text{display:grid;min-width:0;gap:3px}
     .focus-text strong{color:#394257;font-size:10px;font-weight:730}
-    .focus-text small{overflow:hidden;color:#969eae;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+    .focus-text small{overflow:hidden;color:#7c879b;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
     .focus-item>b{margin-left:auto;color:#3d465b;font-size:10px;white-space:nowrap}
     .focus-item>b.money-value{font-size:9px}
     .focus-item>i{color:#b2b8c4;font-size:9px}
