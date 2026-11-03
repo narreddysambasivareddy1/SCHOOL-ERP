@@ -144,7 +144,7 @@ const ALL_NAV: NavItem[] = [
             } @else {
               <span class="logo"><i class="pi pi-sparkles"></i></span>
             }
-            <span class="sidebar-brand-copy"><strong>{{ ctx.context()?.schoolName ?? 'EduCampus' }}</strong><small>{{ ctx.context()?.academicYearName || 'School workspace' }}</small></span>
+            <span class="sidebar-brand-copy"><strong [attr.title]="ctx.context()?.schoolName ?? 'EduCampus'">{{ ctx.context()?.schoolName ?? 'EduCampus' }}</strong><small>{{ ctx.context()?.academicYearName || 'School workspace' }}</small></span>
             <button type="button" class="collapse-btn" (click)="toggleSidebar()"
               [attr.aria-expanded]="!sidebarCollapsed()"
               [attr.aria-label]="sidebarCollapsed() ? 'Expand navigation' : 'Collapse navigation'"
@@ -297,14 +297,14 @@ const ALL_NAV: NavItem[] = [
     .sidebar-brand .logo,.sidebar-brand .logo-img{width:34px;height:34px;flex:none;border-radius:9px}
     .sidebar-brand .logo{display:grid;place-items:center;background:#202b3a;color:#fff;box-shadow:none}
     .sidebar-brand-copy{display:grid;min-width:0;flex:1;gap:3px}
-    .sidebar-brand-copy strong{overflow:hidden;color:#202b3a;font-size:11px;font-weight:760;text-overflow:ellipsis;white-space:nowrap}
-    .sidebar-brand-copy small{color:#929baa;font-size:9px}
+    .sidebar-brand-copy strong{display:-webkit-box;overflow:hidden;color:#202b3a;font-size:11px;font-weight:760;line-height:1.35;white-space:normal;overflow-wrap:anywhere;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+    .sidebar-brand-copy small{overflow:hidden;color:#7f8999;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
     .sidebar-heading{display:none}
-    .nav-label{margin:18px 8px 7px;color:#a0a8b5;font-size:9px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
-    .nav-item{min-height:38px;margin:2px 0;padding:0 10px;border-radius:7px;color:#5d6878;font-size:11px;font-weight:570}
+    .nav-label{margin:20px 8px 8px;padding-top:5px;color:#778397;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .nav-item{min-height:40px;margin:2px 0;padding:0 10px;border:1px solid transparent;border-radius:8px;color:#4f5d70;font-size:12px;font-weight:580}
     .nav-item .nav-icon{width:17px;color:#8792a2;font-size:12px}
-    .nav-item.active{border-left:2px solid #4d63d9;background:#f0f3ff;color:#344dc2;font-weight:700}
-    .nav-item.active .nav-icon{color:#4d63d9}
+    .nav-item.active{border:1px solid #e0e6ff;border-left:3px solid #4d63d9;background:#eef2ff;color:#3048b8;font-weight:750}
+    .nav-item.active .nav-icon{color:#405bd0}.nav-item:focus-visible,.collapse-btn:focus-visible,.mobile-menu-btn:focus-visible,.search-chip:focus-visible{outline:3px solid rgba(77,99,217,.28);outline-offset:2px}.nav-item:focus-visible{background:#f3f5ff}.sidebar nav{padding-bottom:12px}.sidebar-brand-copy{min-width:0;flex:1}.sidebar-brand .collapse-btn{flex:none}
     .sidebar-footer{margin-top:auto;padding:12px 9px;border-top:1px solid #edf0f3;color:#a0a8b5;font-size:9px}
     .main-content{padding:28px clamp(22px,3vw,42px) 42px;background:#f7f8fa}
     .main-content>router-outlet+*{max-width:1560px}
@@ -314,7 +314,7 @@ const ALL_NAV: NavItem[] = [
     .sidebar.collapsed .sidebar-brand-copy,.sidebar.collapsed .sidebar-brand .collapse-btn{display:none}
     .sidebar.collapsed .nav-label,.sidebar.collapsed .nav-item span{display:none}
     .sidebar.collapsed .nav-item{justify-content:center;padding:0}
-    @media(max-width:900px){.sidebar{width:238px;min-width:238px}.sidebar.collapsed{width:76px;min-width:76px}}
+    @media(max-width:900px){.sidebar{width:250px;min-width:250px}.sidebar.collapsed{width:76px;min-width:76px}}
     @media(max-width:768px){
       .topbar{height:60px;gap:9px;padding:0 12px}
       .mobile-menu-btn{display:block}
