@@ -69,18 +69,6 @@ const ALL_NAV: NavItem[] = [
           [attr.aria-expanded]="sidebarOpen()" aria-controls="primary-navigation" aria-label="Toggle navigation">
           <i class="pi pi-bars"></i>
         </button>
-        <div class="brand">
-          @if (ctx.context()?.logoUrl) {
-            <img [src]="ctx.context()!.logoUrl" alt="" class="logo-img" />
-          } @else {
-            <div class="logo"><i class="pi pi-sparkles"></i></div>
-          }
-          <div>
-            <strong>{{ ctx.context()?.schoolName ?? 'EduCampus' }}</strong>
-            <small>{{ ctx.context()?.academicYearName || 'Workspace' }}</small>
-          </div>
-        </div>
-
         <button class="search-chip" type="button" (click)="openPalette()">
           <i class="pi pi-search"></i>
           <span>Search</span>
@@ -150,8 +138,13 @@ const ALL_NAV: NavItem[] = [
       <div class="layout">
         <aside class="sidebar" id="primary-navigation" [class.open]="sidebarOpen()"
           [class.collapsed]="sidebarCollapsed()">
-          <div class="sidebar-heading">
-            <span>School workspace</span>
+          <div class="sidebar-brand">
+            @if (ctx.context()?.logoUrl) {
+              <img [src]="ctx.context()!.logoUrl" alt="" class="logo-img" />
+            } @else {
+              <span class="logo"><i class="pi pi-sparkles"></i></span>
+            }
+            <span class="sidebar-brand-copy"><strong>{{ ctx.context()?.schoolName ?? 'EduCampus' }}</strong><small>{{ ctx.context()?.academicYearName || 'School workspace' }}</small></span>
             <button type="button" class="collapse-btn" (click)="toggleSidebar()"
               [attr.aria-expanded]="!sidebarCollapsed()"
               [attr.aria-label]="sidebarCollapsed() ? 'Expand navigation' : 'Collapse navigation'"
@@ -290,6 +283,54 @@ const ALL_NAV: NavItem[] = [
       .main-content { padding:17px 13px 28px; }
     }
     @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition-duration:.01ms!important; animation-duration:.01ms!important; } }
+
+    /* Workspace shell v3: navigation-first, quiet enterprise workspace */
+    .topbar{height:64px;gap:18px;padding:0 26px;background:#fff;border-bottom:1px solid #e8ebf0;box-shadow:0 1px 0 rgba(18,32,53,.02)}
+    .mobile-menu-btn{display:none}
+    .search-chip{width:min(32vw,360px);height:38px;border:1px solid #e7eaf0;border-radius:8px;background:#f7f8fa}
+    .route-context{padding-left:18px;border-left:1px solid #e8ebf0}
+    .route-context span{font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+    .route-context strong{font-size:12px}
+    .layout{min-height:calc(100vh - 64px);align-items:stretch}
+    .sidebar{width:252px;min-width:252px;padding:0 13px 16px;border-right:1px solid #e8ebf0;background:#fff}
+    .sidebar-brand{display:flex;align-items:center;gap:10px;min-height:76px;margin:0 0 13px;padding:0 7px;border-bottom:1px solid #edf0f3}
+    .sidebar-brand .logo,.sidebar-brand .logo-img{width:34px;height:34px;flex:none;border-radius:9px}
+    .sidebar-brand .logo{display:grid;place-items:center;background:#202b3a;color:#fff;box-shadow:none}
+    .sidebar-brand-copy{display:grid;min-width:0;flex:1;gap:3px}
+    .sidebar-brand-copy strong{overflow:hidden;color:#202b3a;font-size:11px;font-weight:760;text-overflow:ellipsis;white-space:nowrap}
+    .sidebar-brand-copy small{color:#929baa;font-size:9px}
+    .sidebar-heading{display:none}
+    .nav-label{margin:18px 8px 7px;color:#a0a8b5;font-size:9px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+    .nav-item{min-height:38px;margin:2px 0;padding:0 10px;border-radius:7px;color:#5d6878;font-size:11px;font-weight:570}
+    .nav-item .nav-icon{width:17px;color:#8792a2;font-size:12px}
+    .nav-item.active{border-left:2px solid #4d63d9;background:#f0f3ff;color:#344dc2;font-weight:700}
+    .nav-item.active .nav-icon{color:#4d63d9}
+    .sidebar-footer{margin-top:auto;padding:12px 9px;border-top:1px solid #edf0f3;color:#a0a8b5;font-size:9px}
+    .main-content{padding:28px clamp(22px,3vw,42px) 42px;background:#f7f8fa}
+    .main-content>router-outlet+*{max-width:1560px}
+    .collapse-btn{width:26px;height:26px;border:1px solid #e8ebf0;border-radius:7px;background:#fff;color:#8792a2}
+    .sidebar.collapsed{width:76px;min-width:76px}
+    .sidebar.collapsed .sidebar-brand{justify-content:center;padding:0}
+    .sidebar.collapsed .sidebar-brand-copy,.sidebar.collapsed .sidebar-brand .collapse-btn{display:none}
+    .sidebar.collapsed .nav-label,.sidebar.collapsed .nav-item span{display:none}
+    .sidebar.collapsed .nav-item{justify-content:center;padding:0}
+    @media(max-width:900px){.sidebar{width:238px;min-width:238px}.sidebar.collapsed{width:76px;min-width:76px}}
+    @media(max-width:768px){
+      .topbar{height:60px;gap:9px;padding:0 12px}
+      .mobile-menu-btn{display:block}
+      .route-context{display:none}
+      .search-chip{width:40px;min-width:40px;justify-content:center;padding:0}
+      .search-chip span,.search-chip kbd,.user-meta{display:none}
+      .layout{min-height:calc(100vh - 60px)}
+      .sidebar{position:fixed;top:60px;bottom:0;left:0;z-index:35;display:none;width:min(292px,calc(100vw - 48px));min-width:0;height:auto;padding:0 14px 18px;box-shadow:12px 0 40px rgba(24,28,42,.12)}
+      .sidebar.open{display:flex}
+      .sidebar.collapsed{width:min(292px,calc(100vw - 48px));min-width:0}
+      .sidebar.collapsed .sidebar-brand-copy,.sidebar.collapsed .sidebar-brand .collapse-btn,.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-item span{display:initial}
+      .sidebar.collapsed .sidebar-brand{justify-content:flex-start;padding:0 7px}
+      .sidebar.collapsed .nav-item{justify-content:flex-start;padding:0 10px}
+      .sidebar-backdrop:not([hidden]){inset:60px 0 0}
+      .main-content{padding:18px 14px 30px}
+    }
   `]
 })
 export class ShellComponent implements OnInit {
