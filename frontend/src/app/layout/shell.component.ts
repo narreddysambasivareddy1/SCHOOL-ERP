@@ -144,7 +144,7 @@ const ALL_NAV: NavItem[] = [
             } @else {
               <span class="logo"><i class="pi pi-sparkles"></i></span>
             }
-            <span class="sidebar-brand-copy"><strong>{{ ctx.context()?.schoolName ?? 'EduCampus' }}</strong><small>{{ ctx.context()?.academicYearName || 'School workspace' }}</small></span>
+            <span class="sidebar-brand-copy"><strong [attr.title]="ctx.context()?.schoolName ?? 'EduCampus'">{{ ctx.context()?.schoolName ?? 'EduCampus' }}</strong><small>{{ ctx.context()?.academicYearName || 'School workspace' }}</small></span>
             <button type="button" class="collapse-btn" (click)="toggleSidebar()"
               [attr.aria-expanded]="!sidebarCollapsed()"
               [attr.aria-label]="sidebarCollapsed() ? 'Expand navigation' : 'Collapse navigation'"
@@ -297,14 +297,14 @@ const ALL_NAV: NavItem[] = [
     .sidebar-brand .logo,.sidebar-brand .logo-img{width:34px;height:34px;flex:none;border-radius:9px}
     .sidebar-brand .logo{display:grid;place-items:center;background:#202b3a;color:#fff;box-shadow:none}
     .sidebar-brand-copy{display:grid;min-width:0;flex:1;gap:3px}
-    .sidebar-brand-copy strong{overflow:hidden;color:#202b3a;font-size:11px;font-weight:760;text-overflow:ellipsis;white-space:nowrap}
-    .sidebar-brand-copy small{color:#929baa;font-size:9px}
+    .sidebar-brand-copy strong{display:-webkit-box;overflow:hidden;color:#202b3a;font-size:11px;font-weight:760;line-height:1.35;white-space:normal;overflow-wrap:anywhere;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+    .sidebar-brand-copy small{overflow:hidden;color:#7f8999;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
     .sidebar-heading{display:none}
-    .nav-label{margin:18px 8px 7px;color:#a0a8b5;font-size:9px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
-    .nav-item{min-height:38px;margin:2px 0;padding:0 10px;border-radius:7px;color:#5d6878;font-size:11px;font-weight:570}
+    .nav-label{margin:20px 8px 8px;padding-top:5px;color:#778397;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .nav-item{min-height:40px;margin:2px 0;padding:0 10px;border:1px solid transparent;border-radius:8px;color:#4f5d70;font-size:12px;font-weight:580}
     .nav-item .nav-icon{width:17px;color:#8792a2;font-size:12px}
-    .nav-item.active{border-left:2px solid #4d63d9;background:#f0f3ff;color:#344dc2;font-weight:700}
-    .nav-item.active .nav-icon{color:#4d63d9}
+    .nav-item.active{border:1px solid #e0e6ff;border-left:3px solid #4d63d9;background:#eef2ff;color:#3048b8;font-weight:750}
+    .nav-item.active .nav-icon{color:#405bd0}.nav-item:focus-visible,.collapse-btn:focus-visible,.mobile-menu-btn:focus-visible,.search-chip:focus-visible{outline:3px solid rgba(77,99,217,.28);outline-offset:2px}.nav-item:focus-visible{background:#f3f5ff}.sidebar nav{padding-bottom:12px}.sidebar-brand-copy{min-width:0;flex:1}.sidebar-brand .collapse-btn{flex:none}
     .sidebar-footer{margin-top:auto;padding:12px 9px;border-top:1px solid #edf0f3;color:#a0a8b5;font-size:9px}
     .main-content{padding:28px clamp(22px,3vw,42px) 42px;background:#f7f8fa}
     .main-content>router-outlet+*{max-width:1560px}
@@ -314,7 +314,7 @@ const ALL_NAV: NavItem[] = [
     .sidebar.collapsed .sidebar-brand-copy,.sidebar.collapsed .sidebar-brand .collapse-btn{display:none}
     .sidebar.collapsed .nav-label,.sidebar.collapsed .nav-item span{display:none}
     .sidebar.collapsed .nav-item{justify-content:center;padding:0}
-    @media(max-width:900px){.sidebar{width:238px;min-width:238px}.sidebar.collapsed{width:76px;min-width:76px}}
+    @media(max-width:900px){.sidebar{width:250px;min-width:250px}.sidebar.collapsed{width:76px;min-width:76px}}
     @media(max-width:768px){
       .topbar{height:60px;gap:9px;padding:0 12px}
       .mobile-menu-btn{display:block}
@@ -331,6 +331,33 @@ const ALL_NAV: NavItem[] = [
       .sidebar-backdrop:not([hidden]){inset:60px 0 0}
       .main-content{padding:18px 14px 30px}
     }
+
+    /* Premium dark-navy education workspace navigation */
+    .sidebar{width:264px;border-right:1px solid #1d3151;background:linear-gradient(180deg,#172844 0%,#14233c 100%);box-shadow:8px 0 28px rgba(18,35,61,.07)}
+    .sidebar.collapsed{width:78px}
+    .sidebar-brand{padding:0 7px 18px;border-bottom:1px solid rgba(255,255,255,.11)}
+    .sidebar-brand-copy strong{color:#fff;font-size:13px;line-height:1.35}
+    .sidebar-brand-copy small{color:#9fb2cf;font-size:10px}
+    .sidebar .logo{background:linear-gradient(145deg,#6da5ff,#4778dc);box-shadow:0 7px 18px rgba(65,119,220,.28)}
+    .sidebar .logo-img{border-color:rgba(255,255,255,.2)}
+    .sidebar .collapse-btn{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#c2d2e9}
+    .sidebar .collapse-btn:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:#fff}
+    .sidebar .nav-label{margin-top:20px;color:#8298b8;font-size:9px;letter-spacing:.15em}
+    .sidebar .nav-item{min-height:43px;margin:3px 0;padding:9px 12px;border-radius:10px;color:#b3c2d8;font-size:12px;font-weight:590}
+    .sidebar .nav-item:hover{background:rgba(255,255,255,.075);color:#fff}
+    .sidebar .nav-icon{color:#8fa5c5;font-size:15px}
+    .sidebar .nav-item.active{background:linear-gradient(100deg,#376fc5,#477fd4);color:#fff;box-shadow:0 6px 15px rgba(20,53,102,.24)}
+    .sidebar .nav-item.active:before{display:none}
+    .sidebar .nav-item.active .nav-icon{color:#fff}
+    .sidebar .sidebar-footer{border-top-color:rgba(255,255,255,.12);color:#8298b8}
+    .topbar{height:76px;padding-inline:30px;background:rgba(255,255,255,.94);box-shadow:0 4px 18px rgba(29,47,79,.035)}
+    .layout{min-height:calc(100vh - 76px)}
+    .sidebar{top:76px;height:calc(100vh - 76px)}
+    .main-content{padding:30px clamp(22px,3vw,48px) 48px;background:#f4f7fc}
+    @media(max-width:760px){.topbar{height:64px;padding-inline:14px}.layout{min-height:calc(100vh - 64px)}.sidebar{top:64px;height:calc(100vh - 64px)}.main-content{padding:18px 14px 30px}}
+    :host-context(html[data-theme='dark']) .sidebar{background:linear-gradient(180deg,#101c30,#111e33);border-right-color:#263851}
+    :host-context(html[data-theme='dark']) .topbar{background:rgba(24,34,53,.96)}
+    :host-context(html[data-theme='dark']) .main-content{background:#111827}
   `]
 })
 export class ShellComponent implements OnInit {
