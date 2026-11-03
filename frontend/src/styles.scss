@@ -2267,3 +2267,170 @@ html[data-theme="dark"] .main-content .empty {
   background: #1b2638 !important;
   border-color: #3a465a !important;
 }
+
+
+/* People operations and communications finishing details */
+.main-content .ch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 14px !important;
+  padding: 11px 12px;
+  border: 1px solid #e9ecf2;
+  border-radius: 9px;
+  background: #fafbfe;
+}
+.main-content .ch label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  margin: 0 !important;
+  color: #66758a !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.main-content .ch input[type=checkbox] {
+  width: 14px;
+  height: 14px;
+  accent-color: #6258d8;
+}
+.main-content .grid-2 .card h3 {
+  margin: 0 0 14px;
+  color: #273449;
+  font-size: 14px;
+  font-weight: 750;
+}
+.main-content .grid-2 .card > label {
+  display: block;
+  margin: 12px 0 6px;
+  color: #738095;
+  font-size: 10px;
+  font-weight: 750;
+}
+.main-content .grid-2 .card > input,
+.main-content .grid-2 .card > select,
+.main-content .grid-2 .card > textarea {
+  width: 100%;
+  min-height: 39px;
+  padding: 9px 11px;
+  border: 1px solid #e4e8ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #29364a;
+  font-size: 12px;
+}
+.main-content .grid-2 .card > textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.main-content .grid-2 .card > button {
+  min-height: 38px;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #6258d8;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.main-content .grid-2 .card > button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.main-content .grid-2 .card .row {
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eff1f5;
+}
+.main-content .grid-2 .card .row strong {
+  color: #354258;
+  font-size: 11px;
+}
+.main-content .grid-2 .card .row span {
+  color: #8792a3;
+  font-size: 10px;
+}
+.main-content .nums {
+  gap: 10px !important;
+  margin: 18px 0 !important;
+}
+.main-content .nums span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 9px;
+  background: #fafbfe;
+  color: #69778b !important;
+  font-size: 11px !important;
+  font-weight: 650;
+}
+.main-content .nums span:nth-child(n+2) {
+  font-variant-numeric: tabular-nums;
+}
+.main-content .pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 3px 9px !important;
+  border-radius: 6px !important;
+  background: #fff5e4 !important;
+  color: #9b691f !important;
+  font-size: 9px !important;
+  font-weight: 750 !important;
+}
+.main-content .pill.done {
+  background: #e8f6f0 !important;
+  color: #16866b !important;
+}
+.main-content .card header {
+  color: #273449;
+}
+.main-content .card header > button,
+.main-content .toolbar > button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #6258d8;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.main-content .card header > button.ghost,
+.main-content .card > button.ghost {
+  border: 1px solid #e1e3f2;
+  background: #fff;
+  color: #5b56b7;
+}
+.main-content .card table {
+  min-width: 680px;
+}
+.main-content .card:has(> table) {
+  overflow-x: auto;
+}
+html[data-theme="dark"] .main-content .grid-2 .card h3,
+html[data-theme="dark"] .main-content .grid-2 .card .row strong,
+html[data-theme="dark"] .main-content .card header {
+  color: #eef2f8;
+}
+html[data-theme="dark"] .main-content .ch,
+html[data-theme="dark"] .main-content .nums span {
+  background: #202d42;
+  border-color: #303c50;
+}
+html[data-theme="dark"] .main-content .grid-2 .card > input,
+html[data-theme="dark"] .main-content .grid-2 .card > select,
+html[data-theme="dark"] .main-content .grid-2 .card > textarea {
+  background: #172235;
+  border-color: #39465a;
+  color: #e2e8f0;
+}
+@media (max-width: 900px) {
+  .main-content .nums {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+}
