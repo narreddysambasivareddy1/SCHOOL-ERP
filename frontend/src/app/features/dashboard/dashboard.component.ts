@@ -270,6 +270,94 @@ interface Stat {
     :host-context(html[data-theme='dark']) .trend-columns{border-color:#39465a;background:repeating-linear-gradient(to bottom,transparent 0,transparent 24%,#303c50 24.5%,transparent 25%)}
     :host-context(html[data-theme='dark']) .trend-day strong,:host-context(html[data-theme='dark']) .trend-day small{color:#b9c3d2}
     :host-context(html[data-theme='dark']) .online-dot{box-shadow:0 0 0 4px #203b35}
+
+    /* Reference-matched premium education SaaS dashboard */
+    .school-workspace{max-width:1680px;padding:2px 2px 28px;color:#18243b}
+    .welcome-row{position:relative;isolation:isolate;overflow:hidden;align-items:center;min-height:166px;margin:0 0 24px;padding:28px 32px;border:0;border-radius:22px;background:linear-gradient(112deg,#172d58 0%,#244d91 58%,#3976c9 100%);box-shadow:0 16px 36px rgba(30,66,128,.18)}
+    .welcome-row:after{position:absolute;z-index:-1;top:-115px;right:5%;width:330px;height:330px;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 36px rgba(255,255,255,.035),0 0 0 76px rgba(255,255,255,.025);content:""}
+    .workspace-kicker{color:#c7d9f5;font-size:10px;letter-spacing:.15em}
+    .online-dot{background:#4be0ad;box-shadow:0 0 0 4px rgba(75,224,173,.13)}
+    .kicker-divider{color:#8ca9d2}
+    .welcome-copy h1{margin:13px 0 7px;color:#fff;font-size:clamp(29px,3vw,39px);font-weight:760;letter-spacing:-.045em}
+    .welcome-copy p{color:#d4e1f5;font-size:13px}
+    .welcome-copy p span{color:#91add5}
+    .welcome-actions{position:relative;z-index:1}
+    .school-chip{max-width:270px;padding:12px 15px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(255,255,255,.12);color:#fff;backdrop-filter:blur(8px);font-size:11px}
+    .school-chip i{color:#b8d4ff}
+    .create-action{min-height:42px;padding:0 17px;border-radius:10px;background:#fff;color:#244c91;font-size:11px;box-shadow:0 6px 16px rgba(10,29,64,.14)}
+    .create-action:hover{background:#edf4ff;color:#173d7c}
+    .workspace-error{border-radius:12px;font-size:12px}
+    .metric-strip{gap:15px;margin:0 0 31px;border:0;border-radius:0;background:transparent;box-shadow:none}
+    .metric{min-height:135px;padding:20px 21px;border:1px solid #e7edf6!important;border-radius:17px;background:#fff;box-shadow:0 7px 22px rgba(28,49,87,.055);transition:transform .18s ease,box-shadow .18s ease}
+    .metric:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(28,49,87,.10)}
+    .metric-label{color:#697891;font-size:12px;font-weight:680}
+    .metric-label i{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:#edf3ff;color:#4779d1;font-size:16px}
+    .metric:nth-child(2) .metric-label i{background:#eaf8f2;color:#219b77}
+    .metric:nth-child(3) .metric-label i{background:#f1edff;color:#8065cf}
+    .metric:nth-child(4) .metric-label i{background:#fff3e8;color:#d48a3b}
+    .metric>strong{margin:13px 0 4px;color:#1d2b45;font-size:31px;letter-spacing:-.055em}
+    .metric>small{color:#8c98aa;font-size:10px}
+    .metric>a{right:20px;bottom:21px;color:#4674c6;font-size:10px}
+    .content-heading{margin:0 0 15px}
+    .section-kicker{color:#8291a8;font-size:10px;letter-spacing:.14em}
+    .content-heading h2{margin-top:6px;color:#1d2b45;font-size:21px;font-weight:760}
+    .updated-indicator{font-size:10px}
+    .workspace-grid{grid-template-columns:minmax(0,1.65fr) minmax(315px,.88fr);gap:18px}
+    .main-column,.side-column{gap:18px}
+    .attendance-feature,.staff-feature,.focus-card,.shortcut-card{padding:23px;border:1px solid #e7edf5;border-radius:17px;background:#fff;box-shadow:0 7px 22px rgba(28,49,87,.045)}
+    .feature-top h3,.focus-heading h3,.shortcut-card h3{color:#1d2b45;font-size:17px}
+    .feature-top p{color:#8491a6;font-size:12px}
+    .subtle-link{font-size:10px}
+    .attendance-summary{margin:21px 0 15px;padding:17px 19px;border:1px solid #e8eff9;border-radius:13px;background:linear-gradient(110deg,#f2f6ff,#f8fbff)}
+    .attendance-number strong{color:#244c91;font-size:36px}
+    .attendance-number span{color:#73839c;font-size:11px}
+    .register-state{font-size:10px}
+    .trend-chart{height:215px;grid-template-columns:38px 1fr;gap:13px;margin-top:13px}
+    .trend-axis{font-size:10px}
+    .trend-columns{gap:14px;border-color:#e8edf5;background:repeating-linear-gradient(to bottom,transparent 0,transparent 24%,#edf1f7 24.5%,transparent 25%)}
+    .trend-track{height:154px}
+    .trend-track span{width:min(34px,70%);border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#80a8ef,#4e7ed2);box-shadow:0 4px 10px rgba(78,126,210,.15)}
+    .trend-day.latest .trend-track span{background:linear-gradient(180deg,#55c9a5,#239b7b)}
+    .trend-day strong{color:#3c4c66;font-size:11px}
+    .trend-day small{font-size:10px}
+    .trend-day .trend-date{font-size:9px}
+    .feature-foot{margin-top:17px;padding-top:15px;color:#8996a9;font-size:10px}
+    .focus-card{padding:22px}
+    .focus-count{width:34px;height:34px;border-radius:11px;background:#edf3ff;color:#3769bd;font-size:13px}
+    .focus-intro{font-size:12px;color:#8390a4}
+    .focus-item{gap:12px;padding:15px 0}
+    .focus-symbol{width:38px;height:38px;border-radius:12px;font-size:15px}
+    .focus-text strong{font-size:11px;color:#35445e}
+    .focus-text small{font-size:10px}
+    .focus-item>b{font-size:12px}
+    .focus-foot{font-size:10px}
+    .shortcut-card{border:0;background:linear-gradient(145deg,#244d91,#326fc0);box-shadow:0 12px 25px rgba(35,77,145,.17)}
+    .shortcut-card .section-kicker{color:#bcd2f2}
+    .shortcut-card h3{margin-bottom:14px;color:#fff}
+    .shortcut-list a{min-height:43px;border-top-color:rgba(255,255,255,.15);color:#e7f0ff;font-size:11px}
+    .shortcut-list a>i:first-child{color:#b9d2fb;font-size:14px}
+    .shortcut-list a>i:last-child{color:#c2d7f5}
+    .shortcut-list a:hover{color:#fff}
+    .staff-list{gap:12px}
+    .staff-row{gap:8px;padding:15px;border:1px solid #e9eef6;border-radius:12px;background:#f8faff}
+    .period-name{font-size:10px}
+    .staff-row>strong{color:#254b88;font-size:24px}
+    .teacher-names{font-size:10px}
+    .trend-empty{min-height:190px;font-size:11px}
+    .trend-empty strong{font-size:13px}
+    .trend-loading span,.focus-loading span{background:#edf1f8}
+    .focus-item:focus-visible,.shortcut-list a:focus-visible,.subtle-link:focus-visible{outline:3px solid rgba(70,116,198,.3);outline-offset:3px}
+    :host-context(html[data-theme='dark']) .welcome-row{background:linear-gradient(112deg,#101f3d,#1c3d70 58%,#28599c)}
+    :host-context(html[data-theme='dark']) .metric,:host-context(html[data-theme='dark']) .attendance-feature,:host-context(html[data-theme='dark']) .staff-feature,:host-context(html[data-theme='dark']) .focus-card{background:#1b2940;border-color:#2c3b54!important}
+    :host-context(html[data-theme='dark']) .metric-label,:host-context(html[data-theme='dark']) .feature-top h3,:host-context(html[data-theme='dark']) .focus-heading h3,:host-context(html[data-theme='dark']) .content-heading h2,:host-context(html[data-theme='dark']) .metric>strong{color:#edf3fc}
+    :host-context(html[data-theme='dark']) .metric>small,:host-context(html[data-theme='dark']) .feature-top p,:host-context(html[data-theme='dark']) .focus-intro{color:#a4b2c8}
+    :host-context(html[data-theme='dark']) .attendance-summary,:host-context(html[data-theme='dark']) .staff-row{background:#202f48;border-color:#33445f}
+    :host-context(html[data-theme='dark']) .attendance-number strong{color:#a9c8ff}
+    :host-context(html[data-theme='dark']) .attendance-number span,:host-context(html[data-theme='dark']) .trend-day strong{color:#bdcbe0}
+    :host-context(html[data-theme='dark']) .trend-columns{border-color:#35445a;background:repeating-linear-gradient(to bottom,transparent 0,transparent 24%,#2b3b52 24.5%,transparent 25%)}
+    :host-context(html[data-theme='dark']) .focus-text strong,:host-context(html[data-theme='dark']) .focus-item>b{color:#e4ecf8}
+    @media(max-width:900px){.welcome-row{align-items:flex-start;flex-direction:column;padding:24px}.welcome-actions{flex-wrap:wrap}.metric-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.school-workspace{padding:0}.welcome-row{min-height:0;margin-bottom:18px;padding:22px 19px;border-radius:16px}.welcome-copy h1{font-size:29px}.welcome-actions{width:100%}.school-chip{max-width:100%}.metric-strip{gap:10px;margin-bottom:24px}.metric{min-height:125px;padding:15px}.metric>strong{font-size:26px}.metric>a{position:static;display:inline-block;margin-top:8px}.content-heading h2{font-size:18px}.attendance-feature,.staff-feature,.focus-card,.shortcut-card{padding:17px;border-radius:14px}.attendance-summary{align-items:flex-start;flex-direction:column}.attendance-number{align-items:flex-start;flex-direction:column;gap:3px}.trend-chart{height:190px;grid-template-columns:30px 1fr;gap:6px}.trend-track{height:132px}.trend-columns{gap:5px}.feature-foot{align-items:flex-start;flex-direction:column}}
   `]
 })
 export class DashboardComponent implements OnInit {
