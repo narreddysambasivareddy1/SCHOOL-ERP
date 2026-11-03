@@ -331,6 +331,33 @@ const ALL_NAV: NavItem[] = [
       .sidebar-backdrop:not([hidden]){inset:60px 0 0}
       .main-content{padding:18px 14px 30px}
     }
+
+    /* Premium dark-navy education workspace navigation */
+    .sidebar{width:264px;border-right:1px solid #1d3151;background:linear-gradient(180deg,#172844 0%,#14233c 100%);box-shadow:8px 0 28px rgba(18,35,61,.07)}
+    .sidebar.collapsed{width:78px}
+    .sidebar-brand{padding:0 7px 18px;border-bottom:1px solid rgba(255,255,255,.11)}
+    .sidebar-brand-copy strong{color:#fff;font-size:13px;line-height:1.35}
+    .sidebar-brand-copy small{color:#9fb2cf;font-size:10px}
+    .sidebar .logo{background:linear-gradient(145deg,#6da5ff,#4778dc);box-shadow:0 7px 18px rgba(65,119,220,.28)}
+    .sidebar .logo-img{border-color:rgba(255,255,255,.2)}
+    .sidebar .collapse-btn{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#c2d2e9}
+    .sidebar .collapse-btn:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:#fff}
+    .sidebar .nav-label{margin-top:20px;color:#8298b8;font-size:9px;letter-spacing:.15em}
+    .sidebar .nav-item{min-height:43px;margin:3px 0;padding:9px 12px;border-radius:10px;color:#b3c2d8;font-size:12px;font-weight:590}
+    .sidebar .nav-item:hover{background:rgba(255,255,255,.075);color:#fff}
+    .sidebar .nav-icon{color:#8fa5c5;font-size:15px}
+    .sidebar .nav-item.active{background:linear-gradient(100deg,#376fc5,#477fd4);color:#fff;box-shadow:0 6px 15px rgba(20,53,102,.24)}
+    .sidebar .nav-item.active:before{display:none}
+    .sidebar .nav-item.active .nav-icon{color:#fff}
+    .sidebar .sidebar-footer{border-top-color:rgba(255,255,255,.12);color:#8298b8}
+    .topbar{height:76px;padding-inline:30px;background:rgba(255,255,255,.94);box-shadow:0 4px 18px rgba(29,47,79,.035)}
+    .layout{min-height:calc(100vh - 76px)}
+    .sidebar{top:76px;height:calc(100vh - 76px)}
+    .main-content{padding:30px clamp(22px,3vw,48px) 48px;background:#f4f7fc}
+    @media(max-width:760px){.topbar{height:64px;padding-inline:14px}.layout{min-height:calc(100vh - 64px)}.sidebar{top:64px;height:calc(100vh - 64px)}.main-content{padding:18px 14px 30px}}
+    :host-context(html[data-theme='dark']) .sidebar{background:linear-gradient(180deg,#101c30,#111e33);border-right-color:#263851}
+    :host-context(html[data-theme='dark']) .topbar{background:rgba(24,34,53,.96)}
+    :host-context(html[data-theme='dark']) .main-content{background:#111827}
   `]
 })
 export class ShellComponent implements OnInit {
