@@ -167,31 +167,55 @@ import { SchoolContextService } from '../../core/services/school-context.service
     </p-dialog>
   `,
   styles: [`
-    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    h1 { margin: 4px 0; font-size: 22px; color: var(--navy); }
-    .toolbar { margin-bottom: 14px; }
-    .person { display: flex; align-items: center; gap: 12px; }
-    .student-row { cursor: pointer; }
-    .person-btn { border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; padding: 0; }
-    .avatar { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; object-fit: cover; }
-    .photo-field { grid-column: 1 / -1; }
-    .preview, .portrait { width: 96px; height: 96px; object-fit: cover; border-radius: 16px; border: 1px solid var(--line); }
-    .portrait.empty { display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-weight: 700; }
-    .photo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-    .photo-actions button, .cam button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--navy2); color: var(--ink); border-radius: 8px; padding: 7px 10px; font-size: 12px; font-weight: 700; }
-    .cam { margin-top: 12px; }
-    .cam video { width: 100%; max-height: 220px; background: #070d18; border-radius: 12px; object-fit: cover; }
-    .profile { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; align-items: start; }
-    dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin: 0; }
-    dl div { display: grid; gap: 2px; }
-    dt { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-    dd { margin: 0; color: var(--ink); font-size: 15px; }
-    strong { font-size: 12px; }
-    small { color: var(--muted); font-size: 10px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #506078; }
-    .dialog-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    :host ::ng-deep .p-calendar { width: 100%; }
+    :host { display:block; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:0 0 22px; padding:0 0 18px; border-bottom:1px solid var(--line); }
+    .page-header .eyebrow { color:#766de0; font-size:9px; font-weight:850; letter-spacing:.13em; }
+    h1 { margin:5px 0 0; color:#252b45; font-size:29px; font-weight:790; letter-spacing:-.045em; }
+    .toolbar { display:flex; align-items:center; gap:12px; margin:0 0 14px; padding:12px; border:1px solid #e9eaf2; border-radius:12px; background:#fff; }
+    .toolbar input { width:min(360px,100%); min-height:39px; padding:0 12px; border:1px solid #e7e8f0; border-radius:8px; background:#fafaff; color:#303650; font-size:12px; }
+    .toolbar input:focus { border-color:#aaa4f3; background:#fff; outline:0; box-shadow:0 0 0 3px rgba(98,88,223,.10); }
+    :host ::ng-deep .p-datatable { overflow:hidden; border:1px solid #e9eaf2; border-radius:13px; background:#fff; box-shadow:0 2px 9px rgba(35,38,75,.025); }
+    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th { padding:13px 16px; border-color:#eff0f5; background:#f8f8fc; color:#969bb0; font-size:9px; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td { padding:13px 16px; border-color:#f0f1f6; color:#4d536b; font-size:12px; }
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr { transition:background .14s ease; }
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover { background:#fafaff; }
+    :host ::ng-deep .p-paginator { padding:9px 12px; border:0; border-top:1px solid #eff0f5; background:#fff; }
+    .person { display:flex; align-items:center; gap:11px; }
+    .student-row { cursor:pointer; }
+    .person-btn { display:flex; align-items:center; gap:11px; padding:0; border:0; background:transparent; color:inherit; cursor:pointer; text-align:left; }
+    .person-btn strong { color:#303650; font-size:12px; font-weight:750; }
+    .avatar { display:grid; width:39px; height:39px; flex:none; place-items:center; border-radius:11px; background:#f0efff; color:#6258df; font-size:11px; font-weight:800; object-fit:cover; }
+    .photo-field { grid-column:1/-1; }
+    .preview,.portrait { width:96px; height:96px; border:1px solid var(--line); border-radius:14px; object-fit:cover; }
+    .portrait.empty { display:grid; place-items:center; background:#f0efff; color:#6258df; font-weight:800; }
+    .photo-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
+    .photo-actions button,.cam button { padding:8px 11px; border:1px solid #e5e5f0; border-radius:8px; background:#f7f7fc; color:#555d78; cursor:pointer; font-size:11px; font-weight:700; }
+    .photo-actions button:hover,.cam button:hover { border-color:#c9c4fb; background:#f0efff; color:#5146c8; }
+    .cam { margin-top:12px; }
+    .cam video { width:100%; max-height:220px; border-radius:12px; background:#171a2b; object-fit:cover; }
+    .profile { display:grid; grid-template-columns:96px minmax(0,1fr); gap:20px; align-items:start; }
+    dl { display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; margin:0; }
+    dl div { display:grid; gap:4px; padding-bottom:9px; border-bottom:1px solid #f0f0f6; }
+    dt { color:#9297aa; font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    dd { margin:0; color:#343a55; font-size:12px; font-weight:650; }
+    small { color:#969bad; font-size:10px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+    .field label { display:block; margin-bottom:6px; color:#737991; font-size:10px; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
+    .field :where(input) { width:100%; min-height:39px; padding:8px 10px; border:1px solid #e5e7f0; border-radius:8px; background:#fff; color:#343a55; font-size:12px; }
+    .dialog-footer { display:flex; justify-content:flex-end; gap:9px; margin-top:22px; padding-top:15px; border-top:1px solid #eff0f5; }
+    :host ::ng-deep .p-dialog { overflow:hidden; border:1px solid #e9eaf2; border-radius:15px; box-shadow:0 24px 70px rgba(25,29,60,.18); }
+    :host ::ng-deep .p-dialog .p-dialog-header { padding:18px 20px; border-bottom:1px solid #eff0f5; background:#fff; color:#2c324d; font-size:15px; font-weight:760; }
+    :host ::ng-deep .p-dialog .p-dialog-content { padding:20px; background:#fff; }
+    :host ::ng-deep .p-calendar { width:100%; }
+    @media(max-width:650px) {
+      .page-header { align-items:flex-start; flex-direction:column; }
+      h1 { font-size:25px; }
+      .toolbar input { width:100%; }
+      .form-grid { grid-template-columns:1fr; }
+      .profile { grid-template-columns:1fr; }
+      dl { grid-template-columns:1fr 1fr; }
+    }
+  `]
   `]
 })
 export class StudentListComponent implements OnInit, OnDestroy {
