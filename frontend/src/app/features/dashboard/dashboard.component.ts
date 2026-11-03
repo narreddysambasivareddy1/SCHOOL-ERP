@@ -244,233 +244,99 @@ interface Stat {
       .cover-head span:last-child, .cover-row small { grid-column: 1 / -1; }
     }
 
-    /* Premium A+D dashboard composition */
-    .welcome {
-      position: relative; align-items: center; min-height: 154px;
-      margin: 0 0 20px; padding: 27px 30px; overflow: hidden;
-      border: 1px solid var(--line); border-radius: 20px;
-      background: linear-gradient(112deg, var(--surface) 0%, var(--surface) 68%, var(--primary-soft) 145%);
-      box-shadow: 0 5px 20px rgba(24, 43, 75, .035);
-    }
-    .welcome::after {
-      content: ""; position: absolute; width: 210px; height: 210px; right: 7%;
-      top: -118px; border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
-      border-radius: 50%; pointer-events: none;
-    }
-    .welcome-kicker {
-      margin: 0 0 9px; color: var(--primary); font-size: 11px;
-      font-weight: 800; letter-spacing: .09em; text-transform: uppercase;
-    }
-    .welcome h1 { color: var(--ink); font-size: clamp(27px, 2.4vw, 34px); font-weight: 760; letter-spacing: -.045em; }
-    .welcome-date { margin-top: 9px; color: var(--muted); font-size: 13px; }
-    .primary-action {
-      position: relative; z-index: 1; height: 44px; padding: 0 17px;
-      border-radius: 11px; box-shadow: 0 5px 12px color-mix(in srgb, var(--primary) 18%, transparent);
-      font-size: 13px; font-weight: 750;
-    }
-    .alert-banner { border: 1px solid color-mix(in srgb, var(--warn) 18%, transparent); border-radius: 13px; }
-    .kpis { gap: 15px; }
-    .kpi {
-      position: relative; min-height: 142px; gap: 15px; padding: 22px 20px;
-      border: 1px solid var(--line); border-radius: 17px; background: var(--surface);
-      box-shadow: 0 4px 16px rgba(24, 43, 75, .035);
-      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-    }
-    a.kpi:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--primary) 38%, var(--line)); box-shadow: 0 12px 26px rgba(24,43,75,.08); }
-    .kpi-icon { width: 44px; height: 44px; border-radius: 13px; font-size: 17px; }
-    .kpi:nth-child(2) .kpi-icon { background: #eaf7f2; color: #16845f; }
-    .kpi:nth-child(3) .kpi-icon { background: #fff5e7; color: #b7791f; }
-    .kpi:nth-child(4) .kpi-icon { background: #f1edff; color: #7052bd; }
-    .kpi-copy { gap: 5px; }
-    .kpi-label { font-size: 12px; font-weight: 700; letter-spacing: .01em; }
-    .kpi strong { color: var(--ink); font-size: clamp(25px, 2.1vw, 31px); font-weight: 760; letter-spacing: -.045em; }
-    .kpi-note { font-size: 11px; line-height: 1.45; }
-    .board { grid-template-columns: minmax(0, 1.55fr) minmax(300px, .9fr); gap: 15px; margin-top: 15px; }
-    .panel {
-      min-height: 310px; padding: 23px 24px 16px; border-radius: 18px;
-      border-color: var(--line); box-shadow: 0 4px 18px rgba(24,43,75,.035);
-    }
-    .panel-heading { align-items: center; }
-    .panel-heading h2 { color: var(--ink); font-size: 16px; font-weight: 760; letter-spacing: -.025em; }
-    .panel-heading p { margin-top: 5px; font-size: 12px; }
-    .open-link { height: 35px; padding: 0 13px; border-radius: 9px; font-size: 12px; font-weight: 700; }
-    .today-figure { margin-left: auto; margin-right: 8px; }
-    .today-figure strong { color: var(--primary); font-size: 25px; font-weight: 780; }
-    .today-figure span { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
-    .trend-chart {
-      position: relative; height: 222px; gap: 16px; margin-top: 22px;
-      padding: 12px 8px 0; border: 0;
-      background: repeating-linear-gradient(to bottom, transparent 0, transparent 53px, var(--line) 54px, transparent 55px);
-    }
-    .trend-day { grid-template-rows: minmax(0, 1fr) 18px 18px; gap: 5px; }
-    .trend-track { width: min(34px, 100%); border-radius: 9px 9px 3px 3px; background: var(--navy2); overflow: hidden; }
-    .trend-bar { border-radius: 8px 8px 2px 2px; background: color-mix(in srgb, var(--primary) 52%, #aebbd0); transition: height 300ms ease; }
-    .trend-day.is-latest .trend-bar { background: var(--primary); }
-    .trend-day strong { font-size: 12px; font-weight: 750; }
-    .trend-day small { font-size: 11px; }
-    .queue { gap: 9px; margin: 18px 0 12px; }
-    .queue a {
-      min-height: 66px; grid-template-columns: 40px minmax(0,1fr) auto;
-      gap: 12px; padding: 10px 12px; border: 1px solid var(--line);
-      border-radius: 13px; background: var(--surface); transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
-    }
-    .queue a:hover { background: var(--canvas); border-color: color-mix(in srgb, var(--primary) 35%, var(--line)); transform: translateX(2px); }
-    .work-icon { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); font-size: 15px; }
-    .queue a:nth-child(2) .work-icon { background: #eaf7f2; color: #16845f; }
-    .queue a:nth-child(3) .work-icon { background: #fff5e7; color: #b7791f; }
-    .queue a:nth-child(4) .work-icon { background: #f1edff; color: #7052bd; }
-    .work-copy span { font-size: 12px; font-weight: 750; }
-    .work-copy small { margin-top: 2px; font-size: 11px; }
-    .queue a > strong { font-size: 15px; font-weight: 780; }
-    .cover-panel { min-height: auto; margin-top: 15px; }
-    .cover-table { margin-top: 16px; }
-    .cover-head, .cover-row { min-height: 48px; }
-    .cover-head { font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
-    .cover-row { font-size: 13px; }
-    .empty-chart { min-height: 190px; }
-    .skeleton { background: linear-gradient(90deg, var(--navy2), color-mix(in srgb, var(--navy2) 55%, white), var(--navy2)); }
-    @media (max-width: 1100px) {
-      .board { grid-template-columns: minmax(0, 1fr); }
-      .panel { min-height: 0; }
-    }
-    @media (max-width: 720px) {
-      .welcome { min-height: 0; padding: 22px 20px; border-radius: 16px; }
-      .welcome h1 { font-size: 25px; }
-      .primary-action { height: 40px; }
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .kpi { min-height: 124px; padding: 15px 13px; gap: 10px; border-radius: 14px; }
-      .kpi-icon { width: 36px; height: 36px; border-radius: 11px; }
-      .kpi strong { font-size: 23px; overflow-wrap: anywhere; }
-      .kpi-note { font-size: 10px; }
-      .panel { padding: 18px 16px 12px; border-radius: 15px; }
-      .trend-chart { height: 190px; gap: 8px; }
-      .today-figure { margin-right: 0; }
-      .cover-head, .cover-row { grid-template-columns: 1fr 48px; }
-    }
-    @media (max-width: 390px) {
-      .kpis { grid-template-columns: minmax(0, 1fr); }
-    }
-
-
-    
-
-    /* Executive dashboard composition — clear hierarchy and purposeful information density */
-    .dashboard-v2 {
-      width: 100%;
-      max-width: 1600px;
-      margin: 0 auto;
-      gap: 22px;
-      color: #17243b;
-    }
+    /* Premium education SaaS dashboard — editorial light workspace */
+    .dashboard-v2 { max-width:1600px; margin:0 auto; color:#252b45; }
     .dash-intro {
-      position: relative;
-      min-height: 206px;
-      align-items: center;
-      padding: 31px 36px;
-      overflow: hidden;
-      border: 0;
-      border-radius: 20px;
-      background:
-        radial-gradient(circle at 86% 18%,rgba(139,158,255,.30),transparent 25%),
-        radial-gradient(circle at 100% 100%,rgba(41,178,178,.17),transparent 34%),
-        linear-gradient(112deg,#14264a 0%,#243f79 58%,#3e55a9 100%);
-      box-shadow: 0 16px 36px rgba(24,43,85,.16);
+      position:relative; min-height:190px; align-items:center; padding:30px 34px; overflow:hidden;
+      border:1px solid #e8e7f8; border-radius:18px;
+      background:linear-gradient(112deg,#fff 0%,#fbfaff 58%,#f0efff 100%);
+      box-shadow:0 8px 26px rgba(55,48,130,.045);
     }
     .dash-intro::before {
-      content: "";
-      position: absolute;
-      width: 330px;
-      height: 330px;
-      right: 8%;
-      top: -205px;
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 50%;
-      box-shadow: 0 0 0 34px rgba(255,255,255,.035),0 0 0 70px rgba(255,255,255,.025);
-      pointer-events: none;
+      content:""; position:absolute; right:8%; top:-170px; width:340px; height:340px;
+      border:1px solid rgba(101,89,232,.13); border-radius:50%;
+      box-shadow:0 0 0 34px rgba(101,89,232,.035),0 0 0 72px rgba(101,89,232,.025); pointer-events:none;
     }
-    .intro-copy,.intro-actions { position: relative; z-index: 1; }
-    .intro-overline { color: #bdcaff; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
-    .intro-copy h1 { margin: 13px 0 8px; color: #fff; font-size: clamp(30px,3vw,40px); font-weight: 780; letter-spacing: -.045em; }
-    .intro-copy > p { margin: 0; color: #d0daf1; font-size: 13px; }
-    .intro-date { margin-top: 19px; color: #c1cdec; font-size: 11px; }
-    .school-chip { border: 1px solid rgba(255,255,255,.23); background: rgba(255,255,255,.10); color: #f2f5ff; backdrop-filter: blur(8px); }
-    .intro-primary { border: 1px solid rgba(255,255,255,.18); border-radius: 10px; background: #fff; color: #263f8e; font-weight: 760; box-shadow: 0 7px 18px rgba(8,18,48,.16); }
-    .intro-primary:hover { background: #edf1ff; transform: translateY(-1px); }
-    .metric-strip { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+    .dash-intro::after {
+      content:""; position:absolute; right:18%; bottom:-190px; width:270px; height:270px;
+      border-radius:50%; background:radial-gradient(circle,rgba(135,123,255,.14),transparent 68%); pointer-events:none;
+    }
+    .intro-copy,.intro-actions { position:relative; z-index:1; }
+    .intro-overline { color:#766de0; font-size:10px; font-weight:800; letter-spacing:.13em; }
+    .live-dot { display:inline-block; width:7px; height:7px; margin-right:5px; border-radius:50%; background:#22a982; box-shadow:0 0 0 3px rgba(34,169,130,.12); }
+    .intro-copy h1 { margin:12px 0 7px; color:#252b45; font-size:clamp(29px,2.8vw,38px); font-weight:790; letter-spacing:-.05em; }
+    .intro-copy > p { margin:0; color:#7f849b; font-size:13px; }
+    .intro-date { margin-top:17px; color:#9297aa; font-size:11px; }
+    .school-chip { border:1px solid #e8e7f5; border-radius:9px; background:#fff; color:#626984; box-shadow:0 2px 7px rgba(35,38,75,.035); }
+    .intro-primary { border:1px solid #6258df; border-radius:9px; background:#6258df; color:#fff; font-size:12px; font-weight:730; box-shadow:0 6px 15px rgba(98,88,223,.18); }
+    .intro-primary:hover { border-color:#5146c8; background:#5146c8; transform:translateY(-1px); }
+    .metric-strip { grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; }
     .metric-tile {
-      position: relative;
-      min-height: 132px;
-      padding: 19px;
-      gap: 14px;
-      border: 1px solid #e6eaf2;
-      border-radius: 15px;
-      background: #fff;
-      box-shadow: 0 4px 15px rgba(22,38,68,.035);
-      transition: transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+      position:relative; min-height:124px; padding:18px; gap:13px;
+      border:1px solid #e9eaf2; border-radius:13px; background:#fff;
+      box-shadow:0 2px 8px rgba(35,38,75,.025); transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
     }
-    a.metric-tile:hover { transform: translateY(-3px); border-color: #cbd4fa; box-shadow: 0 13px 26px rgba(30,49,93,.09); }
-    .metric-symbol { width: 43px; height: 43px; border-radius: 12px; background: #edf0ff; color: #435bd4; font-size: 16px; }
-    .metric-tone-1 .metric-symbol { background: #e9f7f1; color: #168568; }
-    .metric-tone-2 .metric-symbol { background: #fff4e6; color: #b7791f; }
-    .metric-tone-3 .metric-symbol { background: #f2edff; color: #7656c7; }
-    .metric-content { gap: 5px; }
-    .metric-label { color: #78859b; font-size: 10px; font-weight: 800; letter-spacing: .075em; text-transform: uppercase; }
-    .metric-content strong { color: #1c2d4b; font-size: clamp(25px,2vw,31px); font-weight: 790; letter-spacing: -.045em; }
-    .metric-content small { color: #8995a8; font-size: 10px; }
-    .metric-arrow { color: #9aa6ba; }
-    .workbench-heading { margin: 4px 0 -4px; }
-    .section-overline,.feature-kicker { color: #71809a; font-size: 9px; font-weight: 850; letter-spacing: .13em; }
-    .workbench-heading h2 { margin-top: 5px; color: #1b2b49; font-size: 22px; font-weight: 780; letter-spacing: -.035em; }
-    .updated-label { padding: 7px 10px; border: 1px solid #dcefe7; border-radius: 20px; background: #f0faf5; color: #218260; font-size: 10px; font-weight: 700; }
-    .workbench { grid-template-columns: minmax(0,1.55fr) minmax(330px,.9fr); gap: 15px; }
+    a.metric-tile:hover { transform:translateY(-2px); border-color:#c9c4fb; box-shadow:0 10px 22px rgba(55,48,130,.075); }
+    .metric-symbol { width:40px; height:40px; border-radius:11px; background:#f0efff; color:#6258df; font-size:15px; }
+    .metric-tone-1 .metric-symbol { background:#eaf7f2; color:#16866f; }
+    .metric-tone-2 .metric-symbol { background:#fff5e8; color:#b77a28; }
+    .metric-tone-3 .metric-symbol { background:#f3edff; color:#815cc8; }
+    .metric-content { gap:4px; }
+    .metric-label { color:#8b91a6; font-size:9px; font-weight:800; letter-spacing:.085em; }
+    .metric-content strong { color:#292f4a; font-size:clamp(24px,1.9vw,30px); font-weight:790; letter-spacing:-.045em; }
+    .metric-content small { color:#969bad; font-size:10px; }
+    .metric-arrow { color:#a5a8b8; }
+    .workbench-heading { margin:5px 0 -4px; }
+    .section-overline,.feature-kicker { color:#8c91a6; font-size:9px; font-weight:850; letter-spacing:.13em; }
+    .workbench-heading h2 { margin-top:5px; color:#292f4a; font-size:21px; font-weight:780; letter-spacing:-.04em; }
+    .updated-label { padding:7px 10px; border:1px solid #dff0e9; border-radius:20px; background:#f1faf6; color:#238568; font-size:10px; font-weight:700; }
+    .workbench { grid-template-columns:minmax(0,1.55fr) minmax(320px,.9fr); gap:14px; }
     .attendance-feature,.action-center,.teacher-availability {
-      border: 1px solid #e6eaf2;
-      border-radius: 16px;
-      background: #fff;
-      box-shadow: 0 4px 16px rgba(22,38,68,.035);
+      border:1px solid #e9eaf2; border-radius:14px; background:#fff; box-shadow:0 2px 9px rgba(35,38,75,.025);
     }
-    .attendance-feature { padding: 24px 25px 17px; }
-    .action-center { padding: 23px 20px 16px; }
-    .feature-heading h3,.action-heading h3,.availability-heading h3 { margin: 6px 0 4px; color: #20314f; font-size: 17px; font-weight: 780; letter-spacing: -.025em; }
-    .feature-heading p,.action-heading p,.availability-heading p { color: #8793a7; font-size: 11px; }
-    .feature-link { color: #465dcc; font-size: 11px; font-weight: 750; }
-    .attendance-summary { border: 1px solid #e9edf5; border-radius: 12px; background: #f8f9fd; }
-    .attendance-number strong { color: #253d82; font-size: 29px; font-weight: 800; letter-spacing: -.04em; }
-    .attendance-number span { color: #7c899e; font-size: 10px; }
-    .attendance-state { color: #168568; font-size: 10px; font-weight: 750; }
-    .attendance-state.state-pending { color: #a66c1d; }
-    .v2-chart { height: 210px; }
-    .chart-guides { color: #9aa5b6; font-size: 9px; }
-    .chart-bar-track { width: min(34px,100%); border-radius: 8px 8px 3px 3px; background: #edf0f7; }
-    .chart-bar-fill { border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg,#8192ed,#465dcc); }
-    .chart-column-current .chart-bar-fill { background: linear-gradient(180deg,#29b69d,#13866f); }
-    .chart-column strong { color: #52617a; font-size: 10px; }
-    .chart-day { color: #8a96a9; font-size: 9px; }
-    .feature-foot { border-top: 1px solid #edf0f5; color: #8793a7; font-size: 9px; }
-    .feature-foot a { color: #465dcc; font-weight: 750; }
-    .action-count { display: grid; place-items: center; min-width: 30px; height: 30px; border-radius: 9px; background: #edf0ff; color: #435bd4; font-size: 12px; font-weight: 800; }
-    .action-list { gap: 8px; }
-    .action-item { min-height: 61px; padding: 9px 10px; border: 1px solid #e9edf4; border-radius: 11px; background: #fff; }
-    .action-item:hover { border-color: #cbd4fa; background: #f8f9ff; }
-    .action-detail strong { color: #2a3954; font-size: 11px; font-weight: 750; }
-    .action-detail small { color: #8b97a9; font-size: 9px; }
-    .action-value { color: #25395f; font-size: 13px; font-weight: 800; }
-    .action-chevron { color: #a4afbf; font-size: 10px; }
-    .action-footer { color: #8b97a9; font-size: 9px; }
-    .teacher-availability { padding: 22px 25px; }
-    .availability-item { border: 1px solid #e9edf4; border-radius: 11px; background: #f8f9fd; }
-    .availability-item > strong { color: #24385f; }
-    html[data-theme="dark"] .dash-intro { background: linear-gradient(112deg,#111d35,#1b3260 58%,#30458d); }
-    html[data-theme="dark"] .metric-tile,html[data-theme="dark"] .attendance-feature,html[data-theme="dark"] .action-center,html[data-theme="dark"] .teacher-availability { background: var(--surface); border-color: var(--line); }
+    .attendance-feature { padding:22px 23px 16px; }
+    .action-center { padding:21px 19px 15px; }
+    .feature-heading h3,.action-heading h3,.availability-heading h3 { margin:6px 0 4px; color:#303650; font-size:16px; font-weight:780; letter-spacing:-.025em; }
+    .feature-heading p,.action-heading p,.availability-heading p { color:#9297aa; font-size:11px; }
+    .feature-link,.feature-foot a { color:#6258df; font-size:11px; font-weight:750; }
+    .attendance-summary { border:1px solid #eeedf7; border-radius:11px; background:#fafaff; }
+    .attendance-number strong { color:#5146c8; font-size:29px; font-weight:800; letter-spacing:-.04em; }
+    .attendance-number span { color:#8d92a7; font-size:10px; }
+    .attendance-state { color:#16866f; font-size:10px; font-weight:750; }
+    .attendance-state.state-pending { color:#a66d1f; }
+    .v2-chart { height:205px; }
+    .chart-guides { color:#a0a4b5; font-size:9px; }
+    .chart-bar-track { width:min(34px,100%); border-radius:7px 7px 3px 3px; background:#f0eff8; }
+    .chart-bar-fill { border-radius:7px 7px 3px 3px; background:linear-gradient(180deg,#a39bff,#6258df); }
+    .chart-column-current .chart-bar-fill { background:linear-gradient(180deg,#5ac7a4,#16866f); }
+    .chart-column strong { color:#626982; font-size:10px; }
+    .chart-day { color:#999eb0; font-size:9px; }
+    .feature-foot { border-top:1px solid #f0f0f6; color:#969bad; font-size:9px; }
+    .action-count { display:grid; min-width:29px; height:29px; place-items:center; border-radius:8px; background:#f0efff; color:#6258df; font-size:11px; font-weight:800; }
+    .action-list { gap:7px; }
+    .action-item { min-height:59px; padding:8px 9px; border:1px solid #edecf4; border-radius:10px; background:#fff; }
+    .action-item:hover { border-color:#d4d0fc; background:#fbfaff; }
+    .action-detail strong { color:#363c57; font-size:11px; font-weight:750; }
+    .action-detail small { color:#969bad; font-size:9px; }
+    .action-value { color:#343a58; font-size:12px; font-weight:800; }
+    .action-chevron { color:#aeb1bf; font-size:10px; }
+    .action-footer { color:#969bad; font-size:9px; }
+    .teacher-availability { padding:21px 23px; }
+    .availability-item { border:1px solid #edecf4; border-radius:10px; background:#fafaff; }
+    .availability-item > strong { color:#343a58; }
+    html[data-theme="dark"] .dash-intro { border-color:#30364d; background:linear-gradient(112deg,#1b2438 0%,#222747 58%,#302d5c 100%); }
+    html[data-theme="dark"] .intro-copy h1,html[data-theme="dark"] .workbench-heading h2 { color:#eef0fa; }
+    html[data-theme="dark"] .intro-copy > p,html[data-theme="dark"] .intro-date { color:#b5bad0; }
+    html[data-theme="dark"] .metric-tile,html[data-theme="dark"] .attendance-feature,html[data-theme="dark"] .action-center,html[data-theme="dark"] .teacher-availability { background:var(--surface); border-color:var(--line); }
     @media(max-width:1150px) { .workbench { grid-template-columns:minmax(0,1fr); } }
     @media(max-width:700px) {
-      .dash-intro { min-height:0; padding:23px 20px; border-radius:16px; }
-      .intro-copy h1 { font-size:28px; }
+      .dash-intro { min-height:0; padding:23px 20px; border-radius:15px; }
+      .intro-copy h1 { font-size:27px; }
       .metric-strip { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
-      .metric-tile { min-height:105px; padding:13px 11px; }
+      .metric-tile { min-height:102px; padding:13px 11px; }
       .metric-symbol { width:35px; height:35px; }
       .workbench-heading h2 { font-size:19px; }
-      .attendance-feature,.action-center,.teacher-availability { padding:17px 14px 13px; }
+      .attendance-feature,.action-center,.teacher-availability { padding:16px 14px 13px; }
     }
     @media(max-width:390px) { .metric-strip { grid-template-columns:minmax(0,1fr); } }
 
