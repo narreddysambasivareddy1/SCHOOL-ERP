@@ -51,7 +51,7 @@ interface Stat {
 
       <div class="content-heading">
         <div><span class="section-kicker">THE SCHOOL DAY</span><h2>Operations overview</h2></div>
-        <span class="updated-indicator"><span class="online-dot"></span> Connected to live school data</span>
+        <span class="updated-indicator"><span class="online-dot"></span> School data overview</span>
       </div>
 
       <div class="workspace-grid">
@@ -78,14 +78,14 @@ interface Stat {
             @if (loading()) {
               <div class="trend-loading"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             } @else if (attendanceTrend().length) {
-              <div class="trend-chart" role="img" aria-label="Daily attendance trend for the last seven days">
+              <div class="trend-chart" role="img" [attr.aria-label]="'Daily attendance trend across ' + attendanceTrend().length + ' available days'">
                 <div class="trend-axis"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
                 <div class="trend-columns" [style.grid-template-columns]="'repeat(' + attendanceTrend().length + ', minmax(0, 1fr))'">
                   @for (point of attendanceTrend(); track point.date; let last = $last) {
                     <div class="trend-day" [class.latest]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
                       <div class="trend-track"><span [style.height.%]="point.pct"></span></div>
                       <strong>{{ point.pct }}%</strong>
-                      <small>{{ point.date | date:'EEE' }}</small>
+                      <small>{{ point.date | date:'EEE' }}</small><small class="trend-date">{{ point.date | date:'d MMM' }}</small>
                     </div>
                   }
                 </div>
@@ -115,7 +115,7 @@ interface Stat {
           <section class="focus-card">
             <div class="focus-heading">
               <div><span class="section-kicker">ACTION CENTRE</span><h3>Needs your attention</h3></div>
-              <span class="focus-count">{{ (enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0 }}</span>
+              <span class="focus-count" [attr.aria-label]="'Action items: ' + ((enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0)">{{ (enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0 }}</span>
             </div>
             <p class="focus-intro">Items that may need a follow-up from your team.</p>
             @if (loading()) {
@@ -215,7 +215,7 @@ interface Stat {
     .trend-track{display:flex;width:100%;height:135px;align-items:flex-end;justify-content:center}
     .trend-track span{width:min(30px,68%);min-height:3px;border-radius:5px 5px 2px 2px;background:#aab3e8}
     .trend-day.latest .trend-track span{background:#35a98b}
-    .trend-day strong{color:#5d6579;font-size:9px}.trend-day small{padding-bottom:7px;color:#9ca3b2;font-size:9px}
+    .trend-day strong{color:#4d5870;font-size:10px}.trend-day small{padding-bottom:2px;color:#778398;font-size:9px}.trend-day .trend-date{padding-bottom:7px;color:#9aa3b2;font-size:8px}
     .feature-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px;padding-top:12px;border-top:1px solid #eef0f4;color:#9aa1b0;font-size:9px}
     .feature-foot span,.feature-foot a{display:flex;align-items:center;gap:6px}
     .feature-foot a{color:#4d60b7;font-weight:700;text-decoration:none}
@@ -258,8 +258,8 @@ interface Stat {
     @media(max-width:1120px){.workspace-grid{grid-template-columns:minmax(0,1.35fr) minmax(270px,.9fr)}}
     @media(max-width:900px){.workspace-grid{grid-template-columns:1fr}.side-column{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
     @media(max-width:760px){.welcome-row{align-items:flex-start;flex-direction:column;margin-bottom:18px}.welcome-actions{width:100%;flex-wrap:wrap}.metric-strip{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:23px}.metric{border-bottom:1px solid #edf0f4}.metric:nth-child(2){border-right:0}.metric:nth-child(n+3){border-bottom:0}.content-heading{align-items:flex-start;flex-direction:column;gap:8px}.side-column{grid-template-columns:1fr}.attendance-feature,.staff-feature,.focus-card,.shortcut-card{padding:14px}.attendance-summary{align-items:flex-start;flex-direction:column}.feature-foot{align-items:flex-start;flex-direction:column}.feature-top{flex-direction:column}.subtle-link{margin-top:0}}
-    @media(max-width:390px){.metric{padding:13px}.metric>strong{font-size:22px}.welcome-copy h1{font-size:26px}}
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+    @media(max-width:390px){.metric{padding:13px}.metric>strong{font-size:22px}.welcome-copy h1{font-size:26px}.trend-columns{gap:4px}.trend-day strong{font-size:8px}.trend-day small{font-size:8px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}\n    :host-context(html[data-theme='dark']) .metric-strip,:host-context(html[data-theme='dark']) .attendance-feature,:host-context(html[data-theme='dark']) .staff-feature,:host-context(html[data-theme='dark']) .focus-card,:host-context(html[data-theme='dark']) .shortcut-card{background:#182235;border-color:#303c50;box-shadow:none}\n    :host-context(html[data-theme='dark']) .welcome-copy h1,:host-context(html[data-theme='dark']) .content-heading h2,:host-context(html[data-theme='dark']) .feature-top h3,:host-context(html[data-theme='dark']) .focus-heading h3,:host-context(html[data-theme='dark']) .shortcut-card h3,:host-context(html[data-theme='dark']) .metric>strong,:host-context(html[data-theme='dark']) .attendance-number strong,:host-context(html[data-theme='dark']) .focus-text strong,:host-context(html[data-theme='dark']) .focus-item>b,:host-context(html[data-theme='dark']) .staff-row>strong{color:#e6eaf2}\n    :host-context(html[data-theme='dark']) .welcome-copy p,:host-context(html[data-theme='dark']) .feature-top p,:host-context(html[data-theme='dark']) .focus-intro,:host-context(html[data-theme='dark']) .focus-text small,:host-context(html[data-theme='dark']) .metric>small,:host-context(html[data-theme='dark']) .updated-indicator,:host-context(html[data-theme='dark']) .attendance-number span,:host-context(html[data-theme='dark']) .teacher-names{color:#aab5c7}\n    :host-context(html[data-theme='dark']) .attendance-summary,:host-context(html[data-theme='dark']) .staff-row{background:#202d42;border-color:#303c50}\n    :host-context(html[data-theme='dark']) .metric{border-color:#303c50}\n    :host-context(html[data-theme='dark']) .feature-foot,:host-context(html[data-theme='dark']) .focus-item,:host-context(html[data-theme='dark']) .focus-foot,:host-context(html[data-theme='dark']) .shortcut-list a{border-color:#303c50;color:#aab5c7}\n    :host-context(html[data-theme='dark']) .shortcut-list a{color:#c4ccda}\n    :host-context(html[data-theme='dark']) .trend-columns{border-color:#39465a;background:repeating-linear-gradient(to bottom,transparent 0,transparent 24%,#303c50 24.5%,transparent 25%)}\n    :host-context(html[data-theme='dark']) .trend-day strong,:host-context(html[data-theme='dark']) .trend-day small{color:#b9c3d2}\n    :host-context(html[data-theme='dark']) .online-dot{box-shadow:0 0 0 4px #203b35}
   `]
 })
 export class DashboardComponent implements OnInit {
