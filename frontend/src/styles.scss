@@ -1853,3 +1853,417 @@ html[data-theme="dark"] .main-content .att-table td {
   .main-content .mark-footer { align-items: stretch; flex-direction: column; }
   .main-content .footer-actions { justify-content: flex-end; }
 }
+
+
+/* ================================================================
+   Finance · Admissions · Academics · Campus operations
+   ================================================================ */
+.main-content .grid-2,
+.main-content .grid {
+  gap: 16px !important;
+}
+.main-content .grid-2 > *,
+.main-content .grid > * {
+  min-width: 0;
+}
+.main-content .card,
+.main-content .pipe-card,
+.main-content .theme-panel {
+  border: 1px solid #e7eaf1 !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,.025) !important;
+}
+.main-content .card {
+  padding: 19px 21px !important;
+}
+.main-content .card > strong,
+.main-content .theme-panel h2 {
+  color: #273449 !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+.main-content .text-muted {
+  color: #7c899b !important;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.main-content .pipe {
+  gap: 13px !important;
+  margin: 18px 0 !important;
+}
+.main-content .pipe-card {
+  position: relative;
+  min-height: 112px;
+  padding: 18px !important;
+  overflow: hidden;
+}
+.main-content .pipe-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #766de0;
+  content: "";
+}
+.main-content .pipe-card span {
+  color: #8792a3 !important;
+  font-size: 10px !important;
+  font-weight: 700;
+  letter-spacing: .035em;
+}
+.main-content .pipe-card strong {
+  display: block;
+  margin-top: 12px;
+  color: #202b3c !important;
+  font-size: 26px !important;
+  font-weight: 760 !important;
+  letter-spacing: -.045em;
+}
+.main-content .list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+.main-content .list .item,
+.main-content .route-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 17px !important;
+  border: 1px solid #e9ecf2 !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+}
+.main-content .list .item strong,
+.main-content .route-item strong {
+  color: #29364a;
+  font-size: 12px;
+  font-weight: 750;
+}
+.main-content .list .item small {
+  display: block;
+  margin-top: 5px;
+  color: #8792a3;
+  font-size: 10px;
+}
+.main-content .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.main-content .actions button,
+.main-content .table-action,
+.main-content .tabs button,
+.main-content .mode-switch button,
+.main-content .reset {
+  min-height: 34px;
+  padding: 7px 12px !important;
+  border: 1px solid #e2e4f2 !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #5b56b7 !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  cursor: pointer;
+}
+.main-content .actions button:hover,
+.main-content .table-action:hover,
+.main-content .tabs button:hover {
+  background: #f7f6ff !important;
+  border-color: #cbc7f1 !important;
+}
+.main-content .table-action.danger {
+  color: #bd4b57 !important;
+  border-color: #f0d9dc !important;
+}
+.main-content .alert {
+  padding: 12px 15px !important;
+  border: 1px solid #f2d9dc !important;
+  border-radius: 10px !important;
+  background: #fff4f4 !important;
+  color: #b44450 !important;
+  font-size: 12px;
+}
+.main-content .ok {
+  padding: 12px 15px !important;
+  border: 1px solid #d8eee5 !important;
+  border-radius: 10px !important;
+  background: #eff9f4 !important;
+  color: #287c62 !important;
+  font-size: 12px;
+}
+.main-content .empty {
+  padding: 42px 22px !important;
+  border: 1px dashed #dfe3ed !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  color: #8994a5 !important;
+  font-size: 12px !important;
+  text-align: center;
+}
+.main-content .row {
+  gap: 11px !important;
+  margin-top: 14px;
+}
+.main-content .row input,
+.main-content .form input,
+.main-content .form select,
+.main-content .toolbar.card select {
+  min-height: 39px;
+  padding: 8px 11px;
+  border: 1px solid #e4e8ef !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #29364a !important;
+  font-size: 12px;
+}
+.main-content .row button,
+.main-content .form button:not(.p-button),
+.main-content .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 37px;
+  padding: 8px 13px !important;
+  border: 1px solid #6258d8 !important;
+  border-radius: 8px !important;
+  background: #6258d8 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+.main-content .form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 13px !important;
+}
+.main-content .form label {
+  display: grid;
+  flex: 1 1 145px;
+  gap: 6px;
+  color: #738095;
+  font-size: 10px;
+  font-weight: 700;
+}
+.main-content .tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px !important;
+  margin: 4px 0 16px;
+  padding: 4px;
+  border: 1px solid #e8eaf1;
+  border-radius: 10px;
+  background: #fff;
+}
+.main-content .tabs button {
+  border-color: transparent !important;
+  color: #748095 !important;
+}
+.main-content .tabs button.on,
+.main-content .mode-switch button.on {
+  background: #f0efff !important;
+  border-color: #e6e3ff !important;
+  color: #5d55c8 !important;
+}
+.main-content .grid-scroll {
+  overflow: auto;
+  border: 1px solid #e7eaf1;
+  border-radius: 13px;
+  background: #fff;
+}
+.main-content .timetable-grid-table {
+  min-width: 850px;
+}
+.main-content .timetable-grid-table th,
+.main-content .timetable-grid-table td {
+  padding: 13px !important;
+  border-color: #edf0f5 !important;
+  font-size: 11px !important;
+}
+.main-content .timetable-grid-table th {
+  background: #f8f9fc !important;
+  color: #758196 !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+}
+.main-content .timetable-grid-table th small,
+.main-content .timetable-grid-table td small {
+  display: block;
+  margin-top: 4px;
+  color: #8994a5;
+  font-size: 9px;
+}
+.main-content .grid-cell-controls {
+  display: grid;
+  gap: 6px;
+  min-width: 135px;
+}
+.main-content .grid-cell-controls select {
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 1px solid #e5e8ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #39465a;
+  font-size: 10px;
+}
+.main-content .timetable-grid-table td.open,
+.main-content .mobile-period.open {
+  background: #fffaf0 !important;
+}
+.main-content .clear-slot {
+  justify-self: start;
+  border: 0 !important;
+  background: transparent !important;
+  color: #bd4b57 !important;
+  font-size: 10px;
+  cursor: pointer;
+}
+.main-content .mobile-days {
+  display: none;
+}
+.main-content .theme-panel {
+  margin-top: 18px;
+  padding: 22px !important;
+}
+.main-content .theme-panel p {
+  color: #7c899b;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.main-content .mode-switch {
+  display: flex;
+  gap: 7px;
+  margin: 16px 0;
+}
+.main-content .swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 14px 0;
+}
+.main-content .swatch {
+  min-height: 35px;
+  padding: 7px 11px !important;
+  border: 2px solid rgba(25,35,55,.10) !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  font-size: 10px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
+  cursor: pointer;
+}
+.main-content .swatch.on {
+  outline: 2px solid #6258d8;
+  outline-offset: 2px;
+}
+.main-content .custom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  color: #778397;
+  font-size: 11px;
+  font-weight: 650;
+}
+.main-content .custom input[type=color] {
+  width: 42px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid #e4e8ef;
+  border-radius: 7px;
+  background: #fff;
+}
+.main-content .route-item {
+  margin: 8px 0;
+}
+.main-content .route-item .text-muted {
+  font-size: 10px;
+}
+@media (max-width: 760px) {
+  .main-content .list .item,
+  .main-content .route-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .main-content .pipe {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .main-content .row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .main-content .row input {
+    width: 100%;
+  }
+  .main-content .grid-scroll {
+    display: none;
+  }
+  .main-content .mobile-days {
+    display: grid;
+    gap: 12px;
+  }
+  .main-content .mobile-day-card {
+    padding: 15px;
+    border: 1px solid #e7eaf1;
+    border-radius: 12px;
+    background: #fff;
+  }
+  .main-content .mobile-day-card h2 {
+    margin: 0 0 10px;
+    color: #29364a;
+    font-size: 13px;
+  }
+  .main-content .mobile-period {
+    display: grid;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid #edf0f5;
+    border-radius: 9px;
+  }
+  .main-content .mobile-period header {
+    display: flex;
+    justify-content: space-between;
+    color: #47556a;
+    font-size: 11px;
+  }
+}
+html[data-theme="dark"] .main-content .card,
+html[data-theme="dark"] .main-content .pipe-card,
+html[data-theme="dark"] .main-content .theme-panel,
+html[data-theme="dark"] .main-content .list .item,
+html[data-theme="dark"] .main-content .route-item,
+html[data-theme="dark"] .main-content .tabs,
+html[data-theme="dark"] .main-content .grid-scroll,
+html[data-theme="dark"] .main-content .mobile-day-card {
+  background: #1b2638 !important;
+  border-color: #303c50 !important;
+}
+html[data-theme="dark"] .main-content .pipe-card strong,
+html[data-theme="dark"] .main-content .list .item strong,
+html[data-theme="dark"] .main-content .route-item strong,
+html[data-theme="dark"] .main-content .card > strong,
+html[data-theme="dark"] .main-content .theme-panel h2,
+html[data-theme="dark"] .main-content .mobile-day-card h2 {
+  color: #eef2f8 !important;
+}
+html[data-theme="dark"] .main-content .timetable-grid-table th,
+html[data-theme="dark"] .main-content .timetable-grid-table td {
+  background: #1b2638 !important;
+  color: #d7deea !important;
+  border-color: #303c50 !important;
+}
+html[data-theme="dark"] .main-content .timetable-grid-table th {
+  background: #202d42 !important;
+  color: #aeb9c9 !important;
+}
+html[data-theme="dark"] .main-content .empty {
+  background: #1b2638 !important;
+  border-color: #3a465a !important;
+}
