@@ -216,7 +216,6 @@ import { SchoolContextService } from '../../core/services/school-context.service
       dl { grid-template-columns:1fr 1fr; }
     }
   `]
-  `]
 })
 export class StudentListComponent implements OnInit, OnDestroy {
   students = signal<any[]>([]);
