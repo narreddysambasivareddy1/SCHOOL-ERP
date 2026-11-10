@@ -2958,3 +2958,347 @@ html[data-theme="dark"] .main-content table:not(.att-table) tbody tr:hover > td 
   background: #243044 !important;
   color: #f7fafc !important;
 }
+
+
+/* ==========================================================
+   PREMIUM GLASSMORPHISM LAYER
+   Visual-only overrides: preserves Angular components,
+   PrimeNG behaviour, routes, forms and business logic.
+   ========================================================== */
+
+:root {
+  --glass-blur: 18px;
+  --glass-radius: 18px;
+  --glass-surface: rgba(255, 255, 255, 0.76);
+  --glass-surface-strong: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.78);
+  --glass-shadow: 0 14px 38px rgba(36, 64, 102, 0.10);
+  --glass-highlight: rgba(255, 255, 255, 0.72);
+  --canvas-glow-a: rgba(88, 130, 255, 0.10);
+  --canvas-glow-b: rgba(34, 190, 180, 0.08);
+}
+
+html[data-theme="dark"] {
+  --glass-surface: rgba(18, 29, 49, 0.78);
+  --glass-surface-strong: rgba(18, 29, 49, 0.94);
+  --glass-border: rgba(148, 171, 207, 0.16);
+  --glass-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  --glass-highlight: rgba(255, 255, 255, 0.055);
+  --canvas-glow-a: rgba(67, 105, 220, 0.15);
+  --canvas-glow-b: rgba(20, 166, 159, 0.09);
+}
+
+html, body {
+  background:
+    radial-gradient(ellipse at 8% 0%, var(--canvas-glow-a), transparent 34rem),
+    radial-gradient(ellipse at 92% 12%, var(--canvas-glow-b), transparent 30rem),
+    var(--canvas);
+}
+
+html body .app-shell {
+  min-height: 100vh;
+  background: transparent;
+}
+
+html body .app-shell .topbar {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  box-shadow: 0 8px 28px rgba(22, 42, 74, 0.055);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+}
+
+html[data-theme="dark"] body .app-shell .topbar {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.20);
+}
+
+html body .app-shell .layout {
+  background: transparent;
+}
+
+html body .app-shell .sidebar {
+  background: linear-gradient(165deg, rgba(18, 48, 83, 0.94), rgba(10, 26, 49, 0.91));
+  border-right: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 10px 0 34px rgba(20, 42, 72, 0.09);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  backdrop-filter: blur(22px) saturate(145%);
+}
+
+html body .app-shell .sidebar .nav-item {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+html body .app-shell .sidebar .nav-item:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.10);
+  transform: translateX(2px);
+}
+
+html body .app-shell .sidebar .nav-item.active {
+  background: linear-gradient(110deg, var(--primary), color-mix(in srgb, var(--primary) 76%, #5c8fff));
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+html body .app-shell .sidebar .sidebar-heading {
+  color: rgba(239, 246, 255, 0.76);
+}
+
+html body .app-shell .main-content {
+  background: transparent;
+  padding: clamp(16px, 2.2vw, 30px);
+}
+
+html body .main-content .page-header:not(.welcome),
+html body .main-content .toolbar,
+html body .main-content .filter-bar,
+html body .main-content .card,
+html body .main-content form.card,
+html body .main-content .panel,
+html body .main-content .stat-card,
+html body .main-content .children-section,
+html body .main-content .child-chip,
+html body .main-content .session-card,
+html body .main-content .report-card,
+html body .main-content .kpi-card,
+html body .main-content .calendar-card,
+html body .main-content .assignment-card,
+html body .main-content .plan-card,
+html body .main-content .deadline-card,
+html body .main-content .map-card,
+html body .main-content .empty-state,
+html body .main-content .empty-card,
+html body .main-content .item,
+html body .main-content .grid-scroll,
+html body .main-content .plans-table-scroll,
+html body .main-content .p-card {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(145%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(145%);
+}
+
+html body .main-content .page-header:not(.welcome) {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(20px, 2.4vw, 30px);
+}
+
+html body .main-content .page-header:not(.welcome)::after {
+  content: "";
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -72px;
+  top: -105px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--canvas-glow-a), transparent 70%);
+}
+
+html body .main-content .stat-card,
+html body .main-content .kpi-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+html body .main-content .stat-card:hover,
+html body .main-content .kpi-card:hover,
+html body .main-content .mod-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 42px rgba(30, 65, 110, 0.14);
+}
+
+html body .main-content .stat-card::before,
+html body .main-content .kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--teal), transparent);
+  opacity: 0.78;
+}
+
+html body .main-content .p-datatable,
+html body .main-content .p-datatable .p-datatable-wrapper,
+html body .main-content .table-wrap,
+html body .main-content .grid-scroll,
+html body .main-content .plans-table-scroll {
+  overflow: auto;
+  border-radius: 14px;
+}
+
+html body .main-content .p-datatable .p-datatable-thead > tr > th,
+html body .main-content table thead th,
+html body .main-content .att-table thead th,
+html body .main-content .data-table thead th {
+  background: var(--glass-surface-strong);
+  color: var(--muted);
+  border-color: var(--line);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+html body .main-content .p-datatable .p-datatable-tbody > tr > td,
+html body .main-content table tbody > tr > td {
+  background: transparent;
+  border-color: var(--line);
+}
+
+html body .main-content .p-datatable .p-datatable-tbody > tr:hover > td,
+html body .main-content table tbody > tr:hover > td {
+  background: var(--primary-soft);
+}
+
+html body .main-content :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]) {
+  border-radius: 10px;
+  background: var(--glass-surface-strong);
+  border-color: var(--line);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+html body .main-content :is(input, select, textarea):focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus);
+}
+
+html body .main-content .p-button,
+html body .main-content .btn-primary,
+html body .main-content .primary-action {
+  border-radius: 11px;
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--primary) 17%, transparent);
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+html body .main-content .p-button:not(:disabled):hover,
+html body .main-content .btn-primary:not(:disabled):hover,
+html body .main-content .primary-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+html body .main-content .tabs button,
+html body .main-content .mod-card {
+  border-radius: 13px;
+}
+
+html body .main-content .empty-state,
+html body .main-content .empty-card {
+  background: var(--glass-surface-strong);
+}
+
+html body .p-dialog-mask {
+  background: rgba(8, 18, 34, 0.48) !important;
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+html body .p-dialog {
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+html body .p-dialog .p-dialog-header,
+html body .p-dialog .p-dialog-footer {
+  background: var(--glass-surface-strong);
+}
+
+html[data-theme="dark"] body .app-shell .sidebar {
+  background: linear-gradient(165deg, rgba(8, 16, 30, 0.97), rgba(13, 24, 43, 0.94));
+  border-right-color: rgba(148, 171, 207, 0.12);
+}
+
+html[data-theme="dark"] body .main-content .page-header:not(.welcome),
+html[data-theme="dark"] body .main-content .toolbar,
+html[data-theme="dark"] body .main-content .filter-bar,
+html[data-theme="dark"] body .main-content .card,
+html[data-theme="dark"] body .main-content form.card,
+html[data-theme="dark"] body .main-content .panel,
+html[data-theme="dark"] body .main-content .stat-card,
+html[data-theme="dark"] body .main-content .children-section,
+html[data-theme="dark"] body .main-content .child-chip,
+html[data-theme="dark"] body .main-content .session-card,
+html[data-theme="dark"] body .main-content .report-card,
+html[data-theme="dark"] body .main-content .kpi-card,
+html[data-theme="dark"] body .main-content .calendar-card,
+html[data-theme="dark"] body .main-content .assignment-card,
+html[data-theme="dark"] body .main-content .plan-card,
+html[data-theme="dark"] body .main-content .deadline-card,
+html[data-theme="dark"] body .main-content .map-card,
+html[data-theme="dark"] body .main-content .empty-state,
+html[data-theme="dark"] body .main-content .empty-card,
+html[data-theme="dark"] body .main-content .item,
+html[data-theme="dark"] body .main-content .grid-scroll,
+html[data-theme="dark"] body .main-content .plans-table-scroll,
+html[data-theme="dark"] body .main-content .p-card {
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+html[data-theme="dark"] body .main-content .p-datatable .p-datatable-thead > tr > th,
+html[data-theme="dark"] body .main-content table thead th,
+html[data-theme="dark"] body .main-content .att-table thead th,
+html[data-theme="dark"] body .main-content .data-table thead th {
+  background: rgba(25, 39, 63, 0.96) !important;
+  color: #aebed4 !important;
+}
+
+html[data-theme="dark"] body .main-content .p-datatable .p-datatable-tbody > tr > td,
+html[data-theme="dark"] body .main-content table tbody > tr > td {
+  background: rgba(18, 29, 49, 0.50);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] body .main-content .p-datatable .p-datatable-tbody > tr:hover > td,
+html[data-theme="dark"] body .main-content table tbody > tr:hover > td {
+  background: rgba(75, 112, 178, 0.16) !important;
+}
+
+@media (max-width: 900px) {
+  html body .app-shell .main-content {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 700px) {
+  html body .app-shell .main-content {
+    padding: 14px 12px;
+  }
+
+  html body .main-content .page-header:not(.welcome),
+  html body .main-content .toolbar,
+  html body .main-content .filter-bar {
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-surface: #ffffff;
+    --glass-surface-strong: #ffffff;
+    --glass-blur: 0px;
+  }
+
+  html[data-theme="dark"] {
+    --glass-surface: #121a2b;
+    --glass-surface-strong: #182236;
+  }
+
+  html body .app-shell .topbar,
+  html body .app-shell .sidebar,
+  html body .main-content :is(.card, .panel, .stat-card, .page-header, .toolbar, .filter-bar) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
