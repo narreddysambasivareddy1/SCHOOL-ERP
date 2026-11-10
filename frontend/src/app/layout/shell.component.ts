@@ -221,18 +221,18 @@ const ALL_NAV: NavItem[] = [
     .user-meta { display:flex; flex-direction:column; align-items:flex-start; }
     .user-name { color:#28314b; font-size:12px; font-weight:720; }
     .role-badge { margin-top:2px; color:#9299aa; font-size:9px; font-weight:650; }
-    .menu { position:absolute; top:calc(100% + 10px); right:0; z-index:45; width:286px; padding:10px; border:1px solid #e8eaf2; border-radius:14px; background:#fff; box-shadow:0 20px 55px rgba(30,35,70,.16); }
+    .menu { position:absolute; top:calc(100% + 10px); right:0; z-index:45; width:286px; padding:10px; border:1px solid #e8eaf2; border-radius:14px; background:#fff; color:#243044; box-shadow:0 20px 55px rgba(30,35,70,.16); }
     .mode-switch { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:4px 8px 8px; }
-    .mode-switch button { height:34px; border:1px solid var(--line); border-radius:8px; background:#f7f8fc; color:var(--ink); cursor:pointer; font-size:12px; }
+    .mode-switch button { height:34px; border:1px solid #d5dbe6; border-radius:8px; background:#f4f6fb; color:#1c2940; cursor:pointer; font-size:12px; font-weight:650; }
     .mode-switch button.on { border-color:var(--primary); background:var(--primary); color:#fff; }
     .theme-block { margin:6px 0; padding-top:7px; border-top:1px solid var(--line); }
     .swatches { display:flex; flex-wrap:wrap; gap:8px; padding:5px 8px 9px; }
     .swatch { width:30px; height:30px; border:2px solid transparent; border-radius:9px; cursor:pointer; }
     .swatch.on { outline:2px solid var(--primary); outline-offset:2px; }
-    .custom-color { display:flex; align-items:center; justify-content:space-between; margin:0 8px 5px; color:var(--muted); font-size:12px; }
+    .custom-color { display:flex; align-items:center; justify-content:space-between; margin:0 8px 5px; color:#5c6b80; font-size:12px; }
     .custom-color input { width:40px; height:28px; border:0; background:transparent; cursor:pointer; }
-    .menu-meta { padding:4px 8px; color:var(--muted); font-size:11px; }
-    .menu-item { display:flex; align-items:center; gap:8px; width:100%; padding:9px; border:0; border-radius:8px; background:transparent; color:var(--ink); cursor:pointer; font-size:12px; text-align:left; }
+    .menu-meta { padding:4px 8px; color:#5c6b80; font-size:11px; }
+    .menu-item { display:flex; align-items:center; gap:8px; width:100%; padding:9px; border:0; border-radius:8px; background:transparent; color:#1c2940; cursor:pointer; font-size:12px; text-align:left; }
     .menu-item:hover { background:#f4f3ff; color:#5146cf; }
     .layout { display:flex; flex:1; min-height:calc(100vh - 72px); }
     .sidebar { position:sticky; top:72px; display:flex; width:258px; height:calc(100vh - 72px); flex:none; flex-direction:column; overflow-y:auto; padding:20px 14px 16px; border-right:1px solid #e9eaf2; background:#fff; transition:width .18s ease; }
@@ -336,9 +336,9 @@ const ALL_NAV: NavItem[] = [
     .sidebar{width:264px;border-right:1px solid #1d3151;background:linear-gradient(180deg,#172844 0%,#14233c 100%);box-shadow:8px 0 28px rgba(18,35,61,.07)}
     .sidebar.collapsed{width:78px}
     .sidebar-brand{padding:0 7px 18px;border-bottom:1px solid rgba(255,255,255,.11)}
-    .sidebar-brand-copy strong{color:#fff;font-size:13px;line-height:1.35}
-    .sidebar-brand-copy small{color:#9fb2cf;font-size:10px}
-    .sidebar .logo{background:linear-gradient(145deg,#6da5ff,#4778dc);box-shadow:0 7px 18px rgba(65,119,220,.28)}
+    .sidebar-brand-copy strong{color:#202b3a;font-size:13px;line-height:1.35}
+    .sidebar-brand-copy small{color:#5c6b80;font-size:10px}
+    .sidebar .logo{background:linear-gradient(145deg,#e8c96a,#c9a84c);color:#142033;box-shadow:none}
     .sidebar .logo-img{border-color:rgba(255,255,255,.2)}
     .sidebar .collapse-btn{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#c2d2e9}
     .sidebar .collapse-btn:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:#fff}
@@ -346,18 +346,34 @@ const ALL_NAV: NavItem[] = [
     .sidebar .nav-item{min-height:43px;margin:3px 0;padding:9px 12px;border-radius:10px;color:#b3c2d8;font-size:12px;font-weight:590}
     .sidebar .nav-item:hover{background:rgba(255,255,255,.075);color:#fff}
     .sidebar .nav-icon{color:#8fa5c5;font-size:15px}
-    .sidebar .nav-item.active{background:linear-gradient(100deg,#376fc5,#477fd4);color:#fff;box-shadow:0 6px 15px rgba(20,53,102,.24)}
+    .sidebar .nav-item.active{background:rgba(201,168,76,.18);color:#f6e7bc;box-shadow:inset 3px 0 0 #e8c96a}
     .sidebar .nav-item.active:before{display:none}
-    .sidebar .nav-item.active .nav-icon{color:#fff}
+    .sidebar .nav-item.active .nav-icon{color:#e8c96a}
     .sidebar .sidebar-footer{border-top-color:rgba(255,255,255,.12);color:#8298b8}
     .topbar{height:76px;padding-inline:30px;background:rgba(255,255,255,.94);box-shadow:0 4px 18px rgba(29,47,79,.035)}
     .layout{min-height:calc(100vh - 76px)}
     .sidebar{top:76px;height:calc(100vh - 76px)}
-    .main-content{padding:30px clamp(22px,3vw,48px) 48px;background:#f4f7fc}
+    .main-content{padding:30px clamp(22px,3vw,48px) 48px;background:#f3efe6}
     @media(max-width:760px){.topbar{height:64px;padding-inline:14px}.layout{min-height:calc(100vh - 64px)}.sidebar{top:64px;height:calc(100vh - 64px)}.main-content{padding:18px 14px 30px}}
     :host-context(html[data-theme='dark']) .sidebar{background:linear-gradient(180deg,#101c30,#111e33);border-right-color:#263851}
+    :host-context(html[data-theme='dark']) .sidebar .nav-label{color:#d5deec}
+    :host-context(html[data-theme='dark']) .sidebar .nav-item{color:#f2f6fc}
+    :host-context(html[data-theme='dark']) .sidebar .nav-icon{color:#d5deec}
+    :host-context(html[data-theme='dark']) .sidebar-brand-copy strong{color:#fff}
+    :host-context(html[data-theme='dark']) .sidebar-brand-copy small{color:#c5d2e6}
     :host-context(html[data-theme='dark']) .topbar{background:rgba(24,34,53,.96)}
     :host-context(html[data-theme='dark']) .main-content{background:#111827}
+    :host-context(html[data-theme='dark']) .menu{background:#182235;border-color:#314056;color:#f4f7fb;box-shadow:0 20px 55px rgba(0,0,0,.45)}
+    :host-context(html[data-theme='dark']) .menu-meta,:host-context(html[data-theme='dark']) .custom-color{color:#c9d4e4}
+    :host-context(html[data-theme='dark']) .mode-switch button{background:#243044;border-color:#3d5270;color:#f7fafc}
+    :host-context(html[data-theme='dark']) .mode-switch button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+    :host-context(html[data-theme='dark']) .menu-item{color:#f7fafc}
+    :host-context(html[data-theme='dark']) .menu-item:hover{background:#2c3d58;color:#fff}
+    :host-context(html[data-theme='dark']) .palette{background:#182235;border-color:#314056}
+    :host-context(html[data-theme='dark']) .palette-input{border-bottom-color:#314056}
+    :host-context(html[data-theme='dark']) .palette-input input,:host-context(html[data-theme='dark']) .palette-item{color:#f7fafc}
+    :host-context(html[data-theme='dark']) .palette-item small,:host-context(html[data-theme='dark']) .palette-empty{color:#c9d4e4}
+    :host-context(html[data-theme='dark']) .palette-item:hover{background:#2c3d58;color:#fff}
   `]
 })
 export class ShellComponent implements OnInit {

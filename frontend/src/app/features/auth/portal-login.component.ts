@@ -72,7 +72,7 @@ const PORTAL_CONFIG: Record<PortalRole, PortalConfig> = {
   template: `
     <div class="login-page" [style.--accent]="cfg.accentColor">
       <div class="login-left" [style.background]="cfg.accentBg">
-        <a routerLink="/" class="back-home"><i class="pi pi-arrow-left"></i> Back to website</a>
+        <a href="/" class="back-home"><i class="pi pi-arrow-left"></i> Back to website</a>
         <div class="left-content">
           <div class="left-icon"><i [class]="cfg.icon"></i></div>
           <h2>{{ schoolName() || cfg.title }}</h2>

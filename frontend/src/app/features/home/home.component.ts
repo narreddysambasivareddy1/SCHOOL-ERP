@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
 
@@ -315,8 +315,14 @@ import { PublicEnquiryComponent } from '../enquiries/public-enquiry.component';
     }
   `]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   year = new Date().getFullYear();
+
+  ngOnInit() {
+    // Port 8380 serves the Bright Future site as the public front door.
+    // A client-side visit to "/" would otherwise stay inside this app.
+    if (location.port === '8380') location.assign('/');
+  }
   features = [
     { icon: 'pi pi-users', title: 'Student Management', desc: 'Admissions, enrolments, guardian records and complete student lifecycle management.', bg: '#eaf3ff', color: '#1d4e89' },
     { icon: 'pi pi-check-square', title: 'Attendance', desc: 'Class-level attendance with Present, Absent, Late and Excused codes. Biometric-ready.', bg: '#fff4db', color: '#b45309' },

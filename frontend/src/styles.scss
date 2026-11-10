@@ -2516,3 +2516,445 @@ html[data-theme="dark"] .main-content .p-datatable .p-datatable-thead > tr > th,
 html[data-theme="dark"] .main-content table:not(.att-table) th { background:#202d43; color:#aeb8ca; border-color:#293449; }
 html[data-theme="dark"] .main-content .p-datatable .p-datatable-tbody > tr > td,
 html[data-theme="dark"] .main-content table:not(.att-table) td { color:#d3d9e5; border-color:#293449; }
+
+/* Dark mode: keep menu and navigation names readable */
+html[data-theme="dark"] .sidebar {
+  background: #121b2e !important;
+  color: #f4f7fb !important;
+  border-color: #2c3d58 !important;
+}
+html[data-theme="dark"] .sidebar .nav-label,
+html[data-theme="dark"] .sidebar-heading {
+  color: #d5deec !important;
+}
+html[data-theme="dark"] .sidebar .nav-item,
+html[data-theme="dark"] .sidebar .nav-item span {
+  color: #f4f7fb !important;
+}
+html[data-theme="dark"] .sidebar .nav-item:hover { background: #24344f !important; color: #fff !important; }
+html[data-theme="dark"] .sidebar .nav-item.active { background: #30456a !important; color: #fff !important; }
+html[data-theme="dark"] .sidebar .nav-item .nav-icon {
+  background: #243044 !important;
+  color: #f4f7fb !important;
+}
+html[data-theme="dark"] .sidebar .nav-item:hover .nav-icon {
+  background: #345074 !important;
+  color: #fff !important;
+}
+html[data-theme="dark"] .sidebar .nav-item.active .nav-icon {
+  background: rgba(255,255,255,.16) !important;
+  color: #fff !important;
+}
+.sidebar-brand-copy strong { color: #202b3a !important; }
+.sidebar-brand-copy small { color: #5c6b80 !important; }
+
+/* Light theme: icon tiles so navigation glyphs stay visible */
+.sidebar .nav-item .nav-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  flex: none;
+  border-radius: 8px !important;
+  background: #e8edf4 !important;
+  color: #2c3a4d !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+.sidebar .nav-item:hover .nav-icon {
+  background: #dde3ee !important;
+  color: #1b2636 !important;
+}
+.sidebar .nav-item.active .nav-icon {
+  background: #e3e0fb !important;
+  color: #4338ca !important;
+}
+html[data-theme="dark"] .sidebar-brand-copy strong { color: #fff !important; }
+html[data-theme="dark"] .sidebar-brand-copy small,
+html[data-theme="dark"] .sidebar .sidebar-footer { color: #c9d4e4 !important; }
+@media (max-width: 760px) {
+  html[data-theme="dark"] .sidebar { background: #121b2e !important; }
+}
+html[data-theme="dark"] .menu {
+  background: #182235 !important;
+  border-color: #314056 !important;
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .menu .menu-meta,
+html[data-theme="dark"] .menu .custom-color {
+  color: #d5deec !important;
+}
+html[data-theme="dark"] .menu .mode-switch button {
+  background: #243044 !important;
+  border-color: #4a6282 !important;
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .menu .mode-switch button.on {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+}
+html[data-theme="dark"] .menu .menu-item {
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .menu .menu-item:hover {
+  background: #2c3d58 !important;
+  color: #fff !important;
+}
+
+/* Dashboard titles sit on the light canvas, even in dark mode */
+html[data-theme="dark"] .main-content .mast-copy h1,
+html[data-theme="dark"] .main-content .content-heading h2 {
+  color: #142033 !important;
+}
+html[data-theme="dark"] .main-content .mast-copy .lede,
+html[data-theme="dark"] .main-content .content-heading .updated-indicator {
+  color: #3d4d63 !important;
+}
+html[data-theme="dark"] .main-content .mast .eyebrow,
+html[data-theme="dark"] .main-content .content-heading .section-kicker {
+  color: #6e5424 !important;
+}
+
+/* Workspace pages share the dashboard frame, type and cards */
+html:not([data-theme="dark"]) .main-content {
+  padding: 28px clamp(22px, 3vw, 42px) 48px !important;
+  background: #f6f7fb !important;
+}
+.main-content > router-outlet + * {
+  display: block !important;
+  width: 100% !important;
+  max-width: 1480px !important;
+  margin-inline: auto !important;
+}
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 8px 20px !important;
+  min-height: 0 !important;
+  margin: 0 0 22px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) > .eyebrow,
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) > h1,
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) > p {
+  flex: 1 0 100%;
+}
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) .eyebrow {
+  display: block;
+  margin: 0 0 8px !important;
+  color: #8a7040 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+}
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) h1 {
+  margin: 0 !important;
+  color: #142033 !important;
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: clamp(32px, 3vw, 42px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.03em !important;
+  line-height: 1.08 !important;
+}
+html:not([data-theme="dark"]) .main-content .page-header:not(.welcome) p {
+  max-width: 68ch !important;
+  margin: 12px 0 0 !important;
+  color: #5c6b80 !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+html:not([data-theme="dark"]) .main-content .kpis,
+html:not([data-theme="dark"]) .main-content .pipe,
+html:not([data-theme="dark"]) .main-content .kpi-strip {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px !important;
+  margin: 0 0 18px !important;
+}
+html:not([data-theme="dark"]) .main-content .kpis > div,
+html:not([data-theme="dark"]) .main-content .pipe-card,
+html:not([data-theme="dark"]) .main-content .kpi-card {
+  min-height: 112px;
+  padding: 16px 18px !important;
+  border: 1px solid #e6e0d4 !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 30px rgba(20, 32, 51, .04) !important;
+}
+html:not([data-theme="dark"]) .main-content .kpis span,
+html:not([data-theme="dark"]) .main-content .pipe-card span {
+  color: #5c6b80 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+html:not([data-theme="dark"]) .main-content .kpis strong,
+html:not([data-theme="dark"]) .main-content .pipe-card strong {
+  display: block;
+  margin-top: 14px;
+  color: #142033 !important;
+  font-size: 32px !important;
+  font-weight: 720 !important;
+  letter-spacing: -.04em;
+  line-height: 1;
+}
+html:not([data-theme="dark"]) .main-content .card,
+html:not([data-theme="dark"]) .main-content .toolbar,
+html:not([data-theme="dark"]) .main-content .filter-bar,
+html:not([data-theme="dark"]) .main-content .list-pane,
+html:not([data-theme="dark"]) .main-content .panel,
+html:not([data-theme="dark"]) .main-content table:not(.att-table),
+html:not([data-theme="dark"]) .main-content .p-datatable {
+  border: 1px solid #e6e0d4 !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 30px rgba(20, 32, 51, .04) !important;
+}
+html:not([data-theme="dark"]) .main-content .toolbar,
+html:not([data-theme="dark"]) .main-content .filter-bar {
+  gap: 10px !important;
+  margin: 0 0 16px !important;
+  padding: 12px 14px !important;
+}
+html:not([data-theme="dark"]) .main-content .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 16px;
+  padding: 6px;
+  border: 1px solid #e6e0d4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(20, 32, 51, .04);
+}
+html:not([data-theme="dark"]) .main-content .tabs button {
+  min-height: 36px;
+  padding: 0 14px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #3d4d63 !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+html:not([data-theme="dark"]) .main-content .tabs button.on {
+  background: #142033 !important;
+  color: #f6f1e6 !important;
+}
+html:not([data-theme="dark"]) .main-content .card h2,
+html:not([data-theme="dark"]) .main-content .card h3,
+html:not([data-theme="dark"]) .main-content .card-title {
+  color: #142033 !important;
+  font-family: "Playfair Display", Georgia, serif;
+  letter-spacing: -.02em;
+}
+@media (max-width: 900px) {
+  html:not([data-theme="dark"]) .main-content .kpis,
+  html:not([data-theme="dark"]) .main-content .pipe {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Popups stay solid so the page behind them cannot show through */
+html:not([data-theme="dark"]) .p-dialog,
+html:not([data-theme="dark"]) .p-dialog .p-dialog-header,
+html:not([data-theme="dark"]) .p-dialog .p-dialog-content,
+html:not([data-theme="dark"]) .p-dialog .p-dialog-footer,
+html:not([data-theme="dark"]) .modal-card,
+html:not([data-theme="dark"]) .modal-head,
+html:not([data-theme="dark"]) .modal-body,
+html:not([data-theme="dark"]) .p-dropdown-panel,
+html:not([data-theme="dark"]) .p-select-overlay,
+html:not([data-theme="dark"]) .p-menu,
+html:not([data-theme="dark"]) .p-tieredmenu,
+html:not([data-theme="dark"]) .p-contextmenu,
+html:not([data-theme="dark"]) .p-overlaypanel,
+html:not([data-theme="dark"]) .p-popover,
+html:not([data-theme="dark"]) .p-datepicker,
+html:not([data-theme="dark"]) .p-confirmdialog,
+html:not([data-theme="dark"]) .p-confirmpopup {
+  background: #fff !important;
+  color: #142033 !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="dark"]) .p-dialog .p-dialog-header {
+  border-bottom: 1px solid #e7ebf2 !important;
+}
+html:not([data-theme="dark"]) .p-dialog .p-dialog-content {
+  border-bottom: 0 !important;
+}
+html:not([data-theme="dark"]) .p-dialog dt,
+html:not([data-theme="dark"]) .p-dialog label,
+html:not([data-theme="dark"]) .modal-card label {
+  color: #5c6b80 !important;
+}
+html:not([data-theme="dark"]) .p-dialog dd,
+html:not([data-theme="dark"]) .p-dialog strong,
+html:not([data-theme="dark"]) .p-dialog h3,
+html:not([data-theme="dark"]) .modal-card h3 {
+  color: #142033 !important;
+}
+html:not([data-theme="dark"]) .p-dialog input,
+html:not([data-theme="dark"]) .p-dialog select,
+html:not([data-theme="dark"]) .p-dialog textarea,
+html:not([data-theme="dark"]) .modal-card input,
+html:not([data-theme="dark"]) .modal-card select,
+html:not([data-theme="dark"]) .modal-card textarea {
+  background: #fff !important;
+  color: #142033 !important;
+  border: 1px solid #d5dbe6 !important;
+}
+html:not([data-theme="dark"]) .p-dropdown-item,
+html:not([data-theme="dark"]) .p-select-option,
+html:not([data-theme="dark"]) .p-menuitem-link,
+html:not([data-theme="dark"]) .p-menu .p-menuitem-content {
+  background: transparent !important;
+  color: #142033 !important;
+}
+html:not([data-theme="dark"]) .p-dropdown-item:hover,
+html:not([data-theme="dark"]) .p-select-option:hover,
+html:not([data-theme="dark"]) .p-menuitem-link:hover {
+  background: #f4f6fb !important;
+  color: #142033 !important;
+}
+html[data-theme="dark"] .p-dialog,
+html[data-theme="dark"] .p-dialog .p-dialog-header,
+html[data-theme="dark"] .p-dialog .p-dialog-content,
+html[data-theme="dark"] .p-dialog .p-dialog-footer,
+html[data-theme="dark"] .modal-card,
+html[data-theme="dark"] .modal-head,
+html[data-theme="dark"] .modal-body {
+  background: #182235 !important;
+  color: #f4f7fb !important;
+  opacity: 1 !important;
+  border-color: #314056 !important;
+}
+
+/* Dark mode: one bright text level for pages, dialogs, tables and menus */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .main-content {
+  background: #0e1626 !important;
+  color: #f4f7fb !important;
+}
+html[data-theme="dark"] .main-content :is(
+  h1, h2, h3, h4, p, li, td, dd, a, strong, .card-title, .person-btn strong
+),
+html[data-theme="dark"] .mast-copy h1,
+html[data-theme="dark"] .content-heading h2,
+html[data-theme="dark"] .feature-top h3,
+html[data-theme="dark"] .focus-heading h3,
+html[data-theme="dark"] .shortcut-card h3,
+html[data-theme="dark"] .metric > strong,
+html[data-theme="dark"] .p-dialog :is(h1, h2, h3, h4, p, dd, strong, .p-dialog-title),
+html[data-theme="dark"] .modal-card :is(h1, h2, h3, h4, p, dd, strong) {
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .main-content :is(
+  th, label, small, dt, .text-muted, .eyebrow, .card-sub, .section-kicker, .lede, .updated-indicator
+),
+html[data-theme="dark"] .p-dialog :is(dt, label, small),
+html[data-theme="dark"] .modal-card :is(dt, label, small) {
+  color: #d7e2f0 !important;
+}
+html[data-theme="dark"] .main-content :is(
+  .card, .toolbar, .filter-bar, .list-pane, .panel, .kpis > div, .pipe-card, .kpi-card,
+  .tabs, table:not(.att-table), .p-datatable, .empty, .empty-state
+) {
+  background: #182235 !important;
+  border-color: #314056 !important;
+  color: #f4f7fb !important;
+}
+html[data-theme="dark"] .main-content .page-header:not(.welcome) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .main-content .p-datatable .p-datatable-thead > tr > th,
+html[data-theme="dark"] .main-content table:not(.att-table) th {
+  background: #202d43 !important;
+  color: #d7e2f0 !important;
+  border-color: #314056 !important;
+}
+html[data-theme="dark"] .main-content .p-datatable .p-datatable-tbody > tr,
+html[data-theme="dark"] .main-content .p-datatable .p-datatable-tbody > tr > td,
+html[data-theme="dark"] .main-content table:not(.att-table) tbody tr,
+html[data-theme="dark"] .main-content table:not(.att-table) td {
+  background: #182235 !important;
+  color: #f7fafc !important;
+  border-color: #314056 !important;
+}
+html[data-theme="dark"] .main-content .p-datatable .person-btn strong,
+html[data-theme="dark"] .main-content .p-datatable .person-btn small,
+html[data-theme="dark"] .main-content .p-datatable td small {
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .main-content .p-button.p-button-outlined,
+html[data-theme="dark"] .main-content .p-button.p-button-outlined .p-button-label {
+  background: transparent !important;
+  color: #f4f7fb !important;
+  border-color: #9aadc4 !important;
+}
+html[data-theme="dark"] .main-content .tabs button {
+  background: transparent !important;
+  color: #f4f7fb !important;
+}
+html[data-theme="dark"] .main-content .tabs button.on {
+  background: #f4f7fb !important;
+  color: #142033 !important;
+}
+html[data-theme="dark"] :is(.p-dialog, .modal-card) :is(input, select, textarea),
+html[data-theme="dark"] .main-content :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]) {
+  background: #10192b !important;
+  color: #f7fafc !important;
+  border-color: #4a6282 !important;
+}
+html[data-theme="dark"] :is(.p-dialog, .modal-card) :is(input, textarea)::placeholder,
+html[data-theme="dark"] .main-content :is(input, textarea)::placeholder {
+  color: #c5d2e4 !important;
+}
+html[data-theme="dark"] .p-dialog .p-dialog-header-icon,
+html[data-theme="dark"] .p-dialog .p-dialog-header-actions button {
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .p-dialog button:not(.p-button):not(.p-dialog-header-icon),
+html[data-theme="dark"] .modal-card button:not(.p-button) {
+  background: #f4f6fb !important;
+  color: #142033 !important;
+  border-color: #d7deea !important;
+}
+html[data-theme="dark"] .p-dropdown-panel,
+html[data-theme="dark"] .p-select-overlay,
+html[data-theme="dark"] .p-menu,
+html[data-theme="dark"] .p-datepicker,
+html[data-theme="dark"] .p-dropdown-item,
+html[data-theme="dark"] .p-select-option,
+html[data-theme="dark"] .p-menuitem-link {
+  background: #182235 !important;
+  color: #f7fafc !important;
+}
+html[data-theme="dark"] .p-dropdown-item:hover,
+html[data-theme="dark"] .p-select-option:hover,
+html[data-theme="dark"] .p-menuitem-link:hover {
+  background: #2c3d58 !important;
+  color: #fff !important;
+}
+html[data-theme="dark"] .main-content .p-datatable .p-datatable-tbody > tr:hover,
+html[data-theme="dark"] .main-content .p-datatable .p-datatable-tbody > tr:hover > td,
+html[data-theme="dark"] .main-content table:not(.att-table) tbody tr:hover,
+html[data-theme="dark"] .main-content table:not(.att-table) tbody tr:hover > td {
+  background: #243044 !important;
+  color: #f7fafc !important;
+}
