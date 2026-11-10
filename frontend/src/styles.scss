@@ -3302,3 +3302,161 @@ html[data-theme="dark"] body .main-content table tbody > tr:hover > td {
     backdrop-filter: none;
   }
 }
+
+
+
+/* ==========================================================
+   DASHBOARD-SPECIFIC GLASSMORPHISM
+   The dashboard uses bespoke class names rather than .card
+   and .stat-card. These selectors deliberately target its
+   real markup and override component-scoped visual defaults.
+   ========================================================== */
+
+html body .main-content .campus .school-plate,
+html body .main-content .campus .metric,
+html body .main-content .campus .attendance-feature,
+html body .main-content .campus .staff-feature,
+html body .main-content .campus .focus-card,
+html body .main-content .campus .shortcut-card {
+  background: var(--glass-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--glass-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(155%) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(155%) !important;
+}
+
+html body .main-content .campus .metric {
+  min-height: 156px;
+  padding: 22px !important;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+html body .main-content .campus a.metric:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--glass-border)) !important;
+  box-shadow: 0 20px 42px rgba(35, 64, 110, .14) !important;
+}
+html body .main-content .campus .attendance-feature,
+html body .main-content .campus .staff-feature,
+html body .main-content .campus .focus-card,
+html body .main-content .campus .shortcut-card {
+  padding: 24px !important;
+}
+html body .main-content .campus .school-plate {
+  padding: 12px 16px;
+}
+html body .main-content .campus .mast-copy h1 {
+  letter-spacing: -.045em;
+}
+html body .main-content .campus .attendance-summary {
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+}
+html body .main-content .campus .focus-symbol,
+html body .main-content .campus .metric-label i {
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
+  background: color-mix(in srgb, var(--primary) 9%, var(--glass-surface-strong));
+}
+html body .main-content .campus .staff-row {
+  border: 1px solid var(--glass-border);
+  background: var(--glass-surface-strong);
+}
+html body .main-content .campus .trend-track span {
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+html body .main-content .campus .feature-foot,
+html body .main-content .campus .focus-foot,
+html body .main-content .campus .focus-item,
+html body .main-content .campus .shortcut-list a {
+  border-color: var(--glass-border);
+}
+html body .main-content .campus .gold-btn {
+  border: 1px solid rgba(255,255,255,.25);
+  box-shadow: 0 8px 20px rgba(153, 119, 39, .18);
+}
+html body .main-content .campus .subtle-link,
+html body .main-content .campus .feature-foot a,
+html body .main-content .campus .shortcut-list a {
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+html[data-theme="dark"] body .main-content .campus .mast-copy h1,
+html[data-theme="dark"] body .main-content .campus .content-heading h2,
+html[data-theme="dark"] body .main-content .campus .feature-top h3,
+html[data-theme="dark"] body .main-content .campus .focus-heading h3,
+html[data-theme="dark"] body .main-content .campus .shortcut-card h3,
+html[data-theme="dark"] body .main-content .campus .school-plate strong,
+html[data-theme="dark"] body .main-content .campus .metric > strong,
+html[data-theme="dark"] body .main-content .campus .focus-text strong,
+html[data-theme="dark"] body .main-content .campus .focus-item > b,
+html[data-theme="dark"] body .main-content .campus .staff-row > strong,
+html[data-theme="dark"] body .main-content .campus .trend-day strong,
+html[data-theme="dark"] body .main-content .campus .trend-empty strong {
+  color: #f4f7fc !important;
+}
+html[data-theme="dark"] body .main-content .campus .lede,
+html[data-theme="dark"] body .main-content .campus .updated-indicator,
+html[data-theme="dark"] body .main-content .campus .feature-top p,
+html[data-theme="dark"] body .main-content .campus .focus-intro,
+html[data-theme="dark"] body .main-content .campus .metric-label,
+html[data-theme="dark"] body .main-content .campus .metric > small,
+html[data-theme="dark"] body .main-content .campus .focus-text small,
+html[data-theme="dark"] body .main-content .campus .teacher-names,
+html[data-theme="dark"] body .main-content .campus .staff-row > strong small,
+html[data-theme="dark"] body .main-content .campus .trend-day small,
+html[data-theme="dark"] body .main-content .campus .feature-foot,
+html[data-theme="dark"] body .main-content .campus .focus-foot {
+  color: #c6d2e3 !important;
+}
+html[data-theme="dark"] body .main-content .campus .section-kicker,
+html[data-theme="dark"] body .main-content .campus .eyebrow {
+  color: #a9c3ff !important;
+}
+html[data-theme="dark"] body .main-content .campus .school-plate,
+html[data-theme="dark"] body .main-content .campus .metric,
+html[data-theme="dark"] body .main-content .campus .attendance-feature,
+html[data-theme="dark"] body .main-content .campus .staff-feature,
+html[data-theme="dark"] body .main-content .campus .focus-card,
+html[data-theme="dark"] body .main-content .campus .shortcut-card {
+  background: rgba(20, 32, 53, .82) !important;
+  border-color: rgba(153, 178, 218, .19) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+html[data-theme="dark"] body .main-content .campus .staff-row {
+  background: rgba(35, 51, 76, .78) !important;
+  border-color: rgba(153, 178, 218, .15) !important;
+}
+html[data-theme="dark"] body .main-content .campus .focus-symbol,
+html[data-theme="dark"] body .main-content .campus .metric-label i {
+  background: rgba(105, 143, 220, .16) !important;
+  border-color: rgba(153, 178, 218, .15) !important;
+  color: #b8ceff !important;
+}
+html[data-theme="dark"] body .main-content .campus .feature-foot,
+html[data-theme="dark"] body .main-content .campus .focus-foot,
+html[data-theme="dark"] body .main-content .campus .focus-item,
+html[data-theme="dark"] body .main-content .campus .shortcut-list a {
+  border-color: rgba(153, 178, 218, .16) !important;
+}
+html[data-theme="dark"] body .main-content .campus .subtle-link,
+html[data-theme="dark"] body .main-content .campus .feature-foot a,
+html[data-theme="dark"] body .main-content .campus .shortcut-list a {
+  color: #dbe7fb !important;
+}
+html[data-theme="dark"] body .main-content .campus .trend-columns {
+  border-color: rgba(153, 178, 218, .22) !important;
+}
+html[data-theme="dark"] body .main-content .campus .trend-track span {
+  background: linear-gradient(180deg, #91b5ff, #587fca) !important;
+}
+html[data-theme="dark"] body .main-content .campus .trend-day.latest .trend-track span {
+  background: linear-gradient(180deg, #f2d58b, #b88b3d) !important;
+}
+
+@media (max-width: 800px) {
+  html body .main-content .campus .metric { min-height: 132px; }
+  html body .main-content .campus .attendance-feature,
+  html body .main-content .campus .staff-feature,
+  html body .main-content .campus .focus-card,
+  html body .main-content .campus .shortcut-card { padding: 18px !important; }
+}
