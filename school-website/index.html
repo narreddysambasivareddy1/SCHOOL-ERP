@@ -751,7 +751,7 @@ footer { background: var(--navy); padding: 64px 32px 28px; }
         <a href="http://localhost:8380/admin/login"><i data-lucide="chevron-right"></i>Admin Portal</a>
         <a href="http://localhost:8380/teacher/login"><i data-lucide="chevron-right"></i>Teacher Portal</a>
         <a href="http://localhost:8380/student/login"><i data-lucide="chevron-right"></i>Student Portal</a>
-        <a href="http://localhost:8380/api/swagger"><i data-lucide="chevron-right"></i>API Docs</a>
+        <a href="http://localhost:8380/parent/login"><i data-lucide="chevron-right"></i>Parent Portal</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -811,7 +811,7 @@ lucide.createIcons();
 
 (function () {
   const schoolCode = 'bright-future';
-  const apiBase = window.SCHOOL_ERP_API || 'http://localhost:8100/api';
+  const apiBase = window.SCHOOL_ERP_API || (location.port === '8181' ? 'http://localhost:8380/api' : location.origin + '/api');
   let challengeId = '';
   const msg = document.getElementById('enq-msg');
   const step1 = document.getElementById('enq-step1');

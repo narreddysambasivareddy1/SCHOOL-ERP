@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
@@ -18,39 +18,43 @@ interface Stat {
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink],
-
   template: `
-    <div class="command-dashboard">
-      <header class="command-header">
-        <div class="command-title">
-          <div class="eyebrow"><span class="status-pulse"></span> SCHOOL OVERVIEW <span>/</span> {{ ctx.context()?.academicYearName || 'Academic year' }}</div>
-          <h1>Dashboard</h1>
-          <p>{{ todayLabel }} <span class="dot-separator">·</span> Welcome back, {{ user()?.firstName }}</p>
+    <div class="campus">
+      <header class="mast">
+        <div class="mast-copy">
+          <p class="eyebrow"><span class="live"></span> {{ ctx.context()?.academicYearName || 'Academic year' }}</p>
+          <h1>Good {{ greeting }},<br>{{ user()?.firstName || 'there' }}.</h1>
+          <p class="lede">{{ todayLabel }}. The register, the front office, and fees for {{ ctx.context()?.schoolName || 'your school' }}.</p>
         </div>
-        <div class="command-actions">
-          <span class="school-context"><i class="pi pi-building"></i>{{ ctx.context()?.schoolName || 'Your school' }}</span>
+        <div class="mast-side">
+          <div class="school-plate">
+            <span class="plate-mark"><i class="pi pi-building"></i></span>
+            <div>
+              <strong>{{ ctx.context()?.schoolName || 'Your school' }}</strong>
+              <span>Today’s campus brief</span>
+            </div>
+          </div>
           @if (canCreateAdmission) {
-            <a routerLink="/admissions" class="command-primary"><i class="pi pi-plus"></i> New admission</a>
+            <a routerLink="/admissions" class="gold-btn"><i class="pi pi-plus"></i> Create admission</a>
           }
         </div>
       </header>
 
       @if (error()) {
-        <div class="command-alert" role="alert"><i class="pi pi-exclamation-circle"></i> {{ error() }}</div>
+        <div class="workspace-error" role="alert"><i class="pi pi-exclamation-circle"></i>{{ error() }}</div>
       }
 
-      <section class="kpi-grid" aria-label="School key metrics" [class.loading]="loading()">
-        @for (stat of stats(); track stat.label; let i = $index) {
+      <section class="metric-strip" aria-label="School performance indicators" [attr.aria-busy]="loading()">
+        @for (stat of stats(); track stat.label) {
           @if (stat.link) {
-            <a class="kpi-card" [routerLink]="stat.link">
-              <span class="kpi-topline"><span>{{ stat.label }}</span><i [class]="stat.icon"></i></span>
+            <a class="metric" [routerLink]="stat.link">
+              <div class="metric-label"><i [class]="stat.icon"></i><span>{{ stat.label }}</span></div>
               <strong>{{ loading() ? '—' : stat.value }}</strong>
               <small>{{ stat.sub }}</small>
-              <span class="kpi-open">View details <i class="pi pi-arrow-up-right"></i></span>
             </a>
           } @else {
-            <article class="kpi-card">
-              <span class="kpi-topline"><span>{{ stat.label }}</span><i [class]="stat.icon"></i></span>
+            <article class="metric">
+              <div class="metric-label"><i [class]="stat.icon"></i><span>{{ stat.label }}</span></div>
               <strong>{{ loading() ? '—' : stat.value }}</strong>
               <small>{{ stat.sub }}</small>
             </article>
@@ -58,173 +62,223 @@ interface Stat {
         }
       </section>
 
-      <div class="section-heading">
-        <div><span class="eyebrow">OPERATIONS</span><h2>Today at a glance</h2></div>
-        <span class="live-label"><span class="status-pulse"></span> Live school data</span>
+      <div class="content-heading">
+        <div><span class="section-kicker">The school day</span><h2>What needs a person</h2></div>
+        @if (peakDay(); as peak) {
+          <span class="updated-indicator">Strongest register · {{ peak.date | date:'EEE d MMM' }} · {{ peak.pct }}%</span>
+        }
       </div>
 
-      <section class="operations-grid">
-        <article class="attendance-panel">
-          <div class="panel-heading">
-            <div><span class="panel-label">ATTENDANCE</span><h3>Weekly attendance</h3><p>Daily student attendance across the current week</p></div>
-            <a routerLink="/attendance" class="text-link">Open register <i class="pi pi-arrow-up-right"></i></a>
-          </div>
-          <div class="attendance-overview">
-            <div class="attendance-score">
-              <strong>{{ loading() ? '—' : (attendanceMarked() ? attendancePct() + '%' : '—') }}</strong>
-              <span>{{ attendanceMarked() ? 'Attendance marked today' : 'Today’s register is pending' }}</span>
+      <div class="workspace-grid">
+        <main class="main-column">
+          <section class="attendance-feature">
+            <div class="feature-top">
+              <div>
+                <span class="section-kicker">The register</span>
+                <h3>Attendance across the week</h3>
+                <p>Each bar is a day the school submitted a register.</p>
+              </div>
+              <a routerLink="/attendance" class="subtle-link">Open attendance <i class="pi pi-arrow-up-right"></i></a>
             </div>
-            <div class="attendance-status" [class.pending]="!attendanceMarked()">
-              <i [class]="attendanceMarked() ? 'pi pi-check-circle' : 'pi pi-clock'"></i>
-              {{ attendanceMarked() ? 'Register updated' : 'Awaiting entry' }}
-            </div>
-          </div>
-          @if (loading()) {
-            <div class="chart-skeleton"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          } @else if (attendanceTrend().length) {
-            <div class="attendance-chart" role="img" aria-label="Daily attendance trend for the last seven days">
-              <div class="chart-scale"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
-              <div class="chart-bars">
-                @for (point of attendanceTrend(); track point.date; let last = $last) {
-                  <div class="chart-day-column" [class.current]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'" >
-                    <div class="bar-track"><span [style.height.%]="point.pct"></span></div>
-                    <strong>{{ point.pct }}%</strong>
-                    <small>{{ point.date | date:'EEE' }}</small>
-                  </div>
-                }
+            <div class="attendance-summary">
+              <div class="attendance-number">
+                <strong>{{ loading() ? '—' : (attendanceMarked() ? attendancePct() + '%' : '—') }}</strong>
+                <span>{{ attendanceMarked() ? 'Attendance recorded today' : 'Today’s register has not been submitted' }}</span>
+              </div>
+              <div class="register-state" [class.waiting]="!attendanceMarked()">
+                <i [class]="attendanceMarked() ? 'pi pi-check-circle' : 'pi pi-clock'"></i>
+                {{ attendanceMarked() ? 'Register complete' : 'Awaiting register' }}
               </div>
             </div>
-          } @else {
-            <div class="chart-empty"><i class="pi pi-chart-line"></i><strong>No attendance trend yet</strong><span>Marked sessions will appear here.</span></div>
-          }
-          <div class="panel-foot"><span><i class="pi pi-info-circle"></i> Based on marked attendance sessions</span><a routerLink="/attendance">View attendance history <i class="pi pi-arrow-right"></i></a></div>
-        </article>
-
-        <aside class="priority-panel">
-          <div class="panel-heading">
-            <div><span class="panel-label">NEEDS ATTENTION</span><h3>Priority queue</h3><p>Follow-ups for your school team</p></div>
-            <span class="queue-total">{{ (enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0 }}</span>
-          </div>
-          @if (loading()) {
-            <div class="queue-loading"><span></span><span></span><span></span></div>
-          } @else {
-            <div class="priority-list">
-              <a routerLink="/enquiries" class="priority-row"><span class="priority-icon blue"><i class="pi pi-inbox"></i></span><span class="priority-copy"><strong>New enquiries</strong><small>{{ enquiryOpen() }} still open</small></span><b>{{ enquiryNew() }}</b><i class="pi pi-chevron-right"></i></a>
-              <a routerLink="/fees" class="priority-row"><span class="priority-icon green"><i class="pi pi-wallet"></i></span><span class="priority-copy"><strong>Fees collected</strong><small>Successful payments this month</small></span><b>{{ locale.formatMoney(feeTotal()) }}</b><i class="pi pi-chevron-right"></i></a>
-              @if (canSeeAcademicOps) {
-                <a routerLink="/substitutions" class="priority-row"><span class="priority-icon amber"><i class="pi pi-users"></i></span><span class="priority-copy"><strong>Periods to cover</strong><small>{{ ops()?.onLeave ?? '—' }} on leave · {{ ops()?.presentStaff ?? '—' }} present</small></span><b>{{ ops()?.openSubstitutions ?? '—' }}</b><i class="pi pi-chevron-right"></i></a>
-              }
-              @if (canSeeDiaryCompliance) {
-                <a routerLink="/diary" class="priority-row"><span class="priority-icon violet"><i class="pi pi-book"></i></span><span class="priority-copy"><strong>Diary pending</strong><small>{{ diarySubmitted() }} submitted today</small></span><b>{{ diaryPending() }}</b><i class="pi pi-chevron-right"></i></a>
-              }
-            </div>
-          }
-          @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
-          @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }
-          <div class="priority-foot"><i class="pi pi-shield"></i> Role-based access is applied</div>
-        </aside>
-      </section>
-
-      @if (canSeeAcademicOps && ops()?.availability?.length) {
-        <section class="staff-panel">
-          <div class="panel-heading"><div><span class="panel-label">STAFFING</span><h3>Teacher availability</h3><p>Available staff for period coverage today</p></div><a routerLink="/substitutions" class="text-link">Manage cover <i class="pi pi-arrow-up-right"></i></a></div>
-          <div class="staff-grid">
-            @for (period of ops()?.availability || []; track period.periodId) {
-              <article class="staff-slot"><span>{{ period.period }}</span><strong>{{ period.free }} <small>available</small></strong><p>{{ teacherNames(period) || 'No teachers available' }}</p></article>
+            @if (loading()) {
+              <div class="trend-loading"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            } @else if (attendanceTrend().length) {
+              <div class="trend-chart" role="img" [attr.aria-label]="'Daily attendance trend across ' + attendanceTrend().length + ' available days'">
+                <div class="trend-axis"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+                <div class="trend-columns" [style.grid-template-columns]="'repeat(' + attendanceTrend().length + ', minmax(0, 1fr))'">
+                  @for (point of attendanceTrend(); track point.date; let last = $last) {
+                    <div class="trend-day" [class.latest]="last" [attr.aria-label]="(point.date | date:'EEE, d MMM') + ': ' + point.pct + '%'">
+                      <div class="trend-track"><span [style.height.%]="point.pct"></span></div>
+                      <strong>{{ point.pct }}%</strong>
+                      <small>{{ point.date | date:'EEE' }}</small><small class="trend-date">{{ point.date | date:'d MMM' }}</small>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="trend-empty"><i class="pi pi-chart-line"></i><strong>Attendance history will appear here</strong><span>Once attendance is marked, the weekly trend will be available.</span></div>
             }
-          </div>
-        </section>
-      }
+            <div class="feature-foot"><span><i class="pi pi-info-circle"></i> Trend is based on submitted attendance sessions</span><a routerLink="/attendance">View register history <i class="pi pi-arrow-right"></i></a></div>
+          </section>
+
+          @if (canSeeAcademicOps && ops()?.availability?.length) {
+            <section class="staff-feature">
+              <div class="feature-top">
+                <div><span class="section-kicker">Cover</span><h3>Teachers free this morning</h3><p>People who can take a period today.</p></div>
+                <a routerLink="/substitutions" class="subtle-link">Manage cover <i class="pi pi-arrow-up-right"></i></a>
+              </div>
+              <div class="staff-list">
+                @for (period of ops()?.availability || []; track period.periodId) {
+                  <article class="staff-row"><span class="period-name">{{ period.period }}</span><strong>{{ period.free }} <small>available</small></strong><span class="teacher-names">{{ teacherNames(period) || 'No teachers available' }}</span></article>
+                }
+              </div>
+            </section>
+          }
+        </main>
+
+        <aside class="side-column">
+          <section class="focus-card">
+            <div class="focus-heading">
+              <div><span class="section-kicker">Front of house</span><h3>Needs your attention</h3></div>
+              <span class="focus-count" [attr.aria-label]="'Action items: ' + ((enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0)">{{ (enquiryNew() + (ops()?.openSubstitutions ?? 0) + diaryPending()) || 0 }}</span>
+            </div>
+            <p class="focus-intro">Items that may need a follow-up from your team.</p>
+            @if (loading()) {
+              <div class="focus-loading"><span></span><span></span><span></span></div>
+            } @else {
+              <div class="focus-items">
+                <a routerLink="/enquiries" class="focus-item">
+                  <span class="focus-symbol enquiries"><i class="pi pi-inbox"></i></span>
+                  <span class="focus-text"><strong>New enquiries</strong><small>{{ enquiryOpen() }} still open</small></span>
+                  <b>{{ enquiryNew() }}</b><i class="pi pi-chevron-right"></i>
+                </a>
+                <a routerLink="/fees" class="focus-item">
+                  <span class="focus-symbol finance"><i class="pi pi-wallet"></i></span>
+                  <span class="focus-text"><strong>Fees collected</strong><small>Successful payments this month</small></span>
+                  <b class="money-value">{{ locale.formatMoney(feeTotal()) }}</b><i class="pi pi-chevron-right"></i>
+                </a>
+                @if (canSeeAcademicOps) {
+                  <a routerLink="/substitutions" class="focus-item">
+                    <span class="focus-symbol staffing"><i class="pi pi-users"></i></span>
+                    <span class="focus-text"><strong>Periods to cover</strong><small>{{ ops()?.onLeave ?? '—' }} on leave · {{ ops()?.presentStaff ?? '—' }} present</small></span>
+                    <b>{{ ops()?.openSubstitutions ?? '—' }}</b><i class="pi pi-chevron-right"></i>
+                  </a>
+                }
+                @if (canSeeDiaryCompliance) {
+                  <a routerLink="/diary" class="focus-item">
+                    <span class="focus-symbol diary"><i class="pi pi-book"></i></span>
+                    <span class="focus-text"><strong>Class diary pending</strong><small>{{ diaryPending() }} awaiting · {{ diarySubmitted() }} submitted today</small></span>
+                    <b>{{ diaryPending() }}</b><i class="pi pi-chevron-right"></i>
+                  </a>
+                }
+              </div>
+            }
+            @if (opsError()) { <div class="inline-error" role="alert">{{ opsError() }}</div> }
+            @if (diaryError()) { <div class="inline-error" role="alert">{{ diaryError() }}</div> }
+            <div class="focus-foot"><i class="pi pi-shield"></i> Information shown according to your role</div>
+          </section>
+
+          <section class="shortcut-card">
+            <span class="section-kicker">Open a desk</span>
+            <h3>Go straight to the work</h3>
+            <div class="shortcut-list">
+              @if (canSeeStudents) { <a routerLink="/students"><i class="pi pi-users"></i><span>Student directory</span><i class="pi pi-arrow-up-right"></i></a> }
+              @if (canSeeStaff) { <a routerLink="/staff"><i class="pi pi-id-card"></i><span>Staff & HR</span><i class="pi pi-arrow-up-right"></i></a> }
+              <a routerLink="/timetable"><i class="pi pi-calendar"></i><span>Timetable</span><i class="pi pi-arrow-up-right"></i></a>
+              @if (canSeeAnalytics) { <a routerLink="/analytics"><i class="pi pi-chart-bar"></i><span>School analytics</span><i class="pi pi-arrow-up-right"></i></a> }
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
   `,
   styles: [`
-    :host{display:block;color:#182230}
-    .command-dashboard{max-width:1500px;margin:0 auto}
-    .command-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:4px 0 27px;padding:0 0 22px;border-bottom:1px solid #e7eaf0}
-    .eyebrow,.panel-label{display:flex;align-items:center;gap:8px;color:#8993a4;font-size:10px;font-weight:750;letter-spacing:.12em}
-    .eyebrow>span:not(.status-pulse){color:#c0c6d1}
-    .status-pulse{width:7px;height:7px;border-radius:50%;background:#16a37a;box-shadow:0 0 0 4px #e4f5ef}
-    .command-title h1{margin:11px 0 4px;color:#172230;font-size:30px;font-weight:760;letter-spacing:-.055em}
-    .command-title p{margin:0;color:#7b8798;font-size:12px}
-    .dot-separator{padding:0 5px;color:#c0c6d1}
-    .command-actions{display:flex;align-items:center;gap:10px}
-    .school-context{display:inline-flex;align-items:center;gap:8px;max-width:250px;padding:10px 12px;border:1px solid #e8ebf1;border-radius:8px;color:#536174;background:#fff;font-size:11px;font-weight:650}
-    .school-context i{color:#8b83e8}
-    .command-primary{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 14px;border-radius:8px;background:#5146d8;color:#fff;text-decoration:none;font-size:11px;font-weight:700}
-    .command-primary:hover{background:#4035bd}
-    .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:30px}
-    .kpi-card{position:relative;display:flex;min-height:142px;flex-direction:column;align-items:flex-start;padding:16px 17px;border:1px solid #e7eaf0;border-radius:10px;background:#fff;color:inherit;text-decoration:none;transition:border-color .16s,transform .16s}
-    a.kpi-card:hover{transform:translateY(-2px);border-color:#c7c2fa}
-    .kpi-topline{display:flex;width:100%;align-items:center;justify-content:space-between;color:#788497;font-size:10px;font-weight:700}
-    .kpi-topline i{display:grid;width:29px;height:29px;place-items:center;border-radius:8px;background:#f0efff;color:#6258df;font-size:12px}
-    .kpi-card>strong{margin-top:12px;color:#172230;font-size:25px;font-weight:760;letter-spacing:-.05em}
-    .kpi-card>small{margin-top:3px;color:#929bad;font-size:10px}
-    .kpi-open{position:absolute;right:14px;bottom:14px;color:#6358d9;font-size:9px;font-weight:700;opacity:0;transition:opacity .15s}
-    .kpi-card:hover .kpi-open{opacity:1}
-    .section-heading{display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 13px}
-    .section-heading h2{margin:6px 0 0;color:#202b3a;font-size:18px;font-weight:740;letter-spacing:-.035em}
-    .live-label{display:flex;align-items:center;gap:8px;color:#748294;font-size:10px}
-    .live-label .status-pulse{width:6px;height:6px}
-    .operations-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.85fr);gap:14px;align-items:stretch}
-    .attendance-panel,.priority-panel,.staff-panel{min-width:0;padding:19px;border:1px solid #e6eaf0;border-radius:11px;background:#fff}
-    .panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
-    .panel-heading h3{margin:6px 0 4px;color:#202b3a;font-size:15px;font-weight:730;letter-spacing:-.025em}
-    .panel-heading p{margin:0;color:#8a95a5;font-size:10px}
-    .text-link{display:inline-flex;align-items:center;gap:7px;flex:none;color:#5146d8;text-decoration:none;font-size:10px;font-weight:700}
-    .attendance-overview{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:19px 0 10px;padding:13px 15px;border-radius:8px;background:#f7f8fb}
-    .attendance-score{display:flex;align-items:baseline;gap:10px}
-    .attendance-score strong{color:#172230;font-size:27px;font-weight:780;letter-spacing:-.05em}
-    .attendance-score span{color:#8792a2;font-size:10px}
-    .attendance-status{display:flex;align-items:center;gap:7px;color:#138566;font-size:10px;font-weight:700}
-    .attendance-status.pending{color:#b17a2b}
-    .attendance-chart{display:grid;grid-template-columns:34px 1fr;gap:9px;height:190px;margin-top:9px}
-    .chart-scale{display:flex;flex-direction:column;justify-content:space-between;padding:0 0 25px;color:#a1aaba;font-size:9px}
-    .chart-bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;border-bottom:1px solid #e8ebf1;background:repeating-linear-gradient(to bottom,transparent 0,transparent 24%,#edf0f4 24.5%,transparent 25%)}
-    .chart-day-column{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
-    .bar-track{display:flex;width:100%;height:135px;align-items:flex-end;justify-content:center}
-    .bar-track span{width:min(28px,65%);min-height:3px;border-radius:5px 5px 2px 2px;background:#a6a1f5}
-    .chart-day-column.current .bar-track span{background:#26a887}
-    .chart-day-column strong{color:#566174;font-size:9px}
-    .chart-day-column small{padding-bottom:7px;color:#9aa4b2;font-size:9px}
-    .panel-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid #edf0f4;color:#9aa4b2;font-size:9px}
-    .panel-foot span,.panel-foot a{display:flex;align-items:center;gap:6px}
-    .panel-foot a{color:#5c55d5;text-decoration:none;font-weight:700}
-    .priority-panel{display:flex;flex-direction:column}
-    .queue-total{display:grid;width:29px;height:29px;place-items:center;border-radius:8px;background:#f0efff;color:#5b51d3;font-size:11px;font-weight:750}
-    .priority-list{display:grid;gap:0;margin-top:15px}
-    .priority-row{display:flex;align-items:center;gap:10px;min-width:0;padding:13px 0;border-bottom:1px solid #edf0f4;color:inherit;text-decoration:none}
-    .priority-row:last-child{border-bottom:0}
-    .priority-row:hover .priority-copy strong{color:#5146d8}
-    .priority-icon{display:grid;width:31px;height:31px;flex:none;place-items:center;border-radius:8px;font-size:12px}
-    .priority-icon.blue{background:#edf4ff;color:#4b78c7}.priority-icon.green{background:#eaf7f1;color:#19866a}.priority-icon.amber{background:#fff5e8;color:#b67a27}.priority-icon.violet{background:#f2efff;color:#7664d8}
-    .priority-copy{display:grid;min-width:0;gap:3px}
-    .priority-copy strong{color:#344154;font-size:10px;font-weight:700}
-    .priority-copy small{overflow:hidden;color:#929dad;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
-    .priority-row>b{margin-left:auto;color:#39465a;font-size:10px;white-space:nowrap}
-    .priority-row>i{color:#b0b8c4;font-size:9px}
-    .priority-foot{display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:13px;border-top:1px solid #edf0f4;color:#9aa4b2;font-size:9px}
-    .inline-error{margin-top:8px;color:#b44c59;font-size:10px}
-    .staff-panel{margin-top:14px}
-    .staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin-top:16px}
-    .staff-slot{padding:13px;border:1px solid #e9edf2;border-radius:8px;background:#fafbfd}
-    .staff-slot>span{color:#8792a2;font-size:9px;font-weight:750;letter-spacing:.08em}
-    .staff-slot>strong{display:block;margin:8px 0 4px;color:#202b3a;font-size:21px;font-weight:760}
-    .staff-slot>strong small{color:#8a95a5;font-size:10px;font-weight:500}
-    .staff-slot p{margin:0;color:#8490a0;font-size:9px}
-    .chart-empty{display:grid;min-height:165px;place-content:center;justify-items:center;gap:7px;color:#9aa4b2;font-size:10px}
-    .chart-empty i{font-size:20px;color:#8b83e8}
-    .chart-empty strong{color:#4d596b;font-size:11px}
-    .chart-skeleton,.queue-loading{display:grid;gap:10px}
-    .chart-skeleton{grid-template-columns:repeat(7,1fr);height:150px;align-items:end;padding:10px 0}
-    .chart-skeleton span,.queue-loading span{display:block;border-radius:6px;background:#eff1f6}
-    .chart-skeleton span{height:65%}.chart-skeleton span:nth-child(2n){height:88%}.chart-skeleton span:nth-child(3n){height:45%}
-    .queue-loading{margin-top:20px}.queue-loading span{height:48px}
-    .command-alert{margin-bottom:16px;padding:11px 13px;border:1px solid #f2d9d9;border-radius:8px;background:#fff6f5;color:#a74b4b;font-size:11px}
-    @media(max-width:1100px){.operations-grid{grid-template-columns:1fr}.priority-panel{min-height:0}}
-    @media(max-width:760px){.command-header{align-items:flex-start;flex-direction:column;margin-bottom:18px}.command-actions{width:100%;flex-wrap:wrap}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi-card{min-height:126px;padding:13px}.attendance-panel,.priority-panel,.staff-panel{padding:14px}.attendance-overview{align-items:flex-start;flex-direction:column}.panel-foot{align-items:flex-start;flex-direction:column}.section-heading h2{font-size:17px}}
-    @media(max-width:390px){.kpi-grid{grid-template-columns:1fr}.command-title h1{font-size:26px}}
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
-  `],
+:host{display:block;color:#172033}
+.campus{width:100%;max-width:1480px;margin:0 auto}
+.mast{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.7fr);gap:28px;align-items:end;margin:0 0 28px}
+.eyebrow{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:#8a7040;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.live{width:8px;height:8px;border-radius:50%;background:#1f9d72;box-shadow:0 0 0 4px rgba(31,157,114,.16)}
+.mast-copy h1{margin:0;color:#142033;font-family:"Playfair Display",Georgia,serif;font-size:clamp(40px,4.6vw,58px);font-weight:700;letter-spacing:-.03em;line-height:1.02}
+.lede{max-width:46ch;margin:14px 0 0;color:#5c6b80;font-size:16px;line-height:1.55}
+.mast-side{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.school-plate{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px;border:1px solid #e4dcc8;border-radius:16px;background:#fff}
+.plate-mark{display:grid;width:40px;height:40px;flex:none;place-items:center;border-radius:12px;background:#142033;color:#e8c96a;font-size:16px}
+.school-plate strong{display:block;color:#142033;font-size:14px;font-weight:700}
+.school-plate span{color:#6d7c90;font-size:13px}
+.gold-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;background:#c9a84c;color:#142033;font-size:14px;font-weight:750;text-decoration:none}
+.gold-btn:hover{background:#e0be68}
+.workspace-error{display:flex;align-items:center;gap:8px;margin:0 0 16px;padding:12px 14px;border-radius:12px;background:#fff1f1;color:#9b3d48;font-size:14px}
+.metric-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 32px}
+.metric{display:flex;min-height:148px;flex-direction:column;padding:18px 18px 16px;border:1px solid #e6e0d4;border-radius:18px;background:#fff;color:inherit;text-decoration:none;box-shadow:0 10px 30px rgba(20,32,51,.04)}
+a.metric{cursor:pointer}
+a.metric:hover{border-color:#c9a84c;transform:translateY(-2px)}
+.metric-label{display:flex;align-items:center;gap:8px;color:#5c6b80;font-size:13px;font-weight:650}
+.metric-label i{display:grid;width:28px;height:28px;place-items:center;border-radius:8px;background:#f6f0e2;color:#8a7040}
+.metric>strong{display:block;margin-top:auto;padding-top:18px;color:#142033;font-size:34px;font-weight:720;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
+.metric>small{display:block;margin-top:8px;color:#6d7c90;font-size:13px}
+.content-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 14px}
+.section-kicker{display:block;margin:0 0 4px;color:#8a7040;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.content-heading h2,.feature-top h3,.focus-heading h3,.shortcut-card h3{margin:0;color:#142033;font-family:"Playfair Display",Georgia,serif;font-size:28px;font-weight:700;letter-spacing:-.02em}
+.updated-indicator{color:#5c6b80;font-size:13px}
+.workspace-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);gap:16px;align-items:start}
+.main-column,.side-column{display:grid;gap:16px;min-width:0}
+.attendance-feature,.staff-feature,.focus-card,.shortcut-card{min-width:0;padding:22px;border:1px solid #e6e0d4;border-radius:20px;background:#fff;box-shadow:0 10px 30px rgba(20,32,51,.04)}
+.feature-top,.focus-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.feature-top p,.focus-intro{margin:8px 0 0;color:#5c6b80;font-size:14px;line-height:1.5}
+.subtle-link,.feature-foot a{color:#142033;font-size:14px;font-weight:650;text-decoration:none}
+.subtle-link{display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.attendance-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0 8px;padding:16px 18px;border-radius:16px;background:#142033;color:#f6f1e6}
+.attendance-number{display:flex;align-items:baseline;gap:12px}
+.attendance-number strong{font-family:"Playfair Display",Georgia,serif;font-size:42px;font-weight:700;letter-spacing:-.03em}
+.attendance-number span{color:#d9d0bf;font-size:14px}
+.register-state{display:flex;align-items:center;gap:8px;color:#e8c96a;font-size:14px;font-weight:650}
+.register-state.waiting{color:#f0d48a}
+.trend-chart{display:grid;grid-template-columns:36px 1fr;gap:12px;height:220px;margin-top:12px}
+.trend-axis{display:flex;flex-direction:column;justify-content:space-between;padding-bottom:36px;color:#8b97a8;font-size:12px}
+.trend-columns{display:grid;gap:12px;align-items:end;border-bottom:1px solid #eadfcd}
+.trend-day{display:flex;min-width:0;flex-direction:column;align-items:center;gap:6px}
+.trend-track{display:flex;width:100%;height:140px;align-items:flex-end;justify-content:center}
+.trend-track span{width:min(28px,70%);min-height:4px;border-radius:8px 8px 2px 2px;background:#142033}
+.trend-day.latest .trend-track span{background:#c9a84c}
+.trend-day strong{color:#142033;font-size:13px;font-variant-numeric:tabular-nums}
+.trend-day small{color:#6d7c90;font-size:12px}
+.trend-day .trend-date{margin-top:-4px}
+.feature-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid #efe8da;color:#6d7c90;font-size:13px}
+.feature-foot span{display:flex;align-items:center;gap:6px}
+.focus-count{display:grid;min-width:36px;height:36px;place-items:center;border-radius:12px;background:#142033;color:#e8c96a;font-size:14px;font-weight:700}
+.focus-items{display:grid;margin-top:8px}
+.focus-item{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 0;border-top:1px solid #efe8da;color:inherit;text-decoration:none}
+.focus-item:hover .focus-text strong{color:#8a7040}
+.focus-symbol{display:grid;width:40px;height:40px;flex:none;place-items:center;border-radius:12px;background:#f6f0e2;color:#8a7040;font-size:16px}
+.focus-text{display:grid;min-width:0;gap:2px}
+.focus-text strong{color:#142033;font-size:15px;font-weight:680}
+.focus-text small{overflow:hidden;color:#6d7c90;font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.focus-item>b{margin-left:auto;color:#142033;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.focus-item>i{color:#b3a48a}
+.focus-foot{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:12px;border-top:1px solid #efe8da;color:#6d7c90;font-size:13px}
+.shortcut-list{display:grid;margin-top:12px}
+.shortcut-list a{display:flex;align-items:center;gap:10px;min-height:48px;border-top:1px solid #efe8da;color:#142033;font-size:15px;font-weight:600;text-decoration:none}
+.shortcut-list a>i:first-child{color:#8a7040}
+.shortcut-list a>i:last-child{margin-left:auto;color:#b3a48a}
+.shortcut-list a:hover{color:#8a7040}
+.staff-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px}
+.staff-row{display:grid;gap:6px;padding:14px;border-radius:14px;background:#f7f3ea}
+.period-name{color:#8a7040;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.staff-row>strong{color:#142033;font-size:28px;font-weight:720;font-variant-numeric:tabular-nums}
+.staff-row>strong small{margin-left:4px;color:#6d7c90;font-size:13px;font-weight:500}
+.teacher-names{overflow:hidden;color:#5c6b80;font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.trend-empty{display:grid;min-height:180px;place-content:center;justify-items:center;gap:6px;color:#6d7c90;font-size:14px;text-align:center}
+.trend-empty strong{color:#142033;font-size:16px}
+.trend-loading,.focus-loading{display:grid;gap:10px}
+.trend-loading{grid-template-columns:repeat(7,1fr);height:150px;align-items:end}
+.trend-loading span,.focus-loading span{display:block;border-radius:8px;background:#f3eee4}
+.trend-loading span{height:60%}
+.trend-loading span:nth-child(2n){height:85%}
+.focus-loading span{height:48px}
+.inline-error{margin-top:8px;color:#9b3d48;font-size:14px}
+a:focus-visible,button:focus-visible{outline:3px solid rgba(201,168,76,.55);outline-offset:3px}
+@media(max-width:1100px){.workspace-grid{grid-template-columns:1fr}.side-column{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.mast,.metric-strip,.side-column{grid-template-columns:1fr}.mast{align-items:start}.content-heading,.attendance-summary,.feature-foot,.feature-top{align-items:flex-start;flex-direction:column}.attendance-number{flex-direction:column;gap:4px}}
+@media(prefers-reduced-motion:reduce){a.metric{transition:none}}
+:host-context(html[data-theme='dark']) .mast-copy h1,:host-context(html[data-theme='dark']) .content-heading h2{color:#142033}
+:host-context(html[data-theme='dark']) .lede,:host-context(html[data-theme='dark']) .updated-indicator{color:#3d4d63}
+:host-context(html[data-theme='dark']) .mast .eyebrow,:host-context(html[data-theme='dark']) .content-heading .section-kicker{color:#6e5424}
+:host-context(html[data-theme='dark']) .feature-top h3,:host-context(html[data-theme='dark']) .focus-heading h3,:host-context(html[data-theme='dark']) .shortcut-card h3,:host-context(html[data-theme='dark']) .metric>strong,:host-context(html[data-theme='dark']) .focus-text strong,:host-context(html[data-theme='dark']) .focus-item>b,:host-context(html[data-theme='dark']) .staff-row>strong,:host-context(html[data-theme='dark']) .school-plate strong{color:#f4efe4}
+:host-context(html[data-theme='dark']) .feature-top p,:host-context(html[data-theme='dark']) .focus-intro,:host-context(html[data-theme='dark']) .metric>small,:host-context(html[data-theme='dark']) .focus-text small,:host-context(html[data-theme='dark']) .teacher-names,:host-context(html[data-theme='dark']) .shortcut-list a{color:#c4bba8}
+:host-context(html[data-theme='dark']) .metric,:host-context(html[data-theme='dark']) .attendance-feature,:host-context(html[data-theme='dark']) .staff-feature,:host-context(html[data-theme='dark']) .focus-card,:host-context(html[data-theme='dark']) .shortcut-card,:host-context(html[data-theme='dark']) .school-plate{background:#1b2433;border-color:#314056}
+:host-context(html[data-theme='dark']) .staff-row{background:#243044}
+:host-context(html[data-theme='dark']) .focus-item,:host-context(html[data-theme='dark']) .shortcut-list a,:host-context(html[data-theme='dark']) .feature-foot,:host-context(html[data-theme='dark']) .focus-foot{border-color:#314056}
+  `]
 })
 export class DashboardComponent implements OnInit {
   user = this.auth.user;
@@ -334,6 +388,12 @@ export class DashboardComponent implements OnInit {
   private getGreeting(): string {
     const hour = new Date().getHours();
     return hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  }
+
+  peakDay(): { date: string; pct: number } | null {
+    const rows = this.attendanceTrend();
+    if (!rows.length) return null;
+    return rows.reduce((best, row) => row.pct > best.pct ? row : best);
   }
 
   teacherNames(period: any): string {
