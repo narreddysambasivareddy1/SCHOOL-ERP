@@ -4102,3 +4102,112 @@ html[data-theme="dark"] body .main-content .p-dialog :is(.p-dialog-header, .p-di
     min-width: 78px;
   }
 }
+
+
+/* V3 refinement: make the glass treatment visibly intentional, not opaque white cards. */
+:root {
+  --saas-glass: rgba(255, 255, 255, .54);
+  --saas-glass-strong: rgba(255, 255, 255, .72);
+  --saas-glass-border: rgba(255, 255, 255, .88);
+  --saas-blur: 28px;
+  --saas-shadow: 0 18px 48px rgba(43, 54, 102, .085), inset 0 1px 0 rgba(255,255,255,.82);
+  --saas-shadow-hover: 0 24px 58px rgba(55, 62, 132, .14), inset 0 1px 0 rgba(255,255,255,.92);
+}
+html, body {
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(119, 111, 244, .19), transparent 34%),
+    radial-gradient(ellipse at 88% 16%, rgba(100, 190, 190, .13), transparent 30%),
+    radial-gradient(ellipse at 72% 86%, rgba(211, 184, 242, .2), transparent 34%),
+    linear-gradient(135deg, #edf1ff 0%, #f6f7ff 46%, #edf5fb 100%) !important;
+  background-attachment: fixed !important;
+}
+html body .app-shell .topbar {
+  background: rgba(255,255,255,.66) !important;
+  border-bottom: 1px solid rgba(255,255,255,.9) !important;
+  box-shadow: 0 8px 30px rgba(48,59,106,.045);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+}
+html body .app-shell .sidebar {
+  background: linear-gradient(160deg, rgba(255,255,255,.69), rgba(239,242,255,.56)) !important;
+  border-right: 1px solid rgba(255,255,255,.9) !important;
+  box-shadow: 12px 0 38px rgba(48,59,106,.055);
+}
+html body .app-shell .main-content {
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(129,119,245,.12), transparent 34%),
+    radial-gradient(ellipse at 94% 10%, rgba(105,188,190,.09), transparent 28%) !important;
+}
+html body .main-content .campus :is(.school-plate,.metric,.attendance-feature,.staff-feature,.focus-card,.shortcut-card) {
+  background: linear-gradient(145deg, rgba(255,255,255,.76), rgba(255,255,255,.43)) !important;
+  border: 1px solid rgba(255,255,255,.94) !important;
+  box-shadow: 0 18px 48px rgba(48,58,112,.09), inset 0 1px 0 rgba(255,255,255,.96), inset 0 -1px 0 rgba(125,139,190,.06) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(185%) !important;
+  backdrop-filter: blur(30px) saturate(185%) !important;
+}
+html body .main-content .campus .metric {
+  border-radius: 22px !important;
+}
+html body .main-content .campus :is(.attendance-feature,.staff-feature,.focus-card,.shortcut-card) {
+  border-radius: 22px !important;
+}
+html body .main-content .campus a.metric:hover {
+  transform: translateY(-5px);
+  border-color: rgba(112,103,238,.42) !important;
+  box-shadow: 0 26px 60px rgba(75,73,170,.16), inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+html body .main-content .campus .gold-btn {
+  border: 1px solid rgba(255,255,255,.55);
+  background: linear-gradient(135deg, #7168ed, #5148c9) !important;
+  box-shadow: 0 12px 26px rgba(91,79,218,.25) !important;
+  color: #fff !important;
+}
+html body .main-content .campus .gold-btn:hover {
+  background: linear-gradient(135deg, #8179f5, #5d53d7) !important;
+  box-shadow: 0 16px 32px rgba(91,79,218,.32) !important;
+}
+html body .main-content .campus .metric-label i,
+html body .main-content .campus .focus-symbol {
+  background: linear-gradient(145deg, rgba(112,103,238,.16), rgba(93,191,174,.12)) !important;
+  border-color: rgba(112,103,238,.18) !important;
+  color: #5c53d2 !important;
+}
+html body .main-content .campus .school-plate {
+  background: linear-gradient(135deg, rgba(255,255,255,.83), rgba(244,246,255,.56)) !important;
+}
+html body .main-content .campus .staff-row {
+  background: rgba(255,255,255,.53) !important;
+  border-color: rgba(255,255,255,.88) !important;
+  box-shadow: 0 9px 24px rgba(48,58,112,.055), inset 0 1px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+}
+html body .main-content :is(.page-header:not(.welcome),.toolbar,.filter-bar,.card,form.card,.panel,.stat-card,.kpi-card,.report-card,.calendar-card,.assignment-card,.plan-card,.deadline-card,.map-card,.empty-state,.empty-card,.p-card) {
+  background: linear-gradient(145deg, rgba(255,255,255,.74), rgba(255,255,255,.48)) !important;
+  border-color: rgba(255,255,255,.9) !important;
+  box-shadow: 0 16px 42px rgba(43,54,102,.075), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(175%);
+  backdrop-filter: blur(26px) saturate(175%);
+}
+html[data-theme="dark"] {
+  --saas-glass: rgba(22, 32, 54, .58);
+  --saas-glass-strong: rgba(25, 38, 64, .78);
+  --saas-glass-border: rgba(171, 190, 229, .17);
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] body .app-shell .main-content {
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(103,94,225,.22), transparent 34%),
+    radial-gradient(ellipse at 88% 16%, rgba(48,142,148,.12), transparent 30%),
+    linear-gradient(135deg, #0e1729, #151e35 55%, #101d2e) !important;
+}
+html[data-theme="dark"] body .main-content .campus :is(.school-plate,.metric,.attendance-feature,.staff-feature,.focus-card,.shortcut-card,.staff-row) {
+  background: linear-gradient(145deg, rgba(34,48,76,.78), rgba(21,33,56,.62)) !important;
+  border-color: rgba(177,194,232,.19) !important;
+  box-shadow: 0 18px 48px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+@media (max-width: 768px) {
+  html body .app-shell .sidebar {
+    background: rgba(248,250,255,.94) !important;
+  }
+}
