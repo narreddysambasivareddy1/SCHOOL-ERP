@@ -4093,3 +4093,12 @@ html[data-theme="dark"] body .main-content .p-dialog :is(.p-dialog-header, .p-di
   }
 }
 
+
+
+/* Keep the desktop collapsed navigation state compatible with the new fixed rail width. */
+@media (min-width: 769px) {
+  html body .app-shell .sidebar.collapsed {
+    width: 78px;
+    min-width: 78px;
+  }
+}
