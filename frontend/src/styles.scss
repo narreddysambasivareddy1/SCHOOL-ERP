@@ -3495,3 +3495,601 @@ html[data-theme="dark"] body .main-content .campus .trend-day.latest .trend-trac
   html body .main-content .campus .focus-card,
   html body .main-content .campus .shortcut-card { padding: 18px !important; }
 }
+
+
+
+/* ==========================================================
+   HYBRID PREMIUM SAAS — CONSOLIDATED VISUAL SYSTEM
+   Appended as the final cascade layer so existing feature
+   styles remain functional while shared visual language wins.
+   ========================================================== */
+
+:root {
+  color-scheme: light;
+  --saas-canvas: #f3f5fb;
+  --saas-ink: #17233b;
+  --saas-muted: #68758d;
+  --saas-line: rgba(116, 132, 166, .18);
+  --saas-glass: rgba(255, 255, 255, .66);
+  --saas-glass-strong: rgba(255, 255, 255, .84);
+  --saas-glass-border: rgba(255, 255, 255, .82);
+  --saas-shadow: 0 14px 36px rgba(37, 54, 91, .075), inset 0 1px 0 rgba(255,255,255,.82);
+  --saas-shadow-hover: 0 22px 48px rgba(37, 54, 91, .13), inset 0 1px 0 rgba(255,255,255,.9);
+  --saas-blur: 18px;
+  --saas-radius: 18px;
+  --saas-radius-sm: 12px;
+  --saas-accent: var(--primary, #6258df);
+  --saas-canvas-gradient:
+    radial-gradient(ellipse 54% 42% at 0% 0%, rgba(116, 130, 255, .15), transparent 72%),
+    radial-gradient(ellipse 46% 38% at 100% 0%, rgba(174, 145, 255, .13), transparent 70%),
+    linear-gradient(145deg, #f5f7fc 0%, #eff2fa 52%, #f6f4fb 100%);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --saas-canvas: #0d1526;
+  --saas-ink: #edf3ff;
+  --saas-muted: #a9b7ce;
+  --saas-line: rgba(160, 181, 220, .16);
+  --saas-glass: rgba(20, 31, 52, .72);
+  --saas-glass-strong: rgba(25, 39, 64, .9);
+  --saas-glass-border: rgba(170, 192, 232, .18);
+  --saas-shadow: 0 16px 42px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255,255,255,.055);
+  --saas-shadow-hover: 0 22px 50px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255,255,255,.08);
+  --saas-canvas-gradient:
+    radial-gradient(ellipse 56% 44% at 0% 0%, rgba(79, 93, 190, .18), transparent 72%),
+    radial-gradient(ellipse 48% 38% at 100% 0%, rgba(112, 74, 174, .14), transparent 70%),
+    linear-gradient(145deg, #0b1322 0%, #111c30 55%, #101729 100%);
+}
+
+html, body {
+  background: var(--saas-canvas-gradient) !important;
+  color: var(--saas-ink);
+}
+
+body, button, input, select, textarea, .p-component {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html body .app-shell {
+  min-height: 100vh;
+  color: var(--saas-ink);
+  background: transparent !important;
+}
+
+html body .app-shell .topbar {
+  position: sticky;
+  z-index: 40;
+  min-height: 68px;
+  height: 68px;
+  padding-inline: clamp(16px, 2.2vw, 32px);
+  background: var(--saas-glass) !important;
+  border: 0;
+  border-bottom: 1px solid var(--saas-glass-border);
+  box-shadow: 0 8px 28px rgba(30, 45, 78, .045);
+  -webkit-backdrop-filter: blur(var(--saas-blur)) saturate(155%);
+  backdrop-filter: blur(var(--saas-blur)) saturate(155%);
+}
+
+html body .app-shell .search-chip {
+  height: 40px;
+  border: 1px solid var(--saas-line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.54);
+  color: var(--saas-muted);
+}
+html body .app-shell .search-chip:hover {
+  border-color: color-mix(in srgb, var(--saas-accent) 35%, white);
+  background: var(--saas-glass-strong);
+  color: var(--saas-accent);
+}
+html body .app-shell .search-chip kbd {
+  border-color: var(--saas-line);
+  border-radius: 7px;
+  background: rgba(255,255,255,.7);
+  color: var(--saas-muted);
+}
+
+html body .app-shell .route-context {
+  border-left-color: var(--saas-line);
+}
+html body .app-shell .route-context span {
+  color: var(--saas-muted);
+  letter-spacing: .1em;
+}
+html body .app-shell .route-context strong,
+html body .app-shell .user-name {
+  color: var(--saas-ink);
+}
+html body .app-shell .year-select,
+html body .app-shell .user-btn {
+  border: 1px solid var(--saas-line);
+  border-radius: 12px;
+  background: var(--saas-glass-strong);
+  color: var(--saas-ink);
+}
+html body .app-shell .avatar {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--saas-accent) 12%, white);
+  color: var(--saas-accent);
+}
+
+html body .app-shell .layout {
+  min-height: calc(100vh - 68px);
+  background: transparent;
+}
+html body .app-shell .sidebar {
+  top: 68px;
+  width: 264px;
+  min-width: 264px;
+  height: calc(100vh - 68px);
+  padding: 14px 14px 18px;
+  background: rgba(248, 250, 255, .76) !important;
+  border-right: 1px solid rgba(255,255,255,.88);
+  box-shadow: 8px 0 28px rgba(37, 54, 91, .035);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+}
+html body .app-shell .sidebar-brand {
+  min-height: 78px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--saas-line);
+}
+html body .app-shell .sidebar-brand-copy strong {
+  color: var(--saas-ink);
+  font-size: 13px;
+  font-weight: 760;
+}
+html body .app-shell .sidebar-brand-copy small,
+html body .app-shell .sidebar .nav-label {
+  color: #8995ab;
+}
+html body .app-shell .sidebar .logo {
+  border-radius: 12px;
+  background: linear-gradient(145deg, #7168ef, #5146c8);
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(91, 78, 220, .2);
+}
+html body .app-shell .sidebar .collapse-btn {
+  border: 1px solid var(--saas-line);
+  border-radius: 9px;
+  background: var(--saas-glass-strong);
+  color: var(--saas-muted);
+}
+html body .app-shell .sidebar .nav-label {
+  margin-top: 19px;
+  padding: 7px 10px;
+  font-size: 9px;
+  letter-spacing: .14em;
+}
+html body .app-shell .sidebar .nav-item {
+  min-height: 42px;
+  margin: 3px 0;
+  padding: 8px 11px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: #586780;
+  font-size: 12px;
+  font-weight: 620;
+  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+}
+html body .app-shell .sidebar .nav-item:hover {
+  transform: translateX(2px);
+  border-color: rgba(110, 119, 220, .1);
+  background: rgba(255,255,255,.74);
+  color: var(--saas-ink);
+}
+html body .app-shell .sidebar .nav-icon {
+  color: #8c98ad;
+}
+html body .app-shell .sidebar .nav-item.active {
+  border-color: rgba(101, 91, 224, .13);
+  background: linear-gradient(100deg, rgba(101, 91, 224, .13), rgba(130, 119, 240, .07));
+  box-shadow: inset 3px 0 0 var(--saas-accent);
+  color: var(--saas-accent);
+}
+html body .app-shell .sidebar .nav-item.active .nav-icon {
+  color: var(--saas-accent);
+}
+html body .app-shell .sidebar .sidebar-footer {
+  border-top-color: var(--saas-line);
+  color: #98a3b6;
+}
+html body .app-shell .main-content {
+  min-width: 0;
+  padding: clamp(22px, 2.5vw, 38px) clamp(18px, 3vw, 48px) 48px;
+  background: transparent !important;
+}
+html body .app-shell .main-content > router-outlet + * {
+  max-width: 1600px;
+}
+
+html body .main-content .campus {
+  max-width: 1560px;
+  color: var(--saas-ink);
+}
+html body .main-content .campus .mast {
+  gap: 30px;
+  margin-bottom: 30px;
+}
+html body .main-content .campus .mast-copy h1 {
+  color: var(--saas-ink) !important;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(38px, 4.1vw, 54px);
+  font-weight: 780;
+  letter-spacing: -.065em;
+  line-height: 1.04;
+}
+html body .main-content .campus .eyebrow,
+html body .main-content .campus .section-kicker {
+  color: color-mix(in srgb, var(--saas-accent) 76%, #8c7848);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+html body .main-content .campus .lede {
+  max-width: 58ch;
+  color: var(--saas-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+html body .main-content .campus .school-plate,
+html body .main-content .campus .metric,
+html body .main-content .campus .attendance-feature,
+html body .main-content .campus .staff-feature,
+html body .main-content .campus .focus-card,
+html body .main-content .campus .shortcut-card {
+  border: 1px solid var(--saas-glass-border) !important;
+  border-radius: var(--saas-radius) !important;
+  background: var(--saas-glass) !important;
+  box-shadow: var(--saas-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--saas-blur)) saturate(155%) !important;
+  backdrop-filter: blur(var(--saas-blur)) saturate(155%) !important;
+}
+html body .main-content .campus .school-plate {
+  min-height: 72px;
+  padding: 14px 17px;
+}
+html body .main-content .campus .plate-mark {
+  border-radius: 13px;
+  background: linear-gradient(145deg, #202d48, #111b30);
+  color: #d9c58c;
+}
+html body .main-content .campus .school-plate strong,
+html body .main-content .campus .metric > strong,
+html body .main-content .campus .feature-top h3,
+html body .main-content .campus .focus-heading h3,
+html body .main-content .campus .shortcut-card h3,
+html body .main-content .campus .content-heading h2 {
+  color: var(--saas-ink);
+}
+html body .main-content .campus .school-plate span,
+html body .main-content .campus .metric-label,
+html body .main-content .campus .metric > small,
+html body .main-content .campus .feature-top p,
+html body .main-content .campus .focus-intro,
+html body .main-content .campus .updated-indicator,
+html body .main-content .campus .focus-text small,
+html body .main-content .campus .teacher-names,
+html body .main-content .campus .trend-day small {
+  color: var(--saas-muted);
+}
+html body .main-content .campus .gold-btn {
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e8d18d, #d0b05b);
+  box-shadow: 0 9px 22px rgba(156, 126, 54, .16);
+  color: #26324a;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+html body .main-content .campus .gold-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 13px 28px rgba(156, 126, 54, .22);
+}
+html body .main-content .campus .metric-strip {
+  gap: 16px;
+  margin-bottom: 34px;
+}
+html body .main-content .campus .metric {
+  position: relative;
+  min-height: 154px;
+  padding: 21px 22px !important;
+  overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+html body .main-content .campus .metric::after {
+  position: absolute;
+  top: -45px;
+  right: -45px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(115, 113, 231, .11), transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+html body .main-content .campus a.metric:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--saas-accent) 30%, white) !important;
+  box-shadow: var(--saas-shadow-hover) !important;
+}
+html body .main-content .campus .metric-label {
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+html body .main-content .campus .metric-label i,
+html body .main-content .campus .focus-symbol {
+  border: 1px solid color-mix(in srgb, var(--saas-accent) 14%, white);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--saas-accent) 9%, white);
+  color: var(--saas-accent);
+}
+html body .main-content .campus .metric > strong {
+  padding-top: 22px;
+  font-size: clamp(29px, 2.4vw, 36px);
+  font-weight: 790;
+  letter-spacing: -.055em;
+}
+html body .main-content .campus .content-heading {
+  margin-bottom: 16px;
+}
+html body .main-content .campus .content-heading h2,
+html body .main-content .campus .feature-top h3,
+html body .main-content .campus .focus-heading h3,
+html body .main-content .campus .shortcut-card h3 {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(20px, 2vw, 25px);
+  font-weight: 750;
+  letter-spacing: -.045em;
+}
+html body .main-content .campus .workspace-grid {
+  gap: 18px;
+}
+html body .main-content .campus .main-column,
+html body .main-content .campus .side-column {
+  gap: 18px;
+}
+html body .main-content .campus .attendance-feature,
+html body .main-content .campus .staff-feature,
+html body .main-content .campus .focus-card,
+html body .main-content .campus .shortcut-card {
+  padding: 24px !important;
+}
+html body .main-content .campus .attendance-summary {
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 15px;
+  background: linear-gradient(115deg, #1b2944, #26375a);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+html body .main-content .campus .trend-track span {
+  border-radius: 9px 9px 3px 3px;
+  background: linear-gradient(180deg, #8b86f4, #5e58d6);
+  box-shadow: 0 5px 14px rgba(91, 82, 213, .2);
+}
+html body .main-content .campus .trend-day.latest .trend-track span {
+  background: linear-gradient(180deg, #e6cf8c, #c6a34c);
+}
+html body .main-content .campus .focus-count {
+  border-radius: 11px;
+  background: #1b2944;
+  color: #e7d18f;
+}
+html body .main-content .campus .focus-item,
+html body .main-content .campus .shortcut-list a,
+html body .main-content .campus .feature-foot,
+html body .main-content .campus .focus-foot {
+  border-color: var(--saas-line);
+}
+html body .main-content .campus .focus-item:hover .focus-text strong,
+html body .main-content .campus .shortcut-list a:hover {
+  color: var(--saas-accent);
+}
+html body .main-content .campus .staff-row {
+  border: 1px solid var(--saas-glass-border);
+  border-radius: 14px;
+  background: var(--saas-glass-strong);
+  box-shadow: 0 6px 18px rgba(37, 54, 91, .04);
+}
+html body .main-content .campus .trend-empty,
+html body .main-content .campus .trend-loading span,
+html body .main-content .campus .focus-loading span {
+  color: var(--saas-muted);
+}
+
+html body .main-content :is(.page-header:not(.welcome), .toolbar, .filter-bar, .card, form.card, .panel, .stat-card, .kpi-card, .report-card, .calendar-card, .assignment-card, .plan-card, .deadline-card, .map-card, .empty-state, .empty-card, .p-card) {
+  border: 1px solid var(--saas-glass-border);
+  border-radius: var(--saas-radius);
+  background: var(--saas-glass);
+  box-shadow: var(--saas-shadow);
+}
+html body .main-content :is(.stat-card, .kpi-card, .report-card, .calendar-card, .assignment-card, .plan-card, .deadline-card, .map-card) {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+html body .main-content :is(.stat-card, .kpi-card, .report-card, .calendar-card, .assignment-card, .plan-card, .deadline-card, .map-card):hover {
+  transform: translateY(-2px);
+  box-shadow: var(--saas-shadow-hover);
+}
+html body .main-content .page-header:not(.welcome) {
+  padding: 22px 24px;
+}
+html body .main-content .page-header:not(.welcome) h1 {
+  color: var(--saas-ink);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-weight: 760;
+  letter-spacing: -.045em;
+}
+html body .main-content :is(.toolbar, .filter-bar) {
+  gap: 12px;
+  padding: 16px 18px;
+}
+html body .main-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]), select, textarea) {
+  min-height: 40px;
+  border: 1px solid var(--saas-line);
+  border-radius: 10px;
+  background: var(--saas-glass-strong);
+  color: var(--saas-ink);
+}
+html body .main-content :is(input, select, textarea):focus {
+  border-color: var(--saas-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--saas-accent) 16%, transparent);
+}
+html body .main-content .p-button,
+html body .main-content .btn-primary,
+html body .main-content .primary-action {
+  border-radius: 10px;
+  font-weight: 680;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+html body .main-content .p-button:not(:disabled):hover,
+html body .main-content .btn-primary:not(:disabled):hover,
+html body .main-content .primary-action:hover {
+  transform: translateY(-1px);
+}
+html body .main-content .p-datatable,
+html body .main-content .p-datatable .p-datatable-wrapper,
+html body .main-content .table-wrap,
+html body .main-content .grid-scroll {
+  border-radius: 14px;
+}
+html body .main-content .p-datatable .p-datatable-thead > tr > th,
+html body .main-content table thead th {
+  background: var(--saas-glass-strong);
+  color: var(--saas-muted);
+  border-color: var(--saas-line);
+  font-size: 10px;
+  font-weight: 780;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+html body .main-content .p-datatable .p-datatable-tbody > tr > td,
+html body .main-content table tbody > tr > td {
+  border-color: var(--saas-line);
+}
+html body .main-content .p-dialog {
+  border: 1px solid var(--saas-glass-border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 28px 80px rgba(20, 32, 58, .2);
+}
+html body .main-content .p-dialog .p-dialog-header,
+html body .main-content .p-dialog .p-dialog-content,
+html body .main-content .p-dialog .p-dialog-footer {
+  background: var(--saas-glass-strong);
+  color: var(--saas-ink);
+}
+
+html[data-theme="dark"] body .app-shell .topbar,
+html[data-theme="dark"] body .app-shell .sidebar {
+  background: var(--saas-glass) !important;
+  border-color: var(--saas-glass-border);
+}
+html[data-theme="dark"] body .app-shell .sidebar-brand-copy strong,
+html[data-theme="dark"] body .app-shell .route-context strong,
+html[data-theme="dark"] body .app-shell .user-name,
+html[data-theme="dark"] body .app-shell .year-select {
+  color: var(--saas-ink);
+}
+html[data-theme="dark"] body .app-shell .sidebar-brand-copy small,
+html[data-theme="dark"] body .app-shell .sidebar .nav-label,
+html[data-theme="dark"] body .app-shell .sidebar .nav-item {
+  color: var(--saas-muted);
+}
+html[data-theme="dark"] body .app-shell .sidebar .nav-item:hover {
+  background: rgba(255,255,255,.07);
+  color: var(--saas-ink);
+}
+html[data-theme="dark"] body .app-shell .sidebar .nav-item.active {
+  background: color-mix(in srgb, var(--saas-accent) 22%, transparent);
+  color: #d9ddff;
+}
+html[data-theme="dark"] body .app-shell .search-chip,
+html[data-theme="dark"] body .app-shell .year-select,
+html[data-theme="dark"] body .app-shell .user-btn {
+  background: var(--saas-glass-strong);
+  border-color: var(--saas-line);
+  color: var(--saas-ink);
+}
+html[data-theme="dark"] body .main-content .campus :is(.school-plate, .metric, .attendance-feature, .staff-feature, .focus-card, .shortcut-card) {
+  background: var(--saas-glass) !important;
+  border-color: var(--saas-glass-border) !important;
+  box-shadow: var(--saas-shadow) !important;
+}
+html[data-theme="dark"] body .main-content .campus :is(.mast-copy h1, .content-heading h2, .feature-top h3, .focus-heading h3, .shortcut-card h3, .school-plate strong, .metric > strong, .focus-text strong, .focus-item > b, .staff-row > strong, .trend-day strong, .trend-empty strong) {
+  color: var(--saas-ink) !important;
+}
+html[data-theme="dark"] body .main-content .campus :is(.lede, .updated-indicator, .feature-top p, .focus-intro, .metric-label, .metric > small, .focus-text small, .teacher-names, .staff-row > strong small, .trend-day small, .feature-foot, .focus-foot) {
+  color: var(--saas-muted) !important;
+}
+html[data-theme="dark"] body .main-content :is(.page-header:not(.welcome), .toolbar, .filter-bar, .card, form.card, .panel, .stat-card, .kpi-card, .report-card, .calendar-card, .assignment-card, .plan-card, .deadline-card, .map-card, .empty-state, .empty-card, .p-card) {
+  background: var(--saas-glass);
+  border-color: var(--saas-glass-border);
+  box-shadow: var(--saas-shadow);
+}
+html[data-theme="dark"] body .main-content .p-datatable .p-datatable-thead > tr > th,
+html[data-theme="dark"] body .main-content table thead th {
+  background: rgba(25, 39, 64, .96);
+  color: #b8c7df;
+  border-color: var(--saas-line);
+}
+html[data-theme="dark"] body .main-content .p-datatable .p-datatable-tbody > tr > td,
+html[data-theme="dark"] body .main-content table tbody > tr > td {
+  background: rgba(17, 28, 47, .46);
+  color: var(--saas-ink);
+  border-color: var(--saas-line);
+}
+html[data-theme="dark"] body .main-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]), select, textarea) {
+  background: var(--saas-glass-strong);
+  border-color: var(--saas-line);
+  color: var(--saas-ink);
+}
+html[data-theme="dark"] body .main-content .p-dialog,
+html[data-theme="dark"] body .main-content .p-dialog :is(.p-dialog-header, .p-dialog-content, .p-dialog-footer) {
+  background: var(--saas-glass-strong);
+  color: var(--saas-ink);
+  border-color: var(--saas-line);
+}
+
+@media (max-width: 900px) {
+  html body .app-shell .sidebar { width: 250px; min-width: 250px; }
+  html body .app-shell .main-content { padding: 20px 18px 32px; }
+  html body .main-content .campus .workspace-grid { grid-template-columns: 1fr; }
+  html body .main-content .campus .side-column { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 768px) {
+  html body .app-shell .topbar { height: 62px; min-height: 62px; padding-inline: 12px; }
+  html body .app-shell .layout { min-height: calc(100vh - 62px); }
+  html body .app-shell .sidebar {
+    top: 62px;
+    height: calc(100vh - 62px);
+    width: min(292px, calc(100vw - 48px));
+    min-width: 0;
+    background: rgba(248,250,255,.96) !important;
+  }
+  html body .app-shell .sidebar.collapsed { width: min(292px, calc(100vw - 48px)); }
+  html body .app-shell .main-content { padding: 18px 13px 28px; }
+  html body .main-content .campus .mast,
+  html body .main-content .campus .metric-strip,
+  html body .main-content .campus .side-column { grid-template-columns: 1fr; }
+  html body .main-content .campus .mast { align-items: start; }
+  html body .main-content .campus .metric { min-height: 130px; }
+  html body .main-content .campus :is(.attendance-feature, .staff-feature, .focus-card, .shortcut-card) { padding: 18px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .app-shell *,
+  html body .main-content * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --saas-glass: #f7f8fc; --saas-glass-strong: #fff; --saas-blur: 0px; }
+  html[data-theme="dark"] { --saas-glass: #141f34; --saas-glass-strong: #192740; }
+  html body .app-shell :is(.topbar, .sidebar),
+  html body .main-content :is(.card, .panel, .stat-card, .kpi-card) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
