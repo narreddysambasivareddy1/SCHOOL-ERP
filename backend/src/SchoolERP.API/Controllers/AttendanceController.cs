@@ -98,8 +98,6 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         [FromQuery] Guid sectionId, [FromQuery] DateOnly date, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
-        if (!await CanAccessSection(schoolId, tenantId, null, classId, sectionId, ct))
-            return Forbid();
         var classInSchool = await db.Classes.AnyAsync(c => c.Id == classId && c.SchoolId == schoolId && c.TenantId == tenantId, ct);
         var sectionInClass = await db.Sections.AnyAsync(s =>
             s.Id == sectionId && s.ClassId == classId && s.TenantId == tenantId && s.Class!.SchoolId == schoolId && s.Class.TenantId == tenantId, ct);
@@ -111,6 +109,8 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
                 s.ClassId == classId && s.SectionId == sectionId && s.Date == date, ct);
 
         if (session is null) return NotFound();
+        if (!await CanAccessSection(schoolId, tenantId, session.AcademicYearId, classId, sectionId, ct))
+            return Forbid();
 
         return Ok(new
         {
@@ -147,14 +147,14 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         return Ok(new { total, present, percentage = pct, records });
     }
 
-    private async Task<bool> CanAccessSection(Guid schoolId, Guid tenantId, Guid? academicYearId, Guid classId, Guid sectionId, CancellationToken ct)
+    private async Task<bool> CanAccessSection(Guid schoolId, Guid tenantId, Guid academicYearId, Guid classId, Guid sectionId, CancellationToken ct)
     {
         if (StudentAccess.IsLeadership(User) || StudentAccess.InRole(User, "AttendanceOfficer"))
             return true;
         var userId = StudentAccess.UserId(User);
         return userId is not null && await db.TeacherAssignments.AnyAsync(a =>
             a.TenantId == tenantId && a.IsActive && a.CanTakeAttendance
-            && (academicYearId == null || a.AcademicYearId == academicYearId)
+            && a.AcademicYearId == academicYearId
             && a.ClassId == classId && a.SectionId == sectionId
             && a.Employee!.UserId == userId && a.Employee.SchoolId == schoolId && a.Employee.TenantId == tenantId
             && a.Class!.SchoolId == schoolId && a.Class.TenantId == tenantId

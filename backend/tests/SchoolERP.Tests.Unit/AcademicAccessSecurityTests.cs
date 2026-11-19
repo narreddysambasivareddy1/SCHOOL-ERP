@@ -263,6 +263,43 @@ public class AcademicAccessSecurityTests
     }
 
     [Fact]
+    public async Task AttendanceGet_UsesTheSessionAcademicYear()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        var previousYearId = Guid.NewGuid();
+        db.AcademicYears.Add(new AcademicYear
+        {
+            Id = previousYearId, TenantId = g.TenantId, SchoolId = g.SchoolId, Name = "2025-26",
+            StartDate = new DateOnly(2025, 6, 1), EndDate = new DateOnly(2026, 3, 31)
+        });
+        db.AttendanceSessions.AddRange(
+            new AttendanceSession
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = g.YearId,
+                ClassId = g.ClassId, SectionId = g.SectionId, Date = new DateOnly(2026, 11, 18), MarkedBy = "teacher",
+                Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.StudentId, Code = AttendanceCode.Present }]
+            },
+            new AttendanceSession
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = previousYearId,
+                ClassId = g.ClassId, SectionId = g.SectionId, Date = new DateOnly(2025, 11, 18), MarkedBy = "teacher",
+                Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.StudentId, Code = AttendanceCode.Present }]
+            });
+        await db.SaveChangesAsync();
+
+        var assignedTeacher = Attendance(db, g.TenantId, g.TeacherUserId, "Teacher");
+        var allowed = await assignedTeacher.Get(g.SchoolId, g.ClassId, g.SectionId, new DateOnly(2026, 11, 18), CancellationToken.None);
+        var denied = await assignedTeacher.Get(g.SchoolId, g.ClassId, g.SectionId, new DateOnly(2025, 11, 18), CancellationToken.None);
+        var officer = await Attendance(db, g.TenantId, Guid.NewGuid(), "AttendanceOfficer")
+            .Get(g.SchoolId, g.ClassId, g.SectionId, new DateOnly(2025, 11, 18), CancellationToken.None);
+
+        allowed.Should().BeOfType<OkObjectResult>();
+        denied.Should().BeOfType<ForbidResult>();
+        officer.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
     public async Task AttendanceGet_DoesNotReturnAnotherTenantsSession()
     {
         await using var db = CreateDb();
