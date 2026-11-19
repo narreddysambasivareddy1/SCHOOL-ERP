@@ -15,11 +15,40 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
     <div class="page-header">
       <div class="eyebrow">ATTENDANCE CENTRE</div>
       <h1>Attendance</h1>
-      @if (isViewer) {
+      @if (personal()) {
+        <p class="text-muted">Your own attendance for the last 30 days. Class registers stay with teachers and attendance staff.</p>
+      } @else if (isViewer) {
         <p class="text-muted">View-only for your role. Marking is limited to assigned teachers and attendance officers.</p>
       }
     </div>
 
+    @if (personal()) {
+      @if (children().length > 1) {
+        <div class="filter-bar">
+          <label>Student
+            <select [ngModel]="selectedChild" (ngModelChange)="loadOwn($event)">
+              @for (c of children(); track c.studentId) {
+                <option [value]="c.studentId">{{ c.firstName }} {{ c.lastName }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      }
+      @if (apiError()) { <div class="alert-error">{{ apiError() }}</div> }
+      @if (own()) {
+        <div class="session-card">
+          <div class="session-meta">{{ own().present }} present of {{ own().total }} marked days · {{ own().percentage }}%</div>
+          <table class="att-table">
+            <thead><tr><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              @for (r of own().records; track r.date) {
+                <tr><td>{{ r.date | date:'mediumDate' }}</td><td>{{ r.code }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    } @else {
     <!-- Filters -->
     <div class="filter-bar">
       <div class="filter-group">
@@ -145,6 +174,7 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
         <p>Select a class, section and date to view or mark attendance.</p>
       </div>
     }
+    }
   `,
   styles: [`
     .page-header { margin-bottom: 24px; }
@@ -205,6 +235,10 @@ export class AttendanceComponent implements OnInit {
   loadingStudents = signal(false);
   saving = signal(false);
   apiError = signal<string | null>(null);
+  personal = signal(false);
+  own = signal<any>(null);
+  children = signal<any[]>([]);
+  selectedChild = '';
 
   selectedClassId = '';
   selectedSectionId = '';
@@ -216,7 +250,7 @@ export class AttendanceComponent implements OnInit {
   codes = ['Present', 'Absent', 'Late', 'Excused'];
 
   get canLoad() { return this.selectedClassId && this.selectedSectionId && this.selectedDate; }
-  get canMark() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('Teacher') || this.auth.hasRole('AttendanceOfficer'); }
+  get canMark() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('Teacher') || this.auth.hasRole('AttendanceOfficer'); }
   get isViewer() { return this.auth.hasRole('Student') || this.auth.hasRole('Parent'); }
   get presentCount() { return this.markRows().filter(r => r.code === 'Present').length; }
   get absentCount() { return this.markRows().filter(r => r.code === 'Absent').length; }
@@ -224,9 +258,39 @@ export class AttendanceComponent implements OnInit {
   constructor(private api: ApiService, public ctx: SchoolContextService, private auth: AuthService) {}
 
   ngOnInit() {
-    if (this.ctx.schoolId) {
-      this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c));
+    if (!this.ctx.schoolId) return;
+    const familyOnly = (this.auth.hasRole('Student') || this.auth.hasRole('Parent')) && !this.canMark;
+    this.personal.set(familyOnly);
+    if (familyOnly) {
+      if (this.auth.hasRole('Student')) {
+        this.api.getMyStudent(this.ctx.schoolId).subscribe({
+          next: me => this.loadOwn(me.id),
+          error: () => this.apiError.set('Your student record is not linked to this login.')
+        });
+      } else {
+        this.api.getParentChildren().subscribe({
+          next: rows => {
+            this.children.set(rows ?? []);
+            if (rows?.[0]) this.loadOwn(rows[0].studentId);
+          },
+          error: () => this.apiError.set('Could not load linked students.')
+        });
+      }
+      return;
     }
+    this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c));
+  }
+
+  loadOwn(studentId: string) {
+    this.selectedChild = studentId;
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 30);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    this.api.getStudentAttendance(this.ctx.schoolId, studentId, iso(from), iso(to)).subscribe({
+      next: res => this.own.set(res),
+      error: () => this.apiError.set('Could not load attendance.')
+    });
   }
 
   onClassChange(classId: string) {

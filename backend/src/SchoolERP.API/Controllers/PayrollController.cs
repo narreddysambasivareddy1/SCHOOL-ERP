@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
@@ -14,7 +15,7 @@ public record CreatePayrollRunRequest(int Year, int Month);
 
 [ApiController]
 [Route("api/schools/{schoolId}/payroll")]
-[Authorize(Roles = "SchoolAdmin,HRManager,PayrollOfficer")]
+[Authorize(Roles = RoleNames.Payroll)]
 public class PayrollController(AppDbContext db, IAuditService audit) : ControllerBase
 {
     [HttpGet("runs")]

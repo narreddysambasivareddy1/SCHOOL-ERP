@@ -218,16 +218,18 @@ export class TimetableComponent implements OnInit {
     { name: 'M1', sortOrder: 1, startTime: '08:00', endTime: '08:45', band: 'Morning' };
 
   constructor(private api: ApiService, public ctx: SchoolContextService, auth: AuthService) {
-    this.admin = auth.hasRole('SchoolAdmin');
+    this.admin = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin');
   }
 
   ngOnInit() {
     if (!this.ctx.schoolId) return;
     this.api.getClasses(this.ctx.schoolId).subscribe({ next: c => this.classes.set(c) });
     this.api.getSubjects(this.ctx.schoolId).subscribe({ next: s => this.subjects.set(s) });
-    this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({
-      next: r => this.teachers.set((r.items || []).map((t: any) => ({ ...t, fullName: `${t.firstName} ${t.lastName}` })))
-    });
+    if (this.admin) {
+      this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({
+        next: r => this.teachers.set((r.items || []).map((t: any) => ({ ...t, fullName: `${t.firstName} ${t.lastName}` })))
+      });
+    }
     this.api.getPeriods(this.ctx.schoolId, this.ctx.academicYearId).subscribe({ next: p => this.periods.set(p) });
   }
 

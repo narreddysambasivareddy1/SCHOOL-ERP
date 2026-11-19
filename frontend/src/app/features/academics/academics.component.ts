@@ -18,9 +18,10 @@ interface Assignment {
   template: `
     <div class="page-header">
       <div class="eyebrow">ACADEMIC OPERATIONS</div>
-      <h1>Academics & Timetable</h1>
+      <h1>Classes & allocation</h1>
     </div>
 
+    @if (isAdmin) {
     <div class="card map-card">
       <div class="card-header">
         <div>
@@ -66,6 +67,7 @@ interface Assignment {
         <button type="submit" [disabled]="busy()">Save mapping</button>
       </form>
     </div>
+    }
 
     <div class="card">
       <div class="card-header">
@@ -196,7 +198,7 @@ export class AcademicsComponent implements OnInit {
   ngOnInit() {
     if (!this.ctx.schoolId || !this.ctx.academicYearId) { this.loading.set(false); return; }
     this.load();
-    this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({ next: r => this.employees.set(r.items || []) });
+    if (this.isAdmin) this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({ next: r => this.employees.set(r.items || []) });
     this.api.getSubjects(this.ctx.schoolId).subscribe({ next: s => this.subjects.set(s) });
     this.api.getClasses(this.ctx.schoolId).subscribe({ next: c => this.classes.set(c) });
   }

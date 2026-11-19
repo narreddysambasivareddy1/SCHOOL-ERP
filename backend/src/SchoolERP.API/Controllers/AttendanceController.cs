@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
@@ -18,7 +19,7 @@ public record StudentAttendanceEntry(Guid StudentId, AttendanceCode Code, string
 public class AttendanceController(AppDbContext db, Application.Interfaces.IAuditService audit, Application.Interfaces.INotificationService notifications) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Roles = "SchoolAdmin,Teacher,AttendanceOfficer")]
+    [Authorize(Roles = RoleNames.AttendanceStaff)]
     public async Task<IActionResult> Mark(Guid schoolId, [FromBody] MarkAttendanceRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -68,6 +69,7 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
     }
 
     [HttpGet]
+    [Authorize(Roles = RoleNames.AttendanceStaff)]
     public async Task<IActionResult> Get(Guid schoolId, [FromQuery] Guid classId,
         [FromQuery] Guid sectionId, [FromQuery] DateOnly date, CancellationToken ct)
     {
@@ -95,6 +97,8 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         [FromQuery] DateOnly from, [FromQuery] DateOnly to, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+            return Forbid();
         var records = await db.StudentAttendances
             .Include(r => r.Session)
             .Where(r => r.StudentId == studentId &&

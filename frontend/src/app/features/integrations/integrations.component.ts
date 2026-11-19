@@ -12,7 +12,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
     <div class="page-header">
       <div class="eyebrow">GOVERNANCE</div>
       <h1>School integrations</h1>
-      <p class="text-muted">Dummy credentials are pre-filled. Keep sandbox on until the school provides live SMTP, SMS, WhatsApp, Google and payment keys.</p>
+      <p class="text-muted">Keys are masked. Paste a replacement JSON only when you are changing credentials. An empty box keeps the keys already stored.</p>
     </div>
 
     @if (error()) { <div class="alert">{{ error() }}</div> }
@@ -30,9 +30,9 @@ import { SchoolContextService } from '../../core/services/school-context.service
           <label class="chk"><input type="checkbox" [(ngModel)]="item.isEnabled" /> Enabled</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="item.isSandbox" /> Sandbox (no live provider calls)</label>
           <pre>{{ item.config | json }}</pre>
-          <textarea [(ngModel)]="drafts[item.providerKey]" rows="7" spellcheck="false"></textarea>
+          <textarea [(ngModel)]="drafts[item.providerKey]" rows="5" spellcheck="false" placeholder="Optional replacement JSON. Leave blank to keep stored keys."></textarea>
           <div class="row">
-            <button type="button" (click)="save(item)">Save dummy / school keys</button>
+            <button type="button" (click)="save(item)">Save</button>
             <button type="button" class="ghost" (click)="test(item)">Send test</button>
           </div>
         </article>
@@ -72,7 +72,6 @@ export class IntegrationsComponent implements OnInit {
     this.api.getIntegrations(this.ctx.schoolId).subscribe({
       next: rows => {
         this.items.set(rows);
-        for (const r of rows) this.drafts[r.providerKey] = JSON.stringify(r.config, null, 2);
         this.loading.set(false);
       },
       error: () => { this.error.set('Could not load integrations.'); this.loading.set(false); }
@@ -82,8 +81,8 @@ export class IntegrationsComponent implements OnInit {
   save(item: any) {
     this.notice.set(null);
     this.error.set(null);
-    let json = this.drafts[item.providerKey];
-    try { JSON.parse(json); } catch { this.error.set('Config must be valid JSON.'); return; }
+    const json = (this.drafts[item.providerKey] || '').trim();
+    if (json) { try { JSON.parse(json); } catch { this.error.set('Replacement config must be valid JSON.'); return; } }
     this.api.updateIntegration(this.ctx.schoolId, item.providerKey, {
       isEnabled: item.isEnabled,
       isSandbox: item.isSandbox,

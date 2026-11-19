@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } fro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../core/auth/auth.service';
+import { Roles } from '../core/auth/roles';
 import { SchoolContextService } from '../core/services/school-context.service';
 import { ApiService } from '../core/services/api.service';
 import { EnquiryAlertService } from '../core/services/enquiry-alert.service';
@@ -17,45 +18,40 @@ interface NavItem {
   group: string;
 }
 
-const ADMIN = ['SchoolAdmin','PlatformSuperAdmin'];
-const TEACH = ['Teacher','AttendanceOfficer'];
-const OFFICE = ['AdmissionOfficer','Accountant','HRManager','TransportManager','FrontOffice'];
-const FO = ['FrontOffice','AdmissionOfficer'];
-
 const ALL_NAV: NavItem[] = [
-  { label: 'Dashboard', icon: 'pi pi-th-large', route: '/dashboard', group: 'Workspace', roles: [...ADMIN, ...OFFICE] },
-  { label: 'My dashboard', icon: 'pi pi-th-large', route: '/teacher/dashboard', group: 'Workspace', roles: TEACH },
+  { label: 'Dashboard', icon: 'pi pi-th-large', route: '/dashboard', group: 'Workspace', roles: Roles.officeDashboard },
+  { label: 'My dashboard', icon: 'pi pi-th-large', route: '/teacher/dashboard', group: 'Workspace', roles: Roles.teach },
   { label: 'My dashboard', icon: 'pi pi-th-large', route: '/student/dashboard', group: 'Workspace', roles: ['Student'] },
   { label: 'Family', icon: 'pi pi-home', route: '/parent/dashboard', group: 'Workspace', roles: ['Parent'] },
+  { label: 'Calendar', icon: 'pi pi-calendar', route: '/calendar', group: 'Workspace', roles: Roles.academics },
 
-  { label: 'Enquiry desk', icon: 'pi pi-inbox', route: '/enquiries', group: 'People', roles: [...ADMIN, ...FO] },
-  { label: 'Registrations', icon: 'pi pi-id-card', route: '/registrations', group: 'People', roles: [...ADMIN, ...FO] },
-  { label: 'Admissions', icon: 'pi pi-user-plus', route: '/admissions', group: 'People', roles: [...ADMIN, ...FO] },
-  { label: 'Students', icon: 'pi pi-users', route: '/students', group: 'People', roles: [...ADMIN, 'AdmissionOfficer', ...TEACH] },
-  { label: 'Staff & HR', icon: 'pi pi-id-card', route: '/staff', group: 'People', roles: [...ADMIN, 'HRManager'] },
-  { label: 'Leave', icon: 'pi pi-calendar-plus', route: '/leave', group: 'People', roles: [...ADMIN, 'HRManager', ...TEACH] },
+  { label: 'Enquiry desk', icon: 'pi pi-inbox', route: '/enquiries', group: 'Admissions & People', roles: Roles.admissions },
+  { label: 'Registrations', icon: 'pi pi-id-card', route: '/registrations', group: 'Admissions & People', roles: Roles.admissions },
+  { label: 'Admissions', icon: 'pi pi-user-plus', route: '/admissions', group: 'Admissions & People', roles: Roles.admissions },
+  { label: 'Students', icon: 'pi pi-users', route: '/students', group: 'Admissions & People', roles: Roles.students },
+  { label: 'Staff & HR', icon: 'pi pi-id-card', route: '/staff', group: 'Admissions & People', roles: Roles.staff },
+  { label: 'Leave', icon: 'pi pi-calendar-plus', route: '/leave', group: 'Admissions & People', roles: Roles.leave },
 
-  { label: 'Classes', icon: 'pi pi-sitemap', route: '/academics', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Timetable', icon: 'pi pi-table', route: '/timetable', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Substitutions', icon: 'pi pi-users', route: '/substitutions', group: 'Academics', roles: [...ADMIN, 'HRManager'] },
-  { label: 'Lesson plans', icon: 'pi pi-calendar', route: '/lesson-plans', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Class diary', icon: 'pi pi-book', route: '/diary', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Attendance', icon: 'pi pi-check-square', route: '/attendance', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Homework', icon: 'pi pi-book', route: '/homework', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Exams & results', icon: 'pi pi-file', route: '/examinations', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
-  { label: 'Calendar', icon: 'pi pi-calendar', route: '/calendar', group: 'Academics', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
+  { label: 'Classes & allocation', icon: 'pi pi-sitemap', route: '/academics', group: 'Academics', roles: Roles.academics },
+  { label: 'Timetable', icon: 'pi pi-table', route: '/timetable', group: 'Academics', roles: Roles.academics },
+  { label: 'Substitutions', icon: 'pi pi-users', route: '/substitutions', group: 'Academics', roles: Roles.substitutions },
+  { label: 'Lesson plans', icon: 'pi pi-calendar', route: '/lesson-plans', group: 'Academics', roles: Roles.academics },
+  { label: 'Class diary', icon: 'pi pi-book', route: '/diary', group: 'Academics', roles: Roles.academics },
+  { label: 'Attendance', icon: 'pi pi-check-square', route: '/attendance', group: 'Academics', roles: Roles.academics },
+  { label: 'Homework', icon: 'pi pi-book', route: '/homework', group: 'Academics', roles: Roles.academics },
+  { label: 'Exams & results', icon: 'pi pi-file', route: '/examinations', group: 'Academics', roles: Roles.academics },
 
-  { label: 'Fees', icon: 'pi pi-wallet', route: '/fees', group: 'Finance', roles: [...ADMIN, 'Accountant', 'Student', 'Parent'] },
-  { label: 'Payroll', icon: 'pi pi-briefcase', route: '/payroll', group: 'Finance', roles: [...ADMIN, 'HRManager', 'PayrollOfficer'] },
+  { label: 'Fees', icon: 'pi pi-wallet', route: '/fees', group: 'Finance', roles: Roles.fees },
+  { label: 'Payroll', icon: 'pi pi-briefcase', route: '/payroll', group: 'Finance', roles: Roles.payroll },
 
-  { label: 'Transport', icon: 'pi pi-map', route: '/transport', group: 'Operations', roles: [...ADMIN, 'TransportManager', 'Student', 'Parent'] },
-  { label: 'Messages', icon: 'pi pi-send', route: '/communications', group: 'Operations', roles: [...ADMIN, ...TEACH] },
-  { label: 'Announcements', icon: 'pi pi-megaphone', route: '/announcements', group: 'Operations', roles: [...ADMIN, ...TEACH, 'Parent', 'Student'] },
+  { label: 'Transport', icon: 'pi pi-map', route: '/transport', group: 'Operations', roles: Roles.transport },
+  { label: 'Messages', icon: 'pi pi-send', route: '/communications', group: 'Operations', roles: Roles.messages },
+  { label: 'Announcements', icon: 'pi pi-megaphone', route: '/announcements', group: 'Operations', roles: Roles.announcements },
 
-  { label: 'Analytics', icon: 'pi pi-chart-bar', route: '/analytics', group: 'Governance', roles: ADMIN },
-  { label: 'Audit', icon: 'pi pi-history', route: '/audit', group: 'Governance', roles: ADMIN },
-  { label: 'Settings', icon: 'pi pi-cog', route: '/settings', group: 'Governance', roles: ADMIN },
-  { label: 'Integrations', icon: 'pi pi-link', route: '/integrations', group: 'Governance', roles: ADMIN },
+  { label: 'Analytics', icon: 'pi pi-chart-bar', route: '/analytics', group: 'Reports & Administration', roles: Roles.leadership },
+  { label: 'Audit', icon: 'pi pi-history', route: '/audit', group: 'Reports & Administration', roles: Roles.leadership },
+  { label: 'Settings', icon: 'pi pi-cog', route: '/settings', group: 'Reports & Administration', roles: Roles.leadership },
+  { label: 'Integrations', icon: 'pi pi-link', route: '/integrations', group: 'Reports & Administration', roles: Roles.leadership },
 ];
 
 @Component({
@@ -75,10 +71,10 @@ const ALL_NAV: NavItem[] = [
           <kbd>Ctrl K</kbd>
         </button>
 
-        <div class="route-context" aria-live="polite">
+        <nav class="route-context" aria-label="Breadcrumb">
           <span>{{ currentGroup() }}</span>
           <strong>{{ currentPage() }}</strong>
-        </div>
+        </nav>
 
         <div class="topbar-right">
           @if (years().length) {

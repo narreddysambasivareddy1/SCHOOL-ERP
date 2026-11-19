@@ -40,7 +40,7 @@ import { AuthService } from '../../core/auth/auth.service';
           <label>Due date <input type="date" [(ngModel)]="dueDate" name="dueDate" required /></label>
         </div>
         @if (formError()) { <div class="alert">{{ formError() }}</div> }
-        <button type="submit" [disabled]="saving()">{{ saving() ? 'Publishing…' : 'Publish homework' }}</button>
+        <button class="btn-primary" type="submit" [disabled]="saving()">{{ saving() ? 'Publishing…' : 'Publish homework' }}</button>
       </form>
     }
 
@@ -55,6 +55,11 @@ import { AuthService } from '../../core/auth/auth.service';
               <strong>{{ h.title }}</strong>
               <small>Due {{ h.dueDate }} · {{ h.submissionCount }} submission(s)</small>
             </div>
+            @if (isStudent) {
+              <button class="btn-primary" type="button" [disabled]="h.submitted || submitting() === h.id" (click)="submit(h)">
+                {{ h.submitted ? 'Submitted' : 'Mark submitted' }}
+              </button>
+            }
           </div>
         }
       </div>
@@ -66,7 +71,7 @@ import { AuthService } from '../../core/auth/auth.service';
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 700; color: var(--muted); }
     input, select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; font-size: 13px; }
-    button { align-self: flex-start; background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 700; cursor: pointer; }
+    .item { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .list { display: flex; flex-direction: column; gap: 8px; }
     .item { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
     .item small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
@@ -89,9 +94,12 @@ export class HomeworkComponent implements OnInit {
   issueDate = new Date().toISOString().slice(0, 10);
   dueDate = new Date().toISOString().slice(0, 10);
   canCreate = false;
+  isStudent = false;
+  submitting = signal<string | null>(null);
 
   constructor(private api: ApiService, public ctx: SchoolContextService, private auth: AuthService) {
-    this.canCreate = this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('Teacher');
+    this.canCreate = this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('Teacher');
+    this.isStudent = this.auth.hasRole('Student') && !this.canCreate;
   }
 
   ngOnInit() {
@@ -105,6 +113,14 @@ export class HomeworkComponent implements OnInit {
         next: a => this.assignments.set(a.filter((x: any) => x.canSetHomework !== false))
       });
     }
+  }
+
+  submit(item: any) {
+    this.submitting.set(item.id);
+    this.api.submitHomework(this.ctx.schoolId, item.id).subscribe({
+      next: () => { item.submitted = true; item.submissionCount = (item.submissionCount || 0) + 1; this.submitting.set(null); },
+      error: (e) => { this.error.set(e?.error?.error ?? 'Could not submit homework.'); this.submitting.set(null); }
+    });
   }
 
   create() {

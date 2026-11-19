@@ -1,3 +1,4 @@
+using SchoolERP.API.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
     }
 
     [HttpPut("settings")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> SaveSettings(Guid schoolId, [FromBody] DiaryDeadlineRequest body, CancellationToken ct)
     {
         if (!TimeOnly.TryParse(body.DiaryDeadline, out var t)) return BadRequest(new { error = "Use HH:mm for the diary deadline." });
@@ -60,7 +61,7 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
     }
 
     [HttpPost("periods")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> SavePeriod(Guid schoolId, [FromBody] SavePeriodRequest body, CancellationToken ct)
     {
         if (!TimeOnly.TryParse(body.StartTime, out var start) || !TimeOnly.TryParse(body.EndTime, out var end))
@@ -75,7 +76,7 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
     }
 
     [HttpDelete("periods/{id:guid}")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> DeletePeriod(Guid schoolId, Guid id, [FromQuery] Guid academicYearId, CancellationToken ct)
     {
         try
@@ -100,7 +101,7 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
     }
 
     [HttpPost("slots")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Slot(Guid schoolId, [FromBody] SaveSlotRequest body, CancellationToken ct)
     {
         try
@@ -112,7 +113,7 @@ public class TimetableController(AcademicOpsService ops, AppDbContext db) : Cont
     }
 
     [HttpDelete("slots/{id:guid}")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Clear(Guid schoolId, Guid id, CancellationToken ct)
     {
         try { await ops.ClearSlotAsync(schoolId, Tenant(), id, ct); return NoContent(); }

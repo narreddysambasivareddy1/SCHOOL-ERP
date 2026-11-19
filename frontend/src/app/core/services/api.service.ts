@@ -29,6 +29,7 @@ export class ApiService {
   }
   createStudent(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/students`, body); }
   getStudent(schoolId: string, id: string) { return this.http.get<any>(`${this.base}/schools/${schoolId}/students/${id}`); }
+  getMyStudent(schoolId: string) { return this.http.get<{ id: string; studentCode: string; firstName: string; lastName: string }>(`${this.base}/schools/${schoolId}/students/me`); }
 
   // Employees
   getEmployees(schoolId: string, page = 1, pageSize = 25, search = ''): Observable<PagedResult<any>> {
@@ -46,6 +47,10 @@ export class ApiService {
 
   // Fees
   getStudentPayments(schoolId: string, studentId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/fees/student/${studentId}`); }
+  getFeeSchedule(schoolId: string, studentId: string, academicYearId: string) {
+    return this.http.get<{ items: { category: string; amount: number }[]; total: number }>(
+      `${this.base}/schools/${schoolId}/fees/student/${studentId}/schedule`, { params: { academicYearId } });
+  }
   recordPayment(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/record`, body); }
 
   // Transport
@@ -100,6 +105,7 @@ export class ApiService {
   getStudentResults(schoolId: string, examId: string, studentId: string) { return this.http.get<any>(`${this.base}/schools/${schoolId}/examinations/${examId}/results/${studentId}`); }
 
   createHomework(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/homework`, body); }
+  submitHomework(schoolId: string, homeworkId: string) { return this.http.post<any>(`${this.base}/schools/${schoolId}/homework/${homeworkId}/submit`, {}); }
 
   getStudentAttendance(schoolId: string, studentId: string, from: string, to: string) {
     return this.http.get<any>(`${this.base}/schools/${schoolId}/attendance/student/${studentId}`, { params: { from, to } });

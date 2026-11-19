@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
@@ -28,14 +29,48 @@ public class HomeworkController(AppDbContext db, INotificationService notificati
         if (sectionId.HasValue)
             query = query.Where(h => h.TeacherAssignment!.SectionId == sectionId.Value);
 
-        var items = await query.OrderByDescending(h => h.DueDate)
-            .Select(h => new { h.Id, h.Title, h.IssueDate, h.DueDate, submissionCount = h.Submissions.Count })
+        Guid? myStudentId = null;
+        if (User.IsInRole("Student"))
+        {
+            var userId = StudentAccess.UserId(User);
+            if (userId is not null)
+                myStudentId = await db.Students.Where(s => s.UserId == userId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted)
+                    .Select(s => (Guid?)s.Id).FirstOrDefaultAsync(ct);
+        }
+
+        var rows = await query.OrderByDescending(h => h.DueDate)
+            .Select(h => new { h.Id, h.Title, h.IssueDate, h.DueDate, submissionCount = h.Submissions.Count, submitted = myStudentId != null && h.Submissions.Any(s => s.StudentId == myStudentId) })
             .ToListAsync(ct);
-        return Ok(items);
+        return Ok(rows);
+    }
+
+    [HttpPost("{homeworkId:guid}/submit")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> Submit(Guid schoolId, Guid homeworkId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var userId = StudentAccess.UserId(User);
+        if (userId is null) return Unauthorized();
+        var studentId = await db.Students.Where(s => s.UserId == userId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted)
+            .Select(s => (Guid?)s.Id).FirstOrDefaultAsync(ct);
+        if (studentId is null) return Forbid();
+
+        var homework = await db.Homeworks.FirstOrDefaultAsync(h => h.Id == homeworkId && h.SchoolId == schoolId && h.TenantId == tenantId && h.IsPublished, ct);
+        if (homework is null) return NotFound();
+        var exists = await db.HomeworkSubmissions.AnyAsync(s => s.HomeworkId == homeworkId && s.StudentId == studentId, ct);
+        if (exists) return Conflict(new { error = "This homework is already submitted." });
+
+        db.HomeworkSubmissions.Add(new HomeworkSubmission
+        {
+            TenantId = tenantId, HomeworkId = homeworkId, StudentId = studentId.Value, SubmittedAt = DateTime.UtcNow,
+            CreatedBy = User.FindFirstValue(ClaimTypes.Email)
+        });
+        await db.SaveChangesAsync(ct);
+        return Ok(new { homeworkId, submitted = true });
     }
 
     [HttpPost]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] CreateHomeworkRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);

@@ -1,3 +1,4 @@
+using SchoolERP.API.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,7 @@ public class TransportController(AppDbContext db) : ControllerBase
     }
 
     [HttpPost("routes")]
-    [Authorize(Roles = "SchoolAdmin,TransportManager")]
+    [Authorize(Roles = RoleNames.TransportWrite)]
     public async Task<IActionResult> CreateRoute(Guid schoolId, [FromBody] CreateRouteRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);

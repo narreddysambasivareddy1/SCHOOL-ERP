@@ -1,17 +1,35 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.DTOs;
 using SchoolERP.Application.Interfaces;
+using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.API.Controllers;
 
 [ApiController]
 [Route("api/schools/{schoolId}/students")]
 [Authorize]
-public class StudentsController(IStudentService studentService, IAuditService auditService) : ControllerBase
+public class StudentsController(IStudentService studentService, IAuditService auditService, AppDbContext db) : ControllerBase
 {
+    [HttpGet("me")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> Me(Guid schoolId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var userId = StudentAccess.UserId(User);
+        if (userId is null) return Unauthorized();
+        var student = await db.Students.AsNoTracking()
+            .Where(s => s.SchoolId == schoolId && s.TenantId == tenantId && s.UserId == userId && !s.IsDeleted)
+            .Select(s => new { s.Id, s.StudentCode, s.FirstName, s.LastName })
+            .FirstOrDefaultAsync(ct);
+        return student is null ? NotFound() : Ok(student);
+    }
+
     [HttpGet]
+    [Authorize(Roles = RoleNames.StudentDirectory)]
     public async Task<IActionResult> GetAll(Guid schoolId, [FromQuery] Guid academicYearId,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? search = null, CancellationToken ct = default)
     {
@@ -23,12 +41,15 @@ public class StudentsController(IStudentService studentService, IAuditService au
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid schoolId, Guid id, CancellationToken ct)
     {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, id, ct))
+            return Forbid();
         var student = await studentService.GetStudentAsync(id, schoolId, ct);
         return student is null ? NotFound() : Ok(student);
     }
 
     [HttpPost]
-    [Authorize(Roles = "SchoolAdmin,AdmissionOfficer")]
+    [Authorize(Roles = RoleNames.AdmissionsWrite)]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] CreateStudentRequest request, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -45,7 +66,7 @@ public class StudentsController(IStudentService studentService, IAuditService au
     }
 
     [HttpPost("{id:guid}/status")]
-    [Authorize(Roles = "SchoolAdmin,AdmissionOfficer")]
+    [Authorize(Roles = RoleNames.AdmissionsWrite)]
     public async Task<IActionResult> Status(Guid schoolId, Guid id, [FromBody] StatusToggleRequest body, CancellationToken ct)
     {
         try
@@ -57,7 +78,7 @@ public class StudentsController(IStudentService studentService, IAuditService au
     }
 
     [HttpPost("{id:guid}/photo")]
-    [Authorize(Roles = "SchoolAdmin,AdmissionOfficer")]
+    [Authorize(Roles = RoleNames.AdmissionsWrite)]
     public async Task<IActionResult> Photo(Guid schoolId, Guid id, [FromBody] SetPhotoRequest body, CancellationToken ct)
     {
         try

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
@@ -30,7 +31,7 @@ public class ExaminationsController(AppDbContext db, IAuditService audit, INotif
     }
 
     [HttpPost]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] CreateExamRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -48,32 +49,59 @@ public class ExaminationsController(AppDbContext db, IAuditService audit, INotif
     }
 
     [HttpPost("{examId}/marks")]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> EnterMarks(Guid schoolId, Guid examId, [FromBody] IEnumerable<MarkEntryRequest> entries, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
+        var batch = entries?.ToList() ?? [];
+        if (batch.Count == 0) return BadRequest(new { error = "Enter at least one mark." });
 
         var exam = await db.Examinations.FirstOrDefaultAsync(e => e.Id == examId && e.TenantId == tenantId && e.SchoolId == schoolId, ct);
         if (exam is null) return NotFound();
         if (exam.IsPublished) return Conflict(new { error = "Cannot edit marks on a published examination." });
 
-        var marks = entries.Select(e => new MarkEntry
+        foreach (var entry in batch)
         {
-            TenantId = tenantId, ExaminationId = examId,
-            StudentId = e.StudentId, SubjectId = e.SubjectId,
-            MarksObtained = e.MarksObtained, MaxMarks = e.MaxMarks,
-            IsAbsent = e.IsAbsent, Remarks = e.Remarks, CreatedBy = actor
-        }).ToList();
+            if (entry.MaxMarks <= 0) return BadRequest(new { error = "Maximum marks must be greater than zero." });
+            if (!entry.IsAbsent && entry.MarksObtained is null) return BadRequest(new { error = "Marks are required unless the student is absent." });
+            if (entry.MarksObtained is < 0 || entry.MarksObtained > entry.MaxMarks)
+                return BadRequest(new { error = "Marks must be between zero and the maximum." });
+            var studentOk = await db.Students.AnyAsync(s => s.Id == entry.StudentId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct);
+            var subjectOk = await db.Subjects.AnyAsync(s => s.Id == entry.SubjectId && s.SchoolId == schoolId && s.TenantId == tenantId, ct);
+            if (!studentOk || !subjectOk) return BadRequest(new { error = "Student or subject is not in this school." });
 
-        db.MarkEntries.AddRange(marks);
+            var existing = await db.MarkEntries.FirstOrDefaultAsync(m =>
+                m.ExaminationId == examId && m.StudentId == entry.StudentId && m.SubjectId == entry.SubjectId, ct);
+            if (existing is null)
+            {
+                db.MarkEntries.Add(new MarkEntry
+                {
+                    TenantId = tenantId, ExaminationId = examId,
+                    StudentId = entry.StudentId, SubjectId = entry.SubjectId,
+                    MarksObtained = entry.IsAbsent ? null : entry.MarksObtained,
+                    MaxMarks = entry.MaxMarks, IsAbsent = entry.IsAbsent,
+                    Remarks = entry.Remarks, CreatedBy = actor
+                });
+            }
+            else
+            {
+                existing.MarksObtained = entry.IsAbsent ? null : entry.MarksObtained;
+                existing.MaxMarks = entry.MaxMarks;
+                existing.IsAbsent = entry.IsAbsent;
+                existing.Remarks = entry.Remarks;
+                existing.UpdatedBy = actor;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
         await db.SaveChangesAsync(ct);
-        await audit.LogAsync(tenantId, actor, "MarksEntered", "Examination", examId.ToString(), newValues: new { count = marks.Count });
-        return Ok(new { saved = marks.Count });
+        await audit.LogAsync(tenantId, actor, "MarksEntered", "Examination", examId.ToString(), newValues: new { count = batch.Count });
+        return Ok(new { saved = batch.Count });
     }
 
     [HttpPost("{examId}/publish")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Publish(Guid schoolId, Guid examId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -106,7 +134,9 @@ public class ExaminationsController(AppDbContext db, IAuditService audit, INotif
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var exam = await db.Examinations.FirstOrDefaultAsync(e => e.Id == examId && e.TenantId == tenantId && e.SchoolId == schoolId, ct);
         if (exam is null) return NotFound();
-        if (!exam.IsPublished && !User.IsInRole("SchoolAdmin") && !User.IsInRole("Teacher"))
+        if (!exam.IsPublished && !StudentAccess.IsResultsStaff(User))
+            return Forbid();
+        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
             return Forbid();
 
         var marks = await db.MarkEntries
