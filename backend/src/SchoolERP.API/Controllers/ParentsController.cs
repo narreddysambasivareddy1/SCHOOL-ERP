@@ -23,7 +23,8 @@ public class ParentsController(AppDbContext db) : ControllerBase
                 from g in db.Guardians.AsNoTracking()
                 join sg in db.StudentGuardians.AsNoTracking() on g.Id equals sg.GuardianId
                 join s in db.Students.AsNoTracking() on sg.StudentId equals s.Id
-                where g.TenantId == tenantId && g.UserId == userId && !g.IsDeleted
+                where g.TenantId == tenantId && sg.TenantId == tenantId && s.TenantId == tenantId
+                    && g.UserId == userId && !g.IsDeleted && !s.IsDeleted
                 select new
                 {
                     studentId = s.Id,

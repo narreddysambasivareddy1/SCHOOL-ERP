@@ -43,7 +43,10 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
             return Forbid();
 
         var classId = await db.StudentEnrollments
-            .Where(e => e.StudentId == studentId && e.AcademicYearId == academicYearId && e.TenantId == tenantId && e.EffectiveTo == null)
+            .Where(e => e.StudentId == studentId && e.AcademicYearId == academicYearId && e.TenantId == tenantId && e.EffectiveTo == null
+                && e.Student!.SchoolId == schoolId && e.Student.TenantId == tenantId
+                && e.Class!.SchoolId == schoolId && e.Class.TenantId == tenantId
+                && e.Section!.TenantId == tenantId && e.Section.ClassId == e.ClassId)
             .Select(e => (Guid?)e.ClassId)
             .FirstOrDefaultAsync(ct);
         if (classId is null) return Ok(new { items = Array.Empty<object>(), total = 0m });
