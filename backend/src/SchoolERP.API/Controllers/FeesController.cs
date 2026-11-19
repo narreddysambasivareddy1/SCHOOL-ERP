@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
@@ -19,23 +20,56 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
     [HttpGet("student/{studentId}")]
     public async Task<IActionResult> GetStudentPayments(Guid schoolId, Guid studentId, CancellationToken ct)
     {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+            return Forbid();
+
         var payments = await db.Payments
-            .Where(p => p.SchoolId == schoolId && p.StudentId == studentId)
+            .Where(p => p.SchoolId == schoolId && p.TenantId == tenantId && p.StudentId == studentId)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new { p.Id, p.Amount, p.Status, p.Method, p.ReceiptNumber, p.PaidAt })
             .ToListAsync(ct);
-        return Ok(payments);
+        return Ok(payments.Select(p => new
+        {
+            p.Id, p.Amount, status = p.Status.ToString(), p.Method, p.ReceiptNumber, p.PaidAt
+        }));
+    }
+
+    [HttpGet("student/{studentId}/schedule")]
+    public async Task<IActionResult> Schedule(Guid schoolId, Guid studentId, [FromQuery] Guid academicYearId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+            return Forbid();
+
+        var classId = await db.StudentEnrollments
+            .Where(e => e.StudentId == studentId && e.AcademicYearId == academicYearId && e.TenantId == tenantId && e.EffectiveTo == null
+                && e.Student!.SchoolId == schoolId && e.Student.TenantId == tenantId
+                && e.Class!.SchoolId == schoolId && e.Class.TenantId == tenantId
+                && e.Section!.TenantId == tenantId && e.Section.ClassId == e.ClassId)
+            .Select(e => (Guid?)e.ClassId)
+            .FirstOrDefaultAsync(ct);
+        if (classId is null) return Ok(new { items = Array.Empty<object>(), total = 0m });
+
+        var items = await db.FeeStructures
+            .Where(f => f.SchoolId == schoolId && f.TenantId == tenantId && f.AcademicYearId == academicYearId && f.ClassId == classId)
+            .Select(f => new { category = f.FeeCategory!.Name, f.Amount })
+            .ToListAsync(ct);
+        return Ok(new { items, total = items.Sum(i => i.Amount) });
     }
 
     [HttpPost("record")]
-    [Authorize(Roles = "SchoolAdmin,Accountant")]
+    [Authorize(Roles = RoleNames.FeesStaff)]
     public async Task<IActionResult> RecordPayment(Guid schoolId, [FromBody] RecordPaymentRequest req, CancellationToken ct)
     {
+        if (req.Amount <= 0) return BadRequest(new { error = "Amount must be greater than zero." });
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
+        var studentOk = await db.Students.AnyAsync(s =>
+            s.Id == req.StudentId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct);
+        if (!studentOk) return BadRequest(new { error = "Student was not found in this school." });
 
-        var count = await db.Payments.CountAsync(p => p.SchoolId == schoolId, ct);
-        var receipt = $"RCT-{DateTime.UtcNow.Year}-{count + 1:D4}";
+        var receipt = $"RCT-{DateTime.UtcNow:yyyyMMddHHmmss}-{req.StudentId.ToString()[..8]}";
 
         var payment = new Payment
         {
@@ -52,14 +86,19 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
             newValues: new { payment.Amount, payment.Method, payment.ReceiptNumber });
 
         await NotifyPaymentAsync(tenantId, schoolId, req.StudentId, payment.Amount, payment.ReceiptNumber, ct);
-        return Ok(new { payment.Id, payment.ReceiptNumber, payment.Amount, payment.Status });
+        return Ok(new { payment.Id, payment.ReceiptNumber, payment.Amount, status = payment.Status.ToString() });
     }
 
     [HttpPost("online-order")]
+    [Authorize(Roles = RoleNames.FeesStaff)]
     public async Task<IActionResult> CreateOnlineOrder(Guid schoolId, [FromBody] OnlineOrderRequest req, CancellationToken ct)
     {
+        if (req.Amount <= 0) return BadRequest(new { error = "Amount must be greater than zero." });
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
+        var studentOk = await db.Students.AnyAsync(s =>
+            s.Id == req.StudentId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct);
+        if (!studentOk) return BadRequest(new { error = "Student was not found in this school." });
         var payCfg = await db.IntegrationSettings
             .FirstOrDefaultAsync(s => s.SchoolId == schoolId && s.ProviderKey == "payments", ct);
 
@@ -79,8 +118,7 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
             orderId,
             amount = req.Amount,
             sandbox = payCfg?.IsSandbox != false,
-            keyId = "rzp_test_DUMMYKEYID",
-            message = "Sandbox payment order. Replace payments keyId/keySecret when the school merchant account is ready."
+            message = "Sandbox payment order. A live charge starts only after the school merchant account is connected."
         });
     }
 

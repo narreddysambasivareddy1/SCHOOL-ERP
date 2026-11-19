@@ -20,8 +20,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
       <a routerLink="/students" class="btn">Open student records</a>
     </div>
     <div class="pipe">
-      <div class="pipe-card"><span>Enquiry</span><strong>—</strong></div>
-      <div class="pipe-card"><span>Admission pending</span><strong>—</strong></div>
+      <div class="pipe-card"><span>Open enquiries</span><strong>{{ enquiries() }}</strong></div>
+      <div class="pipe-card"><span>Registrations in progress</span><strong>{{ pending() }}</strong></div>
       <div class="pipe-card"><span>Admitted / active</span><strong>{{ active() }}</strong></div>
       <div class="pipe-card"><span>Other statuses</span><strong>{{ other() }}</strong></div>
     </div>
@@ -59,6 +59,8 @@ import { SchoolContextService } from '../../core/services/school-context.service
 })
 export class AdmissionsComponent implements OnInit {
   students = signal<any[]>([]);
+  enquiries = signal<number | string>('—');
+  pending = signal<number | string>('—');
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -69,6 +71,12 @@ export class AdmissionsComponent implements OnInit {
 
   ngOnInit() {
     if (!this.ctx.schoolId || !this.ctx.academicYearId) { this.loading.set(false); return; }
+    this.api.getEnquiries(this.ctx.schoolId).subscribe({
+      next: rows => this.enquiries.set((rows ?? []).filter((e: any) => e.status !== 'Converted' && e.status !== 'Rejected').length)
+    });
+    this.api.getRegistrations(this.ctx.schoolId).subscribe({
+      next: rows => this.pending.set((rows ?? []).filter((r: any) => r.status !== 'Confirmed').length)
+    });
     this.api.getStudents(this.ctx.schoolId, this.ctx.academicYearId, 1, 100).subscribe({
       next: d => { this.students.set(d.items ?? []); this.loading.set(false); },
       error: () => { this.error.set('Could not load admissions.'); this.loading.set(false); }

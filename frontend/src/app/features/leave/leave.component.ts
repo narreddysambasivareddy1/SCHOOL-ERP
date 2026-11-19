@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -7,7 +8,7 @@ import { AuthService } from '../../core/auth/auth.service';
 @Component({
   selector: 'app-leave',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="page-header">
       <div class="eyebrow">HRMS</div>
@@ -30,9 +31,32 @@ import { AuthService } from '../../core/auth/auth.service';
       }
     </div>
 
-    @if (canApprove) {
+    <form class="card" (ngSubmit)="apply()">
+      <strong>Apply for leave</strong>
+      <div class="row">
+        @if (canApprove) {
+          <select [(ngModel)]="employeeId" name="employee" required>
+            <option value="">Staff member</option>
+            @for (e of employees(); track e.id) {
+              <option [value]="e.id">{{ e.firstName }} {{ e.lastName }}</option>
+            }
+          </select>
+        }
+        <select [(ngModel)]="leaveTypeId" name="type" required>
+          <option value="">Leave type</option>
+          @for (t of types(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+        </select>
+        <input type="date" [(ngModel)]="fromDate" name="from" required />
+        <input type="date" [(ngModel)]="toDate" name="to" required />
+        <input [(ngModel)]="reason" name="reason" placeholder="Reason" />
+        <button class="btn-primary" type="submit" [disabled]="saving()">Submit</button>
+      </div>
+      @if (notice()) { <p class="ok">{{ notice() }}</p> }
+    </form>
+
+    @if (canApprove || requests().length || !canApprove) {
       <div class="card">
-        <strong>Requests</strong>
+        <strong>{{ canApprove ? 'Requests' : 'My requests' }}</strong>
         @if (!requests().length) { <p class="text-muted">No leave requests.</p> }
         @for (r of requests(); track r.id) {
           <div class="item">
@@ -40,18 +64,14 @@ import { AuthService } from '../../core/auth/auth.service';
               <strong>{{ r.employee }}</strong>
               <small>{{ r.leaveType }} · {{ r.fromDate }} → {{ r.toDate }} · {{ r.status }}</small>
             </div>
-            @if (r.status === 'Pending') {
+            @if (canApprove && r.status === 'Pending') {
               <div class="actions">
-                <button type="button" (click)="act(r.id, true)">Approve</button>
+                <button class="btn-primary" type="button" (click)="act(r.id, true)">Approve</button>
                 <button type="button" class="ghost" (click)="act(r.id, false)">Reject</button>
               </div>
             }
           </div>
         }
-      </div>
-    } @else {
-      <div class="card">
-        <p class="text-muted">Your own leave balance and requests will appear here once your employee record is linked. Admins approve from this same workspace.</p>
       </div>
     }
   `,
@@ -60,8 +80,11 @@ import { AuthService } from '../../core/auth/auth.service';
     ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; }
     .item { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
     .item small { display: block; color: var(--muted); font-size: 11px; }
-    button { background: var(--primary); color: white; border: 0; border-radius: 8px; padding: 6px 10px; margin-left: 6px; cursor: pointer; }
+    button { margin-left: 6px; }
     .ghost { background: var(--surface); color: var(--navy); border: 1px solid var(--line); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    input, select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; background: var(--surface); color: var(--ink); }
+    .ok { color: #087d68; margin: 8px 0 0; }
     .alert { background: var(--warn-soft); color: var(--warn); padding: 10px; border-radius: 8px; margin-bottom: 12px; }
   `]
 })
@@ -69,10 +92,18 @@ export class LeaveComponent implements OnInit {
   types = signal<any[]>([]);
   requests = signal<any[]>([]);
   error = signal<string | null>(null);
+  notice = signal<string | null>(null);
+  saving = signal(false);
   canApprove = false;
+  employees = signal<any[]>([]);
+  employeeId = '';
+  leaveTypeId = '';
+  fromDate = '';
+  toDate = '';
+  reason = '';
 
   constructor(private api: ApiService, public ctx: SchoolContextService, private auth: AuthService) {
-    this.canApprove = this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('HRManager');
+    this.canApprove = this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('HRManager');
   }
 
   ngOnInit() {
@@ -82,11 +113,43 @@ export class LeaveComponent implements OnInit {
       error: () => this.error.set('Could not load leave types.')
     });
     if (this.canApprove) {
-      this.api.getLeaveRequests(this.ctx.schoolId).subscribe({
-        next: r => this.requests.set(r),
-        error: () => this.error.set('Could not load leave requests.')
+      this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({
+        next: page => this.employees.set(page.items ?? [])
       });
     }
+    this.api.getLeaveRequests(this.ctx.schoolId).subscribe({
+      next: r => this.requests.set(r),
+      error: () => this.error.set('Could not load leave requests.')
+    });
+  }
+
+  apply() {
+    if (!this.leaveTypeId || !this.fromDate || !this.toDate) return;
+    if (this.canApprove && !this.employeeId) {
+      this.error.set('Select the staff member this leave is for.');
+      return;
+    }
+    this.saving.set(true);
+    this.notice.set(null);
+    this.error.set(null);
+    this.api.applyLeave(this.ctx.schoolId, {
+      employeeId: this.canApprove ? this.employeeId : '00000000-0000-0000-0000-000000000000',
+      leaveTypeId: this.leaveTypeId,
+      fromDate: this.fromDate,
+      toDate: this.toDate,
+      reason: this.reason || null
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.notice.set('Leave request submitted.');
+        this.reason = '';
+        this.ngOnInit();
+      },
+      error: (e) => {
+        this.saving.set(false);
+        this.error.set(e?.error?.error ?? 'Could not submit leave. Your staff record must be linked to this login.');
+      }
+    });
   }
 
   act(id: string, approve: boolean) {

@@ -9,6 +9,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SchoolERP.Application\SchoolERP.Application.csproj" />
     <ProjectReference Include="..\..\src\SchoolERP.Infrastructure\SchoolERP.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\SchoolERP.API\SchoolERP.API.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />

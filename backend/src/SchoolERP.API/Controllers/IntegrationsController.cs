@@ -30,9 +30,7 @@ public class IntegrationsController(AppDbContext db, INotificationService notifi
         var items = rows.Select(s => new
         {
             s.Id, s.ProviderKey, s.ProviderName, s.IsEnabled, s.IsSandbox,
-            config = s.IsSandbox
-                ? IntegrationCatalog.ParseConfig(s.ConfigJson)
-                : IntegrationCatalog.MaskConfig(s.ConfigJson)
+            config = IntegrationCatalog.MaskConfig(s.ConfigJson)
         });
         return Ok(items);
     }
@@ -49,7 +47,7 @@ public class IntegrationsController(AppDbContext db, INotificationService notifi
         setting.IsEnabled = req.IsEnabled;
         setting.IsSandbox = req.IsSandbox;
         if (!string.IsNullOrWhiteSpace(req.ConfigJson))
-            setting.ConfigJson = req.ConfigJson;
+            setting.ConfigJson = IntegrationCatalog.MergeConfig(setting.ConfigJson, req.ConfigJson);
         setting.UpdatedBy = actor;
         await db.SaveChangesAsync(ct);
         await audit.LogAsync(tenantId, actor, "IntegrationUpdated", "IntegrationSetting", setting.Id.ToString(),
@@ -57,9 +55,7 @@ public class IntegrationsController(AppDbContext db, INotificationService notifi
         return Ok(new
         {
             setting.ProviderKey, setting.IsEnabled, setting.IsSandbox,
-            config = setting.IsSandbox
-                ? IntegrationCatalog.ParseConfig(setting.ConfigJson)
-                : IntegrationCatalog.MaskConfig(setting.ConfigJson)
+            config = IntegrationCatalog.MaskConfig(setting.ConfigJson)
         });
     }
 

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
@@ -29,7 +30,7 @@ public class CommunicationsController(AppDbContext db, INotificationService noti
     }
 
     [HttpGet("outbox")]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> Outbox(Guid schoolId, [FromQuery] int take = 50, CancellationToken ct = default)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -48,7 +49,7 @@ public class CommunicationsController(AppDbContext db, INotificationService noti
     }
 
     [HttpPost("announcements")]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> Send(Guid schoolId, [FromBody] SendAnnouncementRequest req, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(req.Title) || string.IsNullOrWhiteSpace(req.Body))

@@ -1,3 +1,4 @@
+using SchoolERP.API.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,7 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
     }
 
     [HttpPost]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] Application.DTOs.CreateTeacherAssignmentRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -103,7 +104,7 @@ public class TeacherAssignmentsController(AppDbContext db, Application.Interface
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Deactivate(Guid schoolId, Guid id, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
