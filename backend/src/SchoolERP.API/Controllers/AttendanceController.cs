@@ -131,20 +131,50 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         [FromQuery] DateOnly from, [FromQuery] DateOnly to, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var inRange = db.StudentAttendances.Where(r =>
+            r.TenantId == tenantId && r.StudentId == studentId
+            && r.Student!.SchoolId == schoolId && r.Student.TenantId == tenantId
+            && r.Session!.TenantId == tenantId && r.Session.SchoolId == schoolId
+            && r.Session.Date >= from && r.Session.Date <= to);
+
+        if (StudentAccess.InRole(User, "Teacher")
+            && !StudentAccess.IsLeadership(User)
+            && !StudentAccess.InRole(User, "AttendanceOfficer"))
+        {
+            var userId = StudentAccess.UserId(User);
+            if (userId is null) return Unauthorized();
+            var visible = inRange.Where(r => db.TeacherAssignments.Any(a =>
+                a.TenantId == tenantId && a.IsActive && a.CanTakeAttendance
+                && a.AcademicYearId == r.Session!.AcademicYearId
+                && a.ClassId == r.Session.ClassId
+                && a.SectionId == r.Session.SectionId
+                && a.Employee!.UserId == userId
+                && a.Employee.SchoolId == schoolId && a.Employee.TenantId == tenantId
+                && a.Class!.SchoolId == schoolId && a.Class.TenantId == tenantId
+                && a.Section!.TenantId == tenantId && a.Section.ClassId == a.ClassId
+                && a.AcademicYear!.SchoolId == schoolId && a.AcademicYear.TenantId == tenantId));
+            if (!await visible.AnyAsync(ct))
+            {
+                if (await inRange.AnyAsync(ct) || !await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+                    return Forbid();
+            }
+            return AttendanceSummary(await visible.Select(r => new AttendanceDay(r.Session!.Date, r.Code)).ToListAsync(ct));
+        }
+
         if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
             return Forbid();
-        var records = await db.StudentAttendances
-            .Where(r => r.TenantId == tenantId && r.StudentId == studentId
-                && r.Student!.SchoolId == schoolId && r.Student.TenantId == tenantId
-                && r.Session!.TenantId == tenantId && r.Session.SchoolId == schoolId
-                && r.Session.Date >= from && r.Session.Date <= to)
-            .Select(r => new { r.Session!.Date, r.Code })
-            .ToListAsync(ct);
+        var records = await inRange.Select(r => new AttendanceDay(r.Session!.Date, r.Code)).ToListAsync(ct);
+        return AttendanceSummary(records);
+    }
 
+    private readonly record struct AttendanceDay(DateOnly Date, AttendanceCode Code);
+
+    private static OkObjectResult AttendanceSummary(IReadOnlyList<AttendanceDay> records)
+    {
         var total = records.Count;
         var present = records.Count(r => r.Code == AttendanceCode.Present || r.Code == AttendanceCode.Late);
         var pct = total > 0 ? Math.Round((double)present / total * 100, 1) : 0;
-        return Ok(new { total, present, percentage = pct, records });
+        return new OkObjectResult(new { total, present, percentage = pct, records });
     }
 
     private async Task<bool> CanAccessSection(Guid schoolId, Guid tenantId, Guid academicYearId, Guid classId, Guid sectionId, CancellationToken ct)
