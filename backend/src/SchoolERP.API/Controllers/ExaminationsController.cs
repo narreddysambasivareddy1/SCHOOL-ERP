@@ -187,7 +187,7 @@ public class ExaminationsController(AppDbContext db, IAuditService audit, INotif
         if (!yearInSchool) return NotFound();
         if (!exam.IsPublished && !StudentAccess.IsResultsStaff(User))
             return Forbid();
-        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, exam.AcademicYearId, ct))
             return Forbid();
 
         var marks = await db.MarkEntries

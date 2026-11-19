@@ -301,6 +301,102 @@ public class AcademicAccessSecurityTests
     }
 
     [Fact]
+    public async Task Teacher_CannotReadAnotherSectionsAttendanceFeesOrResults()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        var exam = new Examination
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = g.YearId,
+            Name = "Published paper", IsPublished = true
+        };
+        db.Examinations.Add(exam);
+        db.MarkEntries.Add(new MarkEntry
+        {
+            TenantId = g.TenantId, ExaminationId = exam.Id, StudentId = g.OtherStudentId, SubjectId = g.SubjectId,
+            MarksObtained = 15, MaxMarks = 20
+        });
+        db.Payments.Add(new Payment
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, StudentId = g.OtherStudentId,
+            Amount = 100, Status = PaymentStatus.Successful, Method = "Cash"
+        });
+        db.AttendanceSessions.Add(new AttendanceSession
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = g.YearId,
+            ClassId = g.ClassId, SectionId = g.OtherSectionId, Date = new DateOnly(2026, 11, 18), MarkedBy = "teacher",
+            Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.OtherStudentId, Code = AttendanceCode.Present }]
+        });
+        await db.SaveChangesAsync();
+
+        var from = new DateOnly(2026, 11, 1);
+        var to = new DateOnly(2026, 11, 30);
+        var attendance = Attendance(db, g.TenantId, g.TeacherUserId, "Teacher");
+        var fees = new FeesController(db, _audit.Object, _notifications.Object);
+        Attach(fees, Principal(g.TenantId, g.TeacherUserId, "Teacher"));
+        var exams = Exams(db, g.TenantId, g.TeacherUserId, "Teacher");
+
+        var otherAttendance = await attendance.GetStudentAttendance(g.SchoolId, g.OtherStudentId, from, to, CancellationToken.None);
+        var otherFees = await fees.GetStudentPayments(g.SchoolId, g.OtherStudentId, CancellationToken.None);
+        var otherResults = await exams.GetStudentResults(g.SchoolId, exam.Id, g.OtherStudentId, CancellationToken.None);
+
+        var otherRegister = await attendance.Get(g.SchoolId, g.ClassId, g.OtherSectionId, new DateOnly(2026, 11, 18), CancellationToken.None);
+
+        otherAttendance.Should().BeOfType<ForbidResult>();
+        otherFees.Should().BeOfType<ForbidResult>();
+        otherResults.Should().BeOfType<ForbidResult>();
+        otherRegister.Should().BeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public async Task Teacher_CanReadAssignedSection_AndAdminCanReadAnyStudent()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        var exam = new Examination
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = g.YearId,
+            Name = "Published paper", IsPublished = true
+        };
+        db.Examinations.Add(exam);
+        db.MarkEntries.Add(new MarkEntry
+        {
+            TenantId = g.TenantId, ExaminationId = exam.Id, StudentId = g.StudentId, SubjectId = g.SubjectId,
+            MarksObtained = 18, MaxMarks = 20
+        });
+        db.Payments.Add(new Payment
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, StudentId = g.StudentId,
+            Amount = 100, Status = PaymentStatus.Successful, Method = "Cash"
+        });
+        db.AttendanceSessions.Add(new AttendanceSession
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = g.YearId,
+            ClassId = g.ClassId, SectionId = g.SectionId, Date = new DateOnly(2026, 11, 18), MarkedBy = "teacher",
+            Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.StudentId, Code = AttendanceCode.Present }]
+        });
+        await db.SaveChangesAsync();
+
+        var from = new DateOnly(2026, 11, 1);
+        var to = new DateOnly(2026, 11, 30);
+        var teacherAttendance = await Attendance(db, g.TenantId, g.TeacherUserId, "Teacher")
+            .GetStudentAttendance(g.SchoolId, g.StudentId, from, to, CancellationToken.None);
+        var teacherFeesController = new FeesController(db, _audit.Object, _notifications.Object);
+        Attach(teacherFeesController, Principal(g.TenantId, g.TeacherUserId, "Teacher"));
+        var teacherFees = await teacherFeesController.GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+        var teacherResults = await Exams(db, g.TenantId, g.TeacherUserId, "Teacher")
+            .GetStudentResults(g.SchoolId, exam.Id, g.StudentId, CancellationToken.None);
+
+        var adminResults = await Exams(db, g.TenantId, g.AdminUserId, "SchoolAdmin")
+            .GetStudentResults(g.SchoolId, exam.Id, g.OtherStudentId, CancellationToken.None);
+
+        teacherAttendance.Should().BeOfType<OkObjectResult>();
+        teacherFees.Should().BeOfType<OkObjectResult>();
+        teacherResults.Should().BeOfType<OkObjectResult>();
+        adminResults.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
     public async Task Student_CannotReadAnotherStudentsAttendance()
     {
         await using var db = CreateDb();

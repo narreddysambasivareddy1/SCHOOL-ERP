@@ -32,18 +32,8 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         if (!await BelongsToSchool(schoolId, tenantId, req.AcademicYearId, req.ClassId, req.SectionId, ct))
             return BadRequest(new { error = "Class, section, or academic year does not belong to this school." });
 
-        if (!StudentAccess.IsLeadership(User) && !StudentAccess.InRole(User, "AttendanceOfficer"))
-        {
-            var userId = StudentAccess.UserId(User);
-            var assigned = userId is not null && await db.TeacherAssignments.AnyAsync(a =>
-                a.TenantId == tenantId && a.IsActive && a.CanTakeAttendance
-                && a.AcademicYearId == req.AcademicYearId
-                && a.ClassId == req.ClassId && a.SectionId == req.SectionId
-                && a.Employee!.UserId == userId && a.Employee.SchoolId == schoolId && a.Employee.TenantId == tenantId
-                && a.Class!.SchoolId == schoolId && a.Class.TenantId == tenantId
-                && a.Section!.TenantId == tenantId && a.Section.ClassId == a.ClassId, ct);
-            if (!assigned) return Forbid();
-        }
+        if (!await CanAccessSection(schoolId, tenantId, req.AcademicYearId, req.ClassId, req.SectionId, ct))
+            return Forbid();
 
         var studentIds = entries.Select(e => e.StudentId).ToList();
         var enrolledIds = await db.StudentEnrollments
@@ -108,6 +98,8 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         [FromQuery] Guid sectionId, [FromQuery] DateOnly date, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        if (!await CanAccessSection(schoolId, tenantId, null, classId, sectionId, ct))
+            return Forbid();
         var classInSchool = await db.Classes.AnyAsync(c => c.Id == classId && c.SchoolId == schoolId && c.TenantId == tenantId, ct);
         var sectionInClass = await db.Sections.AnyAsync(s =>
             s.Id == sectionId && s.ClassId == classId && s.TenantId == tenantId && s.Class!.SchoolId == schoolId && s.Class.TenantId == tenantId, ct);
@@ -153,6 +145,21 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
         var present = records.Count(r => r.Code == AttendanceCode.Present || r.Code == AttendanceCode.Late);
         var pct = total > 0 ? Math.Round((double)present / total * 100, 1) : 0;
         return Ok(new { total, present, percentage = pct, records });
+    }
+
+    private async Task<bool> CanAccessSection(Guid schoolId, Guid tenantId, Guid? academicYearId, Guid classId, Guid sectionId, CancellationToken ct)
+    {
+        if (StudentAccess.IsLeadership(User) || StudentAccess.InRole(User, "AttendanceOfficer"))
+            return true;
+        var userId = StudentAccess.UserId(User);
+        return userId is not null && await db.TeacherAssignments.AnyAsync(a =>
+            a.TenantId == tenantId && a.IsActive && a.CanTakeAttendance
+            && (academicYearId == null || a.AcademicYearId == academicYearId)
+            && a.ClassId == classId && a.SectionId == sectionId
+            && a.Employee!.UserId == userId && a.Employee.SchoolId == schoolId && a.Employee.TenantId == tenantId
+            && a.Class!.SchoolId == schoolId && a.Class.TenantId == tenantId
+            && a.Section!.TenantId == tenantId && a.Section.ClassId == a.ClassId
+            && a.AcademicYear!.SchoolId == schoolId && a.AcademicYear.TenantId == tenantId, ct);
     }
 
     private async Task<bool> BelongsToSchool(Guid schoolId, Guid tenantId, Guid academicYearId, Guid classId, Guid sectionId, CancellationToken ct)
