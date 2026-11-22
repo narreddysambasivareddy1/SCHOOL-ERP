@@ -481,6 +481,8 @@ public class AcademicAccessSecurityTests
 
         var admin = JsonSerializer.Serialize(((OkObjectResult)await Attendance(db, g.TenantId, g.AdminUserId, "SchoolAdmin")
             .GetStudentAttendance(g.SchoolId, g.StudentId, from, to, CancellationToken.None)).Value);
+        var platform = JsonSerializer.Serialize(((OkObjectResult)await Attendance(db, g.TenantId, Guid.NewGuid(), "PlatformSuperAdmin")
+            .GetStudentAttendance(g.SchoolId, g.StudentId, from, to, CancellationToken.None)).Value);
         var officer = JsonSerializer.Serialize(((OkObjectResult)await Attendance(db, g.TenantId, Guid.NewGuid(), "AttendanceOfficer")
             .GetStudentAttendance(g.SchoolId, g.StudentId, from, to, CancellationToken.None)).Value);
         var parent = JsonSerializer.Serialize(((OkObjectResult)await Attendance(db, g.TenantId, g.ParentUserId, "Parent")
@@ -489,9 +491,59 @@ public class AcademicAccessSecurityTests
             .GetStudentAttendance(g.SchoolId, g.StudentId, from, to, CancellationToken.None)).Value);
 
         admin.Should().Contain("2025-11-18").And.Contain("2026-11-19");
+        platform.Should().Contain("2025-11-18").And.Contain("2026-11-19");
         officer.Should().Contain("2025-11-18").And.Contain("2026-11-19");
         parent.Should().Contain("2025-11-18").And.Contain("2026-11-19");
         student.Should().Contain("2025-11-18").And.Contain("2026-11-19");
+    }
+
+    [Fact]
+    public async Task Teacher_CanReadHistoricalYear_OnlyForAssignedSection()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        var previousYearId = Guid.NewGuid();
+        db.AcademicYears.Add(new AcademicYear
+        {
+            Id = previousYearId, TenantId = g.TenantId, SchoolId = g.SchoolId, Name = "2025-26",
+            StartDate = new DateOnly(2025, 6, 1), EndDate = new DateOnly(2026, 3, 31)
+        });
+        db.TeacherAssignments.Add(new TeacherAssignment
+        {
+            TenantId = g.TenantId, AcademicYearId = previousYearId, EmployeeId = g.TeacherId,
+            SubjectId = g.SubjectId, ClassId = g.ClassId, SectionId = g.SectionId,
+            CanTakeAttendance = true, IsActive = true
+        });
+        db.AttendanceSessions.AddRange(
+            new AttendanceSession
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = previousYearId,
+                ClassId = g.ClassId, SectionId = g.SectionId, Date = new DateOnly(2025, 11, 18), MarkedBy = "teacher",
+                Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.StudentId, Code = AttendanceCode.Present }]
+            },
+            new AttendanceSession
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = previousYearId,
+                ClassId = g.ClassId, SectionId = g.OtherSectionId, Date = new DateOnly(2025, 11, 19), MarkedBy = "teacher",
+                Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.StudentId, Code = AttendanceCode.Absent }]
+            },
+            new AttendanceSession
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, AcademicYearId = g.YearId,
+                ClassId = g.ClassId, SectionId = g.OtherSectionId, Date = new DateOnly(2026, 11, 19), MarkedBy = "teacher",
+                Records = [new StudentAttendance { TenantId = g.TenantId, StudentId = g.StudentId, Code = AttendanceCode.Late }]
+            });
+        await db.SaveChangesAsync();
+
+        var teacher = Attendance(db, g.TenantId, g.TeacherUserId, "Teacher");
+        var history = await teacher.GetStudentAttendance(
+            g.SchoolId, g.StudentId, new DateOnly(2025, 11, 1), new DateOnly(2026, 11, 30), CancellationToken.None);
+        var otherHistoricalSection = await teacher.GetStudentAttendance(
+            g.SchoolId, g.StudentId, new DateOnly(2025, 11, 19), new DateOnly(2025, 11, 19), CancellationToken.None);
+
+        var historyJson = JsonSerializer.Serialize(((OkObjectResult)history).Value);
+        historyJson.Should().Contain("2025-11-18").And.NotContain("2025-11-19").And.NotContain("2026-11-19");
+        otherHistoricalSection.Should().BeOfType<ForbidResult>();
     }
 
     [Fact]
