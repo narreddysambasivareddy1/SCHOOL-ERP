@@ -103,7 +103,7 @@ interface EmployeeListDto {
         </div>
         <div class="dialog-footer">
           <p-button label="Cancel" [outlined]="true" type="button" (onClick)="showCreate = false" />
-          <p-button label="Create staff" type="submit" [loading]="saving()" [disabled]="!draft.firstName || !draft.lastName || !draft.joiningDate" />
+          <p-button label="Create staff" type="submit" [loading]="saving()" [disabled]="!draft.firstName || !draft.lastName || !draft.joiningDate || !draft.basicSalary || draft.basicSalary <= 0" />
         </div>
       </form>
     </p-dialog>
@@ -172,6 +172,7 @@ interface EmployeeListDto {
     .form-error { color: var(--danger); }
     strong { font-size: 12px; }
     small { color: var(--muted); font-size: 10px; }
+    .field-hint { display: block; color: var(--muted); font-size: 10px; font-weight: 400; margin-top: 2px; }
   `]
 })
 export class StaffListComponent implements OnInit, OnDestroy {
@@ -189,7 +190,7 @@ export class StaffListComponent implements OnInit, OnDestroy {
   photoSaving = signal(false);
   cam = viewChild<ElementRef<HTMLVideoElement>>('cam');
   private stream: MediaStream | null = null;
-  draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', photoUrl: '' };
+  draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', basicSalary: 0, photoUrl: '' };
   private page = 1;
   private pageSize = 25;
 
@@ -203,7 +204,7 @@ export class StaffListComponent implements OnInit, OnDestroy {
   }
 
   openCreate() {
-    this.draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: new Date().toISOString().slice(0, 10), photoUrl: '' };
+    this.draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: new Date().toISOString().slice(0, 10), basicSalary: 0, photoUrl: '' };
     this.error.set(null);
     this.showCreate = true;
   }
@@ -306,6 +307,11 @@ export class StaffListComponent implements OnInit, OnDestroy {
 
   create() {
     if (!this.draft.firstName || !this.draft.lastName || !this.draft.joiningDate) return;
+    const salary = Number(this.draft.basicSalary);
+    if (!salary || salary <= 0) {
+      this.error.set('Basic salary must be greater than zero.');
+      return;
+    }
     this.saving.set(true);
     this.error.set(null);
     this.api.createEmployee(this.ctx.schoolId, {
@@ -316,10 +322,11 @@ export class StaffListComponent implements OnInit, OnDestroy {
       departmentId: this.draft.departmentId || null,
       designationId: null,
       joiningDate: this.draft.joiningDate,
+      basicSalary: salary,
       photoUrl: this.draft.photoUrl || null
     }).subscribe({
       next: () => { this.saving.set(false); this.showCreate = false; this.load(); },
-      error: () => { this.saving.set(false); this.error.set('Could not create this staff record.'); }
+      error: (e) => { this.saving.set(false); this.error.set(e?.error?.error ?? 'Could not create this staff record.'); }
     });
   }
 
