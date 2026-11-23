@@ -79,6 +79,11 @@ interface EmployeeListDto {
           </select>
         </label>
         <label>Joining date *<input [(ngModel)]="draft.joiningDate" name="joiningDate" type="date" required /></label>
+        <label>Basic salary (₹) *
+          <input [(ngModel)]="draft.basicSalary" name="basicSalary" type="number" min="1" step="1" required
+            placeholder="e.g. 35000" />
+          <small class="field-hint">Monthly basic salary. Required for payroll.</small>
+        </label>
         <div class="photo-field">Photo
           <div class="photo-actions">
             <button type="button" (click)="startCamera()">Open camera</button>

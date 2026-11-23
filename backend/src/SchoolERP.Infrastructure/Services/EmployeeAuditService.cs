@@ -45,6 +45,9 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
     public async Task<EmployeeListDto> CreateEmployeeAsync(
         CreateEmployeeRequest request, Guid schoolId, Guid tenantId, string createdBy, CancellationToken ct = default)
     {
+        if (request.BasicSalary < 0)
+            throw new InvalidOperationException("Basic salary cannot be negative.");
+
         var count = await db.Employees.CountAsync(e => e.SchoolId == schoolId, ct);
         var code = $"EMP-{count + 1:D4}";
 
@@ -61,7 +64,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
             DepartmentId = request.DepartmentId,
             DesignationId = request.DesignationId,
             JoiningDate = request.JoiningDate,
-            BasicSalary = 35_000m,
+            BasicSalary = request.BasicSalary,
             CreatedBy = createdBy
         };
 

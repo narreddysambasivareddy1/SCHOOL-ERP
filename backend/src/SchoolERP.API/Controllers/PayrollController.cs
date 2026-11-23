@@ -47,6 +47,16 @@ public class PayrollController(AppDbContext db, IAuditService audit) : Controlle
         var staff = await db.Employees
             .Where(e => e.SchoolId == schoolId && e.TenantId == tenantId && e.Status == EmployeeStatus.Active)
             .ToListAsync(ct);
+
+        // Block the run if any active employee has no salary on record
+        var missingSalary = staff.Where(e => e.BasicSalary <= 0).Select(e => $"{e.FirstName} {e.LastName} ({e.EmployeeCode})").ToList();
+        if (missingSalary.Count > 0)
+            return BadRequest(new
+            {
+                error = $"{missingSalary.Count} active employee(s) have no basic salary set. Update their records before running payroll.",
+                employees = missingSalary
+            });
+
         var label = new DateOnly(req.Year, req.Month, 1).ToString("MMMM yyyy");
         var run = new PayrollRun
         {
@@ -56,7 +66,9 @@ public class PayrollController(AppDbContext db, IAuditService audit) : Controlle
         };
         foreach (var emp in staff)
         {
-            var calc = PayrollCalculator.Compute(emp.BasicSalary);
+            PayslipBreakdown calc;
+            try { calc = PayrollCalculator.Compute(emp.BasicSalary); }
+            catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
             run.Payslips.Add(new Payslip
             {
                 TenantId = tenantId, EmployeeId = emp.Id,
@@ -77,9 +89,24 @@ public class PayrollController(AppDbContext db, IAuditService audit) : Controlle
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
-        var run = await db.PayrollRuns.FirstOrDefaultAsync(r => r.Id == runId && r.SchoolId == schoolId && r.TenantId == tenantId, ct);
+        var run = await db.PayrollRuns
+            .Include(r => r.Payslips).ThenInclude(p => p.Employee)
+            .FirstOrDefaultAsync(r => r.Id == runId && r.SchoolId == schoolId && r.TenantId == tenantId, ct);
         if (run is null) return NotFound();
         if (run.Status == "Finalized") return Conflict(new { error = "Already finalized." });
+
+        // Refuse to finalize if any payslip has zero gross (salary was missing when run was created)
+        var zeroGross = run.Payslips
+            .Where(p => p.Gross <= 0)
+            .Select(p => p.Employee is null ? p.EmployeeId.ToString() : $"{p.Employee.FirstName} {p.Employee.LastName} ({p.Employee.EmployeeCode})")
+            .ToList();
+        if (zeroGross.Count > 0)
+            return BadRequest(new
+            {
+                error = $"{zeroGross.Count} payslip(s) have zero gross pay. Delete this draft run, fix the employee salary records, and create a new run.",
+                employees = zeroGross
+            });
+
         run.Status = "Finalized";
         run.FinalizedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);

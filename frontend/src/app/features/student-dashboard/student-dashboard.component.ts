@@ -124,6 +124,12 @@ export class StudentDashboardComponent implements OnInit {
       return;
     }
 
+    // Declare date helpers before any use
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 30);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+
     this.api.getMyStudent(this.ctx.schoolId).subscribe({
       next: me => {
         this.api.getStudentPayments(this.ctx.schoolId, me.id).subscribe({
@@ -141,9 +147,5 @@ export class StudentDashboardComponent implements OnInit {
       next: h => { this.homework.set(h); this.loadingHw.set(false); },
       error: () => this.loadingHw.set(false)
     });
-    const to = new Date();
-    const from = new Date();
-    from.setDate(to.getDate() - 30);
-    const iso = (d: Date) => d.toISOString().slice(0, 10);
   }
 }

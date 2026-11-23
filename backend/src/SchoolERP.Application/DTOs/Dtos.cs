@@ -32,7 +32,7 @@ public record EnrollmentDto(Guid Id, string AcademicYear, string ClassName, stri
 
 // Employees
 public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status, string? Email, string? Phone, DateOnly JoiningDate, string? PhotoUrl);
-public record CreateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, string? PhotoUrl = null);
+public record CreateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, decimal BasicSalary = 0m, string? PhotoUrl = null);
 public record SetPhotoRequest(string PhotoUrl);
 
 // Teacher Assignments

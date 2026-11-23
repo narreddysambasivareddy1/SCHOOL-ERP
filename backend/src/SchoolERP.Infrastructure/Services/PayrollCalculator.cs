@@ -1,13 +1,18 @@
 namespace SchoolERP.Infrastructure.Services;
 
 /// <summary>
-/// Illustrative India payroll math for demo schools. Confirm PF/ESI/TDS with the school's consultant before live payroll.
+/// Illustrative India payroll math for demo schools.
+/// Confirm PF/ESI/TDS rates with the school's statutory consultant before live payroll.
+/// Throws if basic salary is zero or negative — callers must supply a real salary.
 /// </summary>
 public static class PayrollCalculator
 {
     public static PayslipBreakdown Compute(decimal basic)
     {
-        if (basic <= 0) basic = 30_000m;
+        if (basic <= 0)
+            throw new InvalidOperationException(
+                "Basic salary must be greater than zero. Update the employee record before running payroll.");
+
         var hra = Round(basic * 0.40m);
         var allowance = Round(basic * 0.10m);
         var gross = basic + hra + allowance;
