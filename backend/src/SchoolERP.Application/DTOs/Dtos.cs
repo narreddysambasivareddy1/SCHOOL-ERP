@@ -38,7 +38,7 @@ public record EnrollmentDto(
     Guid AcademicYearId, Guid ClassId, Guid SectionId);
 
 // Employees
-public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status, string? Email, string? Phone, DateOnly JoiningDate, string? PhotoUrl, decimal BasicSalary, Guid? DepartmentId);
+public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status, string? Email, string? Phone, DateOnly JoiningDate, string? PhotoUrl, decimal BasicSalary, Guid? DepartmentId, Guid? DesignationId);
 public record CreateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, decimal BasicSalary, string? PhotoUrl = null);
 public record UpdateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, decimal BasicSalary);
 public record SetPhotoRequest(string PhotoUrl);

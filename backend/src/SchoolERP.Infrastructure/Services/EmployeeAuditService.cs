@@ -36,7 +36,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
                 e.Department != null ? e.Department.Name : null,
                 e.Designation != null ? e.Designation.Name : null,
-                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId))
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId, e.DesignationId))
             .ToListAsync(ct);
 
         return new PagedResult<EmployeeListDto>(items, total, page, pageSize);
@@ -52,7 +52,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
                 e.Department != null ? e.Department.Name : null,
                 e.Designation != null ? e.Designation.Name : null,
-                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId))
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId, e.DesignationId))
             .FirstOrDefaultAsync(ct);
     }
 
@@ -87,7 +87,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
 
         return new EmployeeListDto(employee.Id, employee.EmployeeCode,
             employee.FirstName, employee.LastName, null, null, employee.Status.ToString(),
-            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl, employee.BasicSalary, employee.DepartmentId);
+            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl, employee.BasicSalary, employee.DepartmentId, employee.DesignationId);
     }
 
     public async Task<EmployeeListDto> UpdateEmployeeAsync(

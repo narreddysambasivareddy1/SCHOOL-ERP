@@ -23,7 +23,7 @@ interface StudentOption { id: string; firstName: string; lastName: string; stude
       <div>
         <div class="eyebrow">FEES & PAYMENTS</div>
         <h1>Fee collection</h1>
-        <p>Outstanding is the class fee schedule minus successful receipts already stored for this student.</p>
+        <p>Outstanding is this academic year's class schedule minus successful receipts recorded for that same year.</p>
       </div>
     </div>
 
@@ -44,7 +44,7 @@ interface StudentOption { id: string; firstName: string; lastName: string; stude
           <option>Bank transfer</option>
         </select>
         <input pInputText [(ngModel)]="reference" name="reference" placeholder="Reference (optional)" />
-        <button class="btn-primary" type="submit" [disabled]="saving() || !studentId || amount <= 0">{{ saving() ? 'Recording…' : 'Record payment' }}</button>
+        <button class="btn-primary" type="submit" [disabled]="saving() || !studentId || amount <= 0 || !ctx.academicYearId">{{ saving() ? 'Recording…' : 'Record payment' }}</button>
       </form>
     } @else if (children().length) {
       <div class="toolbar">
@@ -154,7 +154,7 @@ export class FeesComponent implements OnInit {
     .filter(p => p.status === 'Successful')
     .reduce((sum, p) => sum + Number(p.amount || 0), 0));
 
-  constructor(private api: ApiService, private ctx: SchoolContextService, auth: AuthService) {
+  constructor(private api: ApiService, public ctx: SchoolContextService, auth: AuthService) {
     this.canCollect = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin') || auth.hasRole('Accountant');
     this.family = auth.hasRole('Parent');
     this.self = auth.hasRole('Student') && !this.canCollect;
@@ -248,12 +248,13 @@ export class FeesComponent implements OnInit {
   }
 
   record() {
-    if (!this.studentId || this.amount <= 0) return;
+    if (!this.studentId || this.amount <= 0 || !this.ctx.academicYearId) return;
     this.saving.set(true);
     this.notice.set(null);
     this.error.set(null);
     this.api.recordPayment(this.ctx.schoolId, {
       studentId: this.studentId,
+      academicYearId: this.ctx.academicYearId,
       amount: Number(this.amount),
       method: this.method,
       reference: this.reference || null

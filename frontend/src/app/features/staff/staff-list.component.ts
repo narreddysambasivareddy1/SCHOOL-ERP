@@ -14,7 +14,7 @@ import { ApiService } from '../../core/services/api.service';
 interface EmployeeListDto {
   id: string; employeeCode: string; firstName: string; lastName: string;
   department?: string; designation?: string; status: string;
-  email?: string; phone?: string; joiningDate?: string; photoUrl?: string; basicSalary?: number; departmentId?: string;
+  email?: string; phone?: string; joiningDate?: string; photoUrl?: string; basicSalary?: number; departmentId?: string; designationId?: string;
 }
 
 @Component({
@@ -163,6 +163,12 @@ interface EmployeeListDto {
             @for (dept of departments(); track dept.id) { <option [value]="dept.id">{{ dept.name }}</option> }
           </select>
         </label>
+        <label>Designation
+          <select [(ngModel)]="edit.designationId" name="editDesignation">
+            <option value="">None</option>
+            @for (row of designations(); track row.id) { <option [value]="row.id">{{ row.name }}</option> }
+          </select>
+        </label>
         <label>Joining date *<input [(ngModel)]="edit.joiningDate" name="editJoin" type="date" required /></label>
         <label>Basic salary *
           <input [(ngModel)]="edit.basicSalary" name="editSalary" type="number" min="1" step="1" required />
@@ -214,12 +220,13 @@ export class StaffListComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   selected = signal<EmployeeListDto | null>(null);
   departments = signal<{ id: string; name: string }[]>([]);
+  designations = signal<{ id: string; name: string }[]>([]);
   cameraOn = signal(false);
   photoSaving = signal(false);
   cam = viewChild<ElementRef<HTMLVideoElement>>('cam');
   private stream: MediaStream | null = null;
   draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', basicSalary: 0, photoUrl: '' };
-  edit = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', basicSalary: 0 };
+  edit = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', designationId: '', joiningDate: '', basicSalary: 0 };
   private page = 1;
   private pageSize = 25;
 
@@ -229,7 +236,10 @@ export class StaffListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.load();
-    if (this.ctx.schoolId) this.api.getDepartments(this.ctx.schoolId).subscribe(rows => this.departments.set(rows));
+    if (this.ctx.schoolId) {
+      this.api.getDepartments(this.ctx.schoolId).subscribe(rows => this.departments.set(rows));
+      this.api.getDesignations(this.ctx.schoolId).subscribe(rows => this.designations.set(rows ?? []));
+    }
   }
 
   openCreate() {
@@ -247,6 +257,7 @@ export class StaffListComponent implements OnInit, OnDestroy {
       email: person.email || '',
       phone: person.phone || '',
       departmentId: person.departmentId || '',
+      designationId: person.designationId || '',
       joiningDate: (person.joiningDate || '').slice(0, 10),
       basicSalary: Number(person.basicSalary || 0)
     };
@@ -270,7 +281,7 @@ export class StaffListComponent implements OnInit, OnDestroy {
       email: this.edit.email || null,
       phone: this.edit.phone || null,
       departmentId: this.edit.departmentId || null,
-      designationId: null,
+      designationId: this.edit.designationId || null,
       joiningDate: this.edit.joiningDate,
       basicSalary: salary
     }).subscribe({

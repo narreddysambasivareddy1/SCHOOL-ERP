@@ -44,8 +44,8 @@ import { MoneyPipe } from '../../shared/money.pipe';
           <span>Net {{ r.netTotal | money }}</span>
         </div>
         <button type="button" class="ghost" (click)="open(r.id)">View payslips</button>
-        @if (slipRunId === r.id && slips().length) {
-          <button type="button" class="ghost" (click)="printPayslips(r.periodLabel)">Print payslips</button>
+        @if (r.status === 'Finalized') {
+          <button type="button" class="ghost" (click)="printPayslips(r)" [disabled]="printing()">Print stored payslips</button>
         }
       </article>
     }
@@ -92,6 +92,7 @@ export class PayrollComponent implements OnInit {
   error = signal<string | null>(null);
   notice = signal<string | null>(null);
   busy = signal(false);
+  printing = signal(false);
   year = new Date().getFullYear();
   month = new Date().getMonth() + 1;
   slipRunId = '';
@@ -133,13 +134,28 @@ export class PayrollComponent implements OnInit {
     });
   }
 
-  printPayslips(label: string) {
-    const rows = this.slips().map((p: any) =>
-      `<tr><td>${p.employee} (${p.code})</td><td>${p.basic}</td><td>${p.gross}</td><td>${p.pf}</td><td>${p.esi}</td><td>${p.professionalTax}</td><td>${p.tds}</td><td>${p.net}</td></tr>`).join('');
-    const popup = window.open('', '_blank', 'noopener');
-    if (!popup) { this.error.set('Allow pop-ups to print payslips.'); return; }
-    popup.document.write(`<h1>Payslips · ${label}</h1><table border="1" cellpadding="6"><tr><th>Employee</th><th>Basic</th><th>Gross</th><th>PF</th><th>ESI</th><th>PT</th><th>TDS</th><th>Net</th></tr>${rows}</table>`);
-    popup.document.close();
-    popup.print();
+  printPayslips(run: { id: string; periodLabel: string; status: string }) {
+    if (run.status !== 'Finalized') {
+      this.error.set('Print payslips after the run is finalized.');
+      return;
+    }
+    this.printing.set(true);
+    this.error.set(null);
+    this.api.getPayslips(this.ctx.schoolId, run.id).subscribe({
+      next: rows => {
+        this.printing.set(false);
+        this.slipRunId = run.id;
+        this.slips.set(rows ?? []);
+        if (!rows?.length) { this.error.set('This finalized run has no stored payslips.'); return; }
+        const body = rows.map((p: any) =>
+          `<tr><td>${p.employee} (${p.code})</td><td>${p.basic}</td><td>${p.gross}</td><td>${p.pf}</td><td>${p.esi}</td><td>${p.professionalTax}</td><td>${p.tds}</td><td>${p.net}</td></tr>`).join('');
+        const popup = window.open('', '_blank', 'noopener');
+        if (!popup) { this.error.set('Allow pop-ups to print payslips.'); return; }
+        popup.document.write(`<h1>Payslips · ${run.periodLabel}</h1><p>Printed from stored payroll records.</p><table border="1" cellpadding="6"><tr><th>Employee</th><th>Basic</th><th>Gross</th><th>PF</th><th>ESI</th><th>PT</th><th>TDS</th><th>Net</th></tr>${body}</table>`);
+        popup.document.close();
+        popup.print();
+      },
+      error: () => { this.printing.set(false); this.error.set('Could not load stored payslips.'); }
+    });
   }
 }

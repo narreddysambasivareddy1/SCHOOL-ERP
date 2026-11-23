@@ -241,4 +241,17 @@ public class SchoolsController(AppDbContext db) : ControllerBase
             .ToListAsync(ct);
         return Ok(depts);
     }
+
+    [HttpGet("{schoolId}/designations")]
+    [Authorize(Roles = RoleNames.Hr)]
+    public async Task<IActionResult> GetDesignations(Guid schoolId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var rows = await db.Designations
+            .Where(d => d.SchoolId == schoolId && d.TenantId == tenantId)
+            .OrderBy(d => d.Name)
+            .Select(d => new { d.Id, d.Name })
+            .ToListAsync(ct);
+        return Ok(rows);
+    }
 }

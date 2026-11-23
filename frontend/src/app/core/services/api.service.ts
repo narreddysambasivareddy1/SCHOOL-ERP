@@ -20,6 +20,7 @@ export class ApiService {
   getClasses(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/classes`); }
   getSubjects(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/subjects`); }
   getDepartments(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/departments`); }
+  getDesignations(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/designations`); }
 
   // Students
   getStudents(schoolId: string, academicYearId: string, page = 1, pageSize = 25, search = ''): Observable<PagedResult<any>> {
@@ -48,9 +49,13 @@ export class ApiService {
   getFeeCategories(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/fees/categories`); }
   saveFeeCategory(schoolId: string, name: string) { return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/categories`, { name }); }
   saveAcademicYear(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/academic-years`, body); }
+  updateAcademicYear(schoolId: string, id: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}/academic-years/${id}`, body); }
   saveClass(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/classes`, body); }
+  updateClass(schoolId: string, id: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}/classes/${id}`, body); }
   saveSection(schoolId: string, classId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/classes/${classId}/sections`, body); }
+  updateSection(schoolId: string, id: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}/sections/${id}`, body); }
   saveSubject(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/subjects`, body); }
+  updateSubject(schoolId: string, id: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}/subjects/${id}`, body); }
   requestAttendanceCorrection(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/attendance/corrections`, body); }
   getAttendanceCorrections(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/attendance/corrections`, { params: { status: 'Pending' } }); }
   approveAttendanceCorrection(schoolId: string, id: string) { return this.http.post<any>(`${this.base}/schools/${schoolId}/attendance/corrections/${id}/approve`, {}); }

@@ -175,6 +175,20 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var query = db.AttendanceCorrections.Where(c => c.SchoolId == schoolId && c.TenantId == tenantId);
+        if (!StudentAccess.IsLeadership(User) && !StudentAccess.InRole(User, "AttendanceOfficer"))
+        {
+            var userId = StudentAccess.UserId(User);
+            if (userId is null) return Unauthorized();
+            query = query.Where(c => db.AttendanceSessions.Any(s =>
+                s.Id == c.SessionId && s.SchoolId == schoolId && s.TenantId == tenantId
+                && db.TeacherAssignments.Any(a =>
+                    a.TenantId == tenantId && a.IsActive && a.CanTakeAttendance
+                    && a.AcademicYearId == s.AcademicYearId && a.ClassId == s.ClassId && a.SectionId == s.SectionId
+                    && a.Employee!.UserId == userId && a.Employee.SchoolId == schoolId && a.Employee.TenantId == tenantId
+                    && a.Class!.SchoolId == schoolId && a.Class.TenantId == tenantId
+                    && a.Section!.TenantId == tenantId && a.Section.ClassId == a.ClassId
+                    && a.AcademicYear!.SchoolId == schoolId && a.AcademicYear.TenantId == tenantId)));
+        }
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(c => c.Status == status);
         var items = await query.OrderByDescending(c => c.CreatedAt)
             .Select(c => new { c.Id, c.StudentId, c.SessionId, c.OriginalCode, c.RequestedCode, c.Reason, c.Status, c.RequestedBy, c.DecidedBy })

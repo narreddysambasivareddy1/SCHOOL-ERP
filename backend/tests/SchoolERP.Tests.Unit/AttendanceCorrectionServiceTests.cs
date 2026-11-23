@@ -49,6 +49,31 @@ public class AttendanceCorrectionServiceTests
     }
 
     [Fact]
+    public async Task Reject_LeavesTheOriginalCodeUnchanged()
+    {
+        var db = NewDb();
+        var tenantId = Guid.NewGuid();
+        var schoolId = Guid.NewGuid();
+        var studentId = Guid.NewGuid();
+        var session = new AttendanceSession
+        {
+            TenantId = tenantId, SchoolId = schoolId, AcademicYearId = Guid.NewGuid(),
+            ClassId = Guid.NewGuid(), SectionId = Guid.NewGuid(), Date = new DateOnly(2026, 11, 2), MarkedBy = "teacher@school.edu"
+        };
+        db.Tenants.Add(new Tenant { Id = tenantId, Name = "T", Slug = "t2" });
+        db.Schools.Add(new School { Id = schoolId, TenantId = tenantId, Name = "S" });
+        db.Students.Add(new Student { Id = studentId, TenantId = tenantId, SchoolId = schoolId, StudentCode = "STU-2", FirstName = "A", LastName = "B", DateOfBirth = new DateOnly(2012, 1, 1) });
+        db.AttendanceSessions.Add(session);
+        db.StudentAttendances.Add(new StudentAttendance { TenantId = tenantId, SessionId = session.Id, StudentId = studentId, Code = AttendanceCode.Late });
+        await db.SaveChangesAsync();
+        var svc = new AttendanceCorrectionService(db);
+        var saved = await svc.RequestAsync(schoolId, tenantId, session.Id, studentId, "Present", "Register was marked late by mistake", "teacher@school.edu", CancellationToken.None);
+        var decided = await svc.DecideAsync(schoolId, tenantId, saved.Id, false, "officer@school.edu", CancellationToken.None);
+        decided.Status.Should().Be("Rejected");
+        (await db.StudentAttendances.SingleAsync()).Code.Should().Be(AttendanceCode.Late);
+    }
+
+    [Fact]
     public async Task Request_RejectsShortReason()
     {
         var svc = new AttendanceCorrectionService(NewDb());

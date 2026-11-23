@@ -1466,6 +1466,9 @@ namespace SchoolERP.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AcademicYearId")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 

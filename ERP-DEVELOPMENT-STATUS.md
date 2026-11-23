@@ -1,29 +1,31 @@
 # ERP Development Status
 
-Last updated: 23 November 2026, after the six essential modules were implemented on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
+Last updated: 23 November 2026, after the six-module gap pass on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
 
-## Essential modules implemented
+## Gap pass
 
-| Module | What now works | Still open |
+| Module | Verified | Change |
 |---|---|---|
-| Students | Profile edit saves name, date of birth, status, class, section, roll number, and primary contact through `PUT /api/schools/{schoolId}/students/{id}`. Another tenant is not found. A class from another school is rejected. | Guardian relationship is stored as Guardian when a new contact is created |
-| Staff | Profile edit saves name, email, phone, department, joining date, and basic salary. Salary must be greater than zero. HR and leadership only. A department from another school is rejected | Designation is not edited on the form |
-| Fees | Accountant can add a category and save a class fee amount. The schedule response now returns scheduled total, successful payments, and outstanding as scheduled minus paid | Payments are not limited to the academic year. A student with payments from another year can reduce this year's outstanding |
-| Attendance | A marked row can request a correction with a reason. The original code stays until a school admin or attendance officer approves. Rejection leaves the original row unchanged. Requests and decisions are audited | The correction queue is not filtered to the teacher's own sections |
-| Classes | School admin can create an academic year, class, section, and subject. Existing teacher allocation is unchanged | The screen creates new rows. The PUT endpoints for editing an existing year, class, section, or subject are not wired to a picker |
-| Payroll | The screen chooses year and month and creates a draft from saved salaries. Payslips are the stored rows. Print opens those amounts | Statutory percentages are still the existing calculator. They were not changed |
+| Fees | Schedule outstanding now uses successful payments whose `AcademicYearId` matches the requested year. A payment for another year is rejected when the student is not enrolled in it, and a stored other-year receipt does not change this year's paid total. | `Payments.AcademicYearId` added. Recording a receipt requires the year and a current enrollment. |
+| Attendance | Original code stays until approval. A teacher cannot request a correction for another section or approve one. A student cannot approve. Cross-tenant approval is rejected. Approval writes `AttendanceCorrectionApproved`. | Pending queue for teachers is limited to assigned sections. Attendance mark accepts the text codes the screen already sends. |
+| Classes | Existing create and teacher-allocation APIs kept. PUT year, class, section, and subject are now called from Edit actions. A parent cannot rename a class. | Frontend edit actions only. |
+| Staff | Salary at or below zero is rejected. A teacher cannot list designations. An admin can save a designation that belongs to the school. | Designation dropdown on staff edit. `GET /api/schools/{schoolId}/designations`. |
+| Payroll | Print loads `GET .../payslips` for that run and only after the run status is Finalized. Calculator rates were not changed. | Print button no longer uses whatever slips happen to be on screen. |
+| Students | Existing update still keeps the photo when `photoUrl` is null, rejects another tenant, and checks class, section, and year ownership. No further change in this pass. | None |
 
-## Commands run for this implementation
+## Commands run for this gap pass
 
 | Command | Result |
 |---|---|
-| `dotnet test tests/SchoolERP.Tests.Unit/SchoolERP.Tests.Unit.csproj` | Passed 58, failed 0 |
-| `dotnet test tests/SchoolERP.Tests.Integration/SchoolERP.Tests.Integration.csproj` | Passed 12, failed 0 |
+| `dotnet test tests/SchoolERP.Tests.Unit/SchoolERP.Tests.Unit.csproj` | Passed 59, failed 0 |
+| `dotnet test tests/SchoolERP.Tests.Integration/SchoolERP.Tests.Integration.csproj` | Passed 15, failed 0 |
 | `dotnet build src/SchoolERP.API/SchoolERP.API.csproj -c Release` | Succeeded, 0 warnings, 0 errors |
 | `npm run build` in `frontend` | Succeeded. Existing shell CSS budget warning remains: 17.50 kB against 16.00 kB |
-| `npm test` | Not run. The frontend test target is Karma and there is no existing component test for these screens |
+| `npm test -- --watch=false --browsers=ChromeHeadless` with Edge as `CHROME_BIN` | 6 passed, 0 failed. Chrome itself is not installed |
 
-Migration `20261123020128_AddAttendanceCorrections` creates only `AttendanceCorrections`. It is applied when the API seeder runs. It was not applied to the running school database in this pass.
+Live database `schoolerp`: `__EFMigrationsHistory` includes `20261123020128_AddAttendanceCorrections` and `20261123023303_AddPaymentAcademicYear`. `AttendanceCorrections` has 0 rows. All 10 existing successful payments had a paid date inside academic year 2026-27 and an enrollment in that year, so their `AcademicYearId` was set to that year. No rows were deleted.
+
+The API and frontend containers were not recreated, so the portal is still serving the previous image.
 
 ---
 
