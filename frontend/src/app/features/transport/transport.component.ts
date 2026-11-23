@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
@@ -7,6 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { environment } from '../../../environments/environment';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Route { id: string; name: string; stops: { name: string; stopOrder: number; pickupTime: string }[]; }
 interface ActiveTrip { id: string; route: string; vehicle: string; driver: string; startedAt: string; }
@@ -14,7 +16,7 @@ interface ActiveTrip { id: string; route: string; vehicle: string; driver: strin
 @Component({
   selector: 'app-transport',
   standalone: true,
-  imports: [CommonModule, TableModule, CardModule, TagModule],
+  imports: [CommonModule, FormsModule, TableModule, CardModule, TagModule],
   template: `
     <div class="page-header">
       <div>
@@ -55,6 +57,21 @@ interface ActiveTrip { id: string; route: string; vehicle: string; driver: strin
       </p-card>
     </div>
 
+    <p-card header="Vehicles" styleClass="mt-3">
+      @if (vehicleError()) { <p class="text-muted">{{ vehicleError() }}</p> }
+      @if (vehicles().length === 0) { <p class="text-muted">No vehicles saved for this school.</p> }
+      @for (v of vehicles(); track v.id) {
+        <div class="route-item"><strong>{{ v.registrationNumber }}</strong> <span class="text-muted">· capacity {{ v.capacity }}</span></div>
+      }
+      @if (canManage) {
+        <form class="vehicle-form" (ngSubmit)="saveVehicle()">
+          <input [(ngModel)]="vehicle.registrationNumber" name="registrationNumber" placeholder="Registration number" required />
+          <input type="number" [(ngModel)]="vehicle.capacity" name="capacity" placeholder="Capacity" min="1" required />
+          <button type="submit" [disabled]="savingVehicle()">Save vehicle</button>
+        </form>
+      }
+    </p-card>
+
     <p-card header="Sandbox map (Google Maps placeholder)" styleClass="mt-3">
       <p class="text-muted">{{ map()?.message }}</p>
       @for (r of map()?.routes || []; track r.id) {
@@ -72,6 +89,9 @@ interface ActiveTrip { id: string; route: string; vehicle: string; driver: strin
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .route-item { padding: 8px 0; border-bottom: 1px solid var(--line); }
     .route-item:last-child { border-bottom: none; }
+    .vehicle-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .vehicle-form input, .vehicle-form button { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); }
+    .vehicle-form button { background: var(--primary); color: white; border: 0; cursor: pointer; font-weight: 700; }
     @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
   `]
 })
@@ -79,8 +99,13 @@ export class TransportComponent implements OnInit {
   routes = signal<Route[]>([]);
   trips = signal<ActiveTrip[]>([]);
   map = signal<any>(null);
+  vehicles = signal<any[]>([]);
+  vehicleError = signal<string | null>(null);
+  savingVehicle = signal(false);
+  canManage = false;
+  vehicle = { registrationNumber: '', capacity: 40 };
 
-  constructor(private http: HttpClient, private api: ApiService, private ctx: SchoolContextService) {}
+  constructor(private http: HttpClient, private api: ApiService, private ctx: SchoolContextService, private auth: AuthService) {}
 
   ngOnInit() {
     if (!this.ctx.schoolId) return;
@@ -89,5 +114,24 @@ export class TransportComponent implements OnInit {
     this.http.get<ActiveTrip[]>(`${environment.apiUrl}/schools/${this.ctx.schoolId}/transport/trips/active`)
       .subscribe({ next: t => this.trips.set(t), error: () => {} });
     this.api.getTransportMap(this.ctx.schoolId).subscribe({ next: m => this.map.set(m), error: () => {} });
+    this.canManage = this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('TransportManager');
+    this.loadVehicles();
+  }
+
+  loadVehicles() {
+    this.api.getVehicles(this.ctx.schoolId).subscribe({
+      next: rows => this.vehicles.set(rows ?? []),
+      error: () => this.vehicleError.set('Could not load vehicles.')
+    });
+  }
+
+  saveVehicle() {
+    if (!this.vehicle.registrationNumber || this.vehicle.capacity <= 0) return;
+    this.savingVehicle.set(true);
+    this.vehicleError.set(null);
+    this.api.saveVehicle(this.ctx.schoolId, this.vehicle).subscribe({
+      next: () => { this.savingVehicle.set(false); this.vehicle = { registrationNumber: '', capacity: 40 }; this.loadVehicles(); },
+      error: (err) => { this.savingVehicle.set(false); this.vehicleError.set(err?.error?.error || 'Could not save the vehicle.'); }
+    });
   }
 }

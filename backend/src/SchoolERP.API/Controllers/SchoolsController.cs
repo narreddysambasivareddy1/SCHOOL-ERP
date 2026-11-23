@@ -2,15 +2,36 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Infrastructure.Data;
 
 namespace SchoolERP.API.Controllers;
+
+public record UpdateSchoolRequest(string Name, string? PrimaryColor, string TimeZone, string DefaultLanguage, string Locale, string Currency);
 
 [ApiController]
 [Route("api/schools")]
 [Authorize]
 public class SchoolsController(AppDbContext db) : ControllerBase
 {
+    [HttpPut("{schoolId}")]
+    [Authorize(Roles = RoleNames.Leadership)]
+    public async Task<IActionResult> Update(Guid schoolId, [FromBody] UpdateSchoolRequest req, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(req.Name)) return BadRequest(new { error = "School name is required." });
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var school = await db.Schools.FirstOrDefaultAsync(s => s.Id == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct);
+        if (school is null) return NotFound();
+        school.Name = req.Name.Trim();
+        school.PrimaryColor = string.IsNullOrWhiteSpace(req.PrimaryColor) ? school.PrimaryColor : req.PrimaryColor.Trim();
+        school.TimeZone = string.IsNullOrWhiteSpace(req.TimeZone) ? school.TimeZone : req.TimeZone.Trim();
+        school.DefaultLanguage = string.IsNullOrWhiteSpace(req.DefaultLanguage) ? school.DefaultLanguage : req.DefaultLanguage.Trim();
+        school.Locale = string.IsNullOrWhiteSpace(req.Locale) ? school.Locale : req.Locale.Trim();
+        school.Currency = string.IsNullOrWhiteSpace(req.Currency) ? school.Currency : req.Currency.Trim();
+        await db.SaveChangesAsync(ct);
+        return Ok(new { school.Id, school.Name, school.PrimaryColor, school.TimeZone, school.DefaultLanguage, school.Locale, school.Currency });
+    }
+
     [HttpGet("{schoolId}")]
     public async Task<IActionResult> Get(Guid schoolId, CancellationToken ct)
     {

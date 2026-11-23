@@ -221,6 +221,16 @@ public class Designation : TenantEntity
     public string Name { get; set; } = string.Empty;
 }
 
+public class CalendarEvent : TenantEntity
+{
+    public Guid SchoolId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public DateOnly EventDate { get; set; }
+    public string Kind { get; set; } = "Event";
+    public bool RequiresConsent { get; set; }
+}
+
 public class AuditEvent : TenantEntity
 {
     public string Actor { get; set; } = string.Empty;

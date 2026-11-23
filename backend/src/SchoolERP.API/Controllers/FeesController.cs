@@ -10,6 +10,7 @@ using SchoolERP.Infrastructure.Data;
 namespace SchoolERP.API.Controllers;
 
 public record RecordPaymentRequest(Guid StudentId, decimal Amount, string Method, string? Reference);
+public record UpsertFeeStructureRequest(Guid AcademicYearId, Guid ClassId, Guid FeeCategoryId, decimal Amount);
 public record OnlineOrderRequest(Guid StudentId, decimal Amount);
 
 [ApiController]
@@ -56,6 +57,53 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
             .Select(f => new { category = f.FeeCategory!.Name, f.Amount })
             .ToListAsync(ct);
         return Ok(new { items, total = items.Sum(i => i.Amount) });
+    }
+
+    [HttpGet("structures")]
+    [Authorize(Roles = RoleNames.FeesStaff)]
+    public async Task<IActionResult> Structures(Guid schoolId, [FromQuery] Guid academicYearId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var yearOk = await db.AcademicYears.AnyAsync(y => y.Id == academicYearId && y.SchoolId == schoolId && y.TenantId == tenantId, ct);
+        if (!yearOk) return NotFound();
+        var items = await (
+            from f in db.FeeStructures
+            join c in db.Classes on f.ClassId equals c.Id
+            where f.SchoolId == schoolId && f.TenantId == tenantId && f.AcademicYearId == academicYearId
+                && c.SchoolId == schoolId && c.TenantId == tenantId
+                && f.FeeCategory!.SchoolId == schoolId && f.FeeCategory.TenantId == tenantId
+            select new { f.Id, f.ClassId, className = c.Name, f.FeeCategoryId, category = f.FeeCategory!.Name, f.Amount })
+            .ToListAsync(ct);
+        return Ok(items);
+    }
+
+    [HttpPost("structures")]
+    [Authorize(Roles = RoleNames.FeesStaff)]
+    public async Task<IActionResult> SaveStructure(Guid schoolId, [FromBody] UpsertFeeStructureRequest req, CancellationToken ct)
+    {
+        if (req.Amount <= 0) return BadRequest(new { error = "Fee amount must be greater than zero." });
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var yearOk = await db.AcademicYears.AnyAsync(y => y.Id == req.AcademicYearId && y.SchoolId == schoolId && y.TenantId == tenantId, ct);
+        var classOk = await db.Classes.AnyAsync(c => c.Id == req.ClassId && c.SchoolId == schoolId && c.TenantId == tenantId, ct);
+        var categoryOk = await db.FeeCategories.AnyAsync(c => c.Id == req.FeeCategoryId && c.SchoolId == schoolId && c.TenantId == tenantId, ct);
+        if (!yearOk || !classOk || !categoryOk)
+            return BadRequest(new { error = "Year, class, or fee category does not belong to this school." });
+
+        var row = await db.FeeStructures.FirstOrDefaultAsync(f =>
+            f.TenantId == tenantId && f.SchoolId == schoolId && f.AcademicYearId == req.AcademicYearId
+            && f.ClassId == req.ClassId && f.FeeCategoryId == req.FeeCategoryId, ct);
+        if (row is null)
+        {
+            row = new FeeStructure
+            {
+                TenantId = tenantId, SchoolId = schoolId, AcademicYearId = req.AcademicYearId,
+                ClassId = req.ClassId, FeeCategoryId = req.FeeCategoryId, Amount = req.Amount
+            };
+            db.FeeStructures.Add(row);
+        }
+        else row.Amount = req.Amount;
+        await db.SaveChangesAsync(ct);
+        return Ok(new { row.Id, row.Amount });
     }
 
     [HttpPost("record")]

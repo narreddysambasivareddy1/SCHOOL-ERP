@@ -70,6 +70,10 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
     public async Task PublicEnquiryResponse_DoesNotContainTheOutboxCode()
     {
         var client = factory.CreateClient();
+        // Use a unique IP per test run so the rate limiter (3 req/IP/15 min) is not
+        // triggered by accumulated challenges from previous test runs on the shared DB.
+        var testIp = $"10.{Random.Shared.Next(1, 254)}.{Random.Shared.Next(1, 254)}.{Random.Shared.Next(1, 254)}";
+        client.DefaultRequestHeaders.Add("X-Forwarded-For", testIp);
         var phone = "9" + Random.Shared.Next(100000000, 999999999);
         var response = await client.PostAsJsonAsync("/api/public/bright-future/enquiries/otp", new
         {
@@ -87,12 +91,18 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
 
         await using var scope = factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        // RecipientRef is stored as "{ref}|{address}" — phone appears in both parts
         var stored = await db.NotificationMessages
             .Where(n => n.TemplateKey == "enquiry.otp" && n.RecipientRef.Contains(phone))
             .Select(n => n.Body)
-            .FirstAsync();
-        var code = System.Text.RegularExpressions.Regex.Match(stored, @"\b\d{6}\b").Value;
+            .FirstOrDefaultAsync();
+        stored.Should().NotBeNull("an OTP notification message must be stored in the outbox");
+        var match = System.Text.RegularExpressions.Regex.Match(stored!, @"\b\d{6}\b");
+        match.Success.Should().BeTrue("the stored notification body must contain a 6-digit OTP code");
+        var code = match.Value;
+        // The HTTP response must NOT reveal the OTP code
         body.Should().NotContain(code);
+        // The stored outbox body MUST contain the OTP code
         stored.Should().Contain(code);
     }
 

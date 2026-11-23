@@ -18,7 +18,7 @@ try
 
     builder.Host.UseSerilog((ctx, lc) => lc
         .ReadFrom.Configuration(ctx.Configuration)
-        .WriteTo.Console());
+        .WriteTo.Console(), preserveStaticLogger: true);
 
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddControllers();

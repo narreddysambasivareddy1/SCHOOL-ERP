@@ -2,6 +2,16 @@
 .env
 *.env.local
 
+# Database backups — never commit
+backups/
+*.sql
+*.dump
+*.bak
+
+# Compiled publish output — never commit
+backend/.publish-test/
+**/publish/
+
 # .NET
 **/bin/
 **/obj/

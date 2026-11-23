@@ -128,7 +128,11 @@ export class StudentDashboardComponent implements OnInit {
     const to = new Date();
     const from = new Date();
     from.setDate(to.getDate() - 30);
-    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    const iso = (d: Date) => {
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${d.getFullYear()}-${month}-${day}`;
+    };
 
     this.api.getMyStudent(this.ctx.schoolId).subscribe({
       next: me => {

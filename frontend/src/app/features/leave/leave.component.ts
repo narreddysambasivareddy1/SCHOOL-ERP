@@ -133,7 +133,7 @@ export class LeaveComponent implements OnInit {
     this.notice.set(null);
     this.error.set(null);
     this.api.applyLeave(this.ctx.schoolId, {
-      employeeId: this.canApprove ? this.employeeId : '00000000-0000-0000-0000-000000000000',
+      employeeId: this.canApprove ? this.employeeId : null,
       leaveTypeId: this.leaveTypeId,
       fromDate: this.fromDate,
       toDate: this.toDate,
@@ -143,7 +143,7 @@ export class LeaveComponent implements OnInit {
         this.saving.set(false);
         this.notice.set('Leave request submitted.');
         this.reason = '';
-        this.ngOnInit();
+        this.reload();
       },
       error: (e) => {
         this.saving.set(false);
@@ -156,6 +156,14 @@ export class LeaveComponent implements OnInit {
     const call = approve
       ? this.api.approveLeave(this.ctx.schoolId, id)
       : this.api.rejectLeave(this.ctx.schoolId, id);
-    call.subscribe({ next: () => this.ngOnInit(), error: (e) => this.error.set(e?.error?.error ?? 'Action failed.') });
+    call.subscribe({ next: () => this.reload(), error: (e) => this.error.set(e?.error?.error ?? 'Action failed.') });
+  }
+
+  private reload() {
+    if (!this.ctx.schoolId) return;
+    this.api.getLeaveRequests(this.ctx.schoolId).subscribe({
+      next: r => this.requests.set(r),
+      error: () => {}
+    });
   }
 }

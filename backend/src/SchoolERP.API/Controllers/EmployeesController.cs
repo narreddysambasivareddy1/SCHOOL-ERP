@@ -39,6 +39,22 @@ public class EmployeesController(IEmployeeService employeeService, IAuditService
         return CreatedAtAction(nameof(GetAll), new { schoolId }, employee);
     }
 
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = RoleNames.Hr)]
+    public async Task<IActionResult> Update(Guid schoolId, Guid id, [FromBody] UpdateEmployeeRequest request, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
+        try
+        {
+            var employee = await employeeService.UpdateEmployeeAsync(id, schoolId, request, actor, ct);
+            await auditService.LogAsync(tenantId, actor, "EmployeeUpdated", "Employee", employee.Id.ToString(),
+                newValues: new { employee.EmployeeCode, employee.BasicSalary });
+            return Ok(employee);
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
     [HttpPost("{id:guid}/status")]
     [Authorize(Roles = RoleNames.Hr)]
     public async Task<IActionResult> Status(Guid schoolId, Guid id, [FromBody] StatusToggleRequest body, CancellationToken ct)

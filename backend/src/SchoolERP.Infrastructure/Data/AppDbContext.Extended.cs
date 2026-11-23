@@ -38,4 +38,5 @@ public partial class AppDbContext
     public DbSet<WeeklyLessonPlan> WeeklyLessonPlans => Set<WeeklyLessonPlan>();
     public DbSet<WeeklyLessonPlanDay> WeeklyLessonPlanDays => Set<WeeklyLessonPlanDay>();
     public DbSet<ClassDiary> ClassDiaries => Set<ClassDiary>();
+    public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
 }

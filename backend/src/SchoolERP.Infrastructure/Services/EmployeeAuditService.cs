@@ -36,17 +36,31 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
                 e.Department != null ? e.Department.Name : null,
                 e.Designation != null ? e.Designation.Name : null,
-                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl))
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary))
             .ToListAsync(ct);
 
         return new PagedResult<EmployeeListDto>(items, total, page, pageSize);
     }
 
+    public async Task<EmployeeListDto?> GetEmployeeAsync(Guid id, Guid schoolId, CancellationToken ct = default)
+    {
+        return await db.Employees
+            .Where(e => e.Id == id && e.SchoolId == schoolId)
+            .Include(e => e.Department)
+            .Include(e => e.Designation)
+            .Select(e => new EmployeeListDto(
+                e.Id, e.EmployeeCode, e.FirstName, e.LastName,
+                e.Department != null ? e.Department.Name : null,
+                e.Designation != null ? e.Designation.Name : null,
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary))
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<EmployeeListDto> CreateEmployeeAsync(
         CreateEmployeeRequest request, Guid schoolId, Guid tenantId, string createdBy, CancellationToken ct = default)
     {
-        if (request.BasicSalary < 0)
-            throw new InvalidOperationException("Basic salary cannot be negative.");
+        if (request.BasicSalary <= 0)
+            throw new InvalidOperationException("Basic salary must be greater than zero.");
 
         var count = await db.Employees.CountAsync(e => e.SchoolId == schoolId, ct);
         var code = $"EMP-{count + 1:D4}";
@@ -73,7 +87,27 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
 
         return new EmployeeListDto(employee.Id, employee.EmployeeCode,
             employee.FirstName, employee.LastName, null, null, employee.Status.ToString(),
-            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl);
+            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl, employee.BasicSalary);
+    }
+
+    public async Task<EmployeeListDto> UpdateEmployeeAsync(
+        Guid id, Guid schoolId, UpdateEmployeeRequest request, string updatedBy, CancellationToken ct = default)
+    {
+        if (request.BasicSalary <= 0)
+            throw new InvalidOperationException("Basic salary must be greater than zero.");
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id && e.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Employee not found.");
+        employee.FirstName = request.FirstName;
+        employee.LastName = request.LastName;
+        employee.Email = request.Email;
+        employee.Phone = request.Phone;
+        employee.DepartmentId = request.DepartmentId;
+        employee.DesignationId = request.DesignationId;
+        employee.JoiningDate = request.JoiningDate;
+        employee.BasicSalary = request.BasicSalary;
+        employee.UpdatedBy = updatedBy;
+        await db.SaveChangesAsync(ct);
+        return (await GetEmployeeAsync(id, schoolId, ct))!;
     }
 
     public async Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default)

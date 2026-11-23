@@ -38,6 +38,17 @@ export class ApiService {
     return this.http.get<PagedResult<any>>(`${this.base}/schools/${schoolId}/employees`, { params });
   }
   createEmployee(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/employees`, body); }
+  updateEmployee(schoolId: string, id: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}/employees/${id}`, body); }
+  updateStudent(schoolId: string, id: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}/students/${id}`, body); }
+  updateSchool(schoolId: string, body: any) { return this.http.put<any>(`${this.base}/schools/${schoolId}`, body); }
+  getFeeStructures(schoolId: string, academicYearId: string) {
+    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/fees/structures`, { params: { academicYearId } });
+  }
+  saveFeeStructure(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/structures`, body); }
+  getVehicles(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/transport/vehicles`); }
+  getCalendar(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/calendar`); }
+  saveCalendarEvent(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/calendar`, body); }
+  saveVehicle(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/transport/vehicles`, body); }
 
   // Attendance
   getAttendance(schoolId: string, classId: string, sectionId: string, date: string) {

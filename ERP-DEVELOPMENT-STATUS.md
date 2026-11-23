@@ -1,237 +1,54 @@
 # ERP Development Status
 
-Last updated: Audit complete — awaiting implementation approval.
+Last updated: 23 November 2026, after code changes on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
 
----
+This file records what was verified by running commands. It does not treat the product as deployment-ready.
 
-## Legend
-- ✅ Complete and verified
-- 🔶 Partial / has gaps
-- ❌ Missing / broken
-- 🔒 Security issue
-- 🚧 In progress
+## Commands actually run
 
----
+| Command | Result |
+|---|---|
+| `dotnet test tests/SchoolERP.Tests.Unit/SchoolERP.Tests.Unit.csproj --nologo --verbosity minimal` | Passed: 52, Failed: 0 |
+| `dotnet test tests/SchoolERP.Tests.Integration/SchoolERP.Tests.Integration.csproj --nologo --verbosity minimal` | First run after the Serilog change was still the old binary and failed 1 of 11 with `The logger is already frozen`. After `preserveStaticLogger: true`, a fresh run passed: 11, Failed: 0 |
+| `dotnet build src/SchoolERP.API/SchoolERP.API.csproj -c Release` | Succeeded, 0 warnings, 0 errors |
+| `npm run build` in `frontend` | Succeeded. Angular budget warning: `shell.component.ts` styles are 17.50 kB against a 16.00 kB budget. Exit code was 0 |
+| `dotnet ef migrations add AddCalendarEvents` | Created `20261123013716_AddCalendarEvents`. The design-time host abort message is expected |
+| `docker compose config --quiet` | Exit code 0 |
+| `docker exec school-erp-api-1` upload count | `/app/private-uploads` is missing. `/app/uploads` exists and contains 0 files. `docker inspect` showed no mounts |
+| `docker compose ps` | `school-erp-api-1`, `db`, `frontend`, `nginx`, and `school-website` were already up. The API image in that container dates from 19 November and does not include this working tree |
+| `docker compose build api` | Exit code 0. Image `school-erp-api:latest` built |
+| `docker compose up -d api` | Recreated `school-erp-api-1`, created volume `school-erp_uploads_data`, and mounted it at `/app/private-uploads` |
+| `Invoke-WebRequest http://localhost:8301/health` | HTTP 200, `{"status":"Healthy","checks":[{"name":"postgres","status":"Healthy"}]}` |
+| Calendar table | `CalendarEvents` is present in the `schoolerp` database after the new API started |
+| Upload persistence | Wrote `persist-check.txt` into `/app/private-uploads`, ran `docker compose up -d --force-recreate api`, and read the same contents back. The marker file was then removed |
 
-## PHASE 1 — Security & Stability
+`dotnet test backend/SchoolERP.sln` is not a valid suite run. The solution has no build entries, so it restores nothing and runs no tests.
 
-| # | Issue | Severity | Status | Files |
-|---|---|---|---|---|
-| S1 | Student dashboard hoisting bug — `iso(from)` used before `const from` | CRITICAL | ❌ | `student-dashboard.component.ts:87` |
-| S2 | No Docker volume for `private-uploads` — files lost on restart | HIGH | ❌ | `docker-compose.yml` |
-| S3 | `.env` committed to repo — JWT secret and DB password exposed | CRITICAL | 🔒 | `.env`, `.gitignore` |
-| S4 | `backups/schoolerp-2026-11-19.sql` committed — full DB dump in repo | CRITICAL | 🔒 | `backups/` |
-| S5 | `schoolerp-backup.dump` committed to repo root | CRITICAL | 🔒 | `schoolerp-backup.dump` |
-| S6 | `backend/.publish-test/` committed — compiled binaries + appsettings | HIGH | 🔒 | `backend/.publish-test/` |
-| S7 | Staff creation form has no salary field — all employees get BasicSalary=0 | HIGH | ❌ | `staff-list.component.ts`, `EmployeesController.cs` |
-| S8 | No refresh token endpoint — users silently logged out after 60 min | MEDIUM | ❌ | `AuthController.cs` |
-| S9 | `leave.component.ts` calls `this.ngOnInit()` in success callback | LOW | ❌ | `leave.component.ts` |
-| S10 | Regression tests for security fixes | — | ❌ | `tests/` |
+## Phase 1
 
----
+| Item | Verified state |
+|---|---|
+| Student dashboard date | The old “used before declaration” bug is not present. `iso` now uses the local calendar date (`getFullYear` / `getMonth` / `getDate`) instead of `toISOString()`, which was the previous UTC day in IST. The production bundle compiled. The screen was not clicked in a browser |
+| Basic salary | Create and update reject `BasicSalary <= 0` in `EmployeeAuditService`. The staff form already blocks a non-positive salary. Unit tests `CreateEmployee_RejectsZeroSalary` and `CreateEmployee_RejectsNegativeSalary` passed |
+| Payroll | `PayrollCalculator.Compute` throws when basic is not positive. Creating a run refuses an active employee without a positive salary. Finalizing refuses a payslip whose gross is not positive. There is no silent salary default in the calculator. Statutory percentages are still fixed illustrative values |
+| Uploads | The API container now mounts `school-erp_uploads_data` at `/app/private-uploads`. A marker file survived `docker compose up -d --force-recreate api` and was then removed. `scripts/Migrate-PrivateUploads.ps1` was not needed: the previous container's `/app/uploads` held 0 files. The script still copies with `cp -an` and does not delete the source |
 
-## MODULE STATUS
+## Security that is still open
 
-### 1. Admin Dashboard (`/dashboard`)
-- **Backend**: ✅ `GET /api/schools/{id}/dashboard` — stats + 7-day trend
-- **Frontend**: ✅ Wired to 3 APIs, renders stats and chart
-- **UI/UX**: 🔶 No loading skeleton
-- **Permissions**: ✅ OfficeDashboard roles only
-- **Gaps**: ops-today widget returns 403 for Teacher role (requires Substitutions role)
-- **Tests**: ❌
+- `backups/schoolerp-2026-11-19.sql`, `schoolerp-backup.dump`, `backend/.publish-test/`, and `backend/src/SchoolERP.API/appsettings.Development.json` are tracked. `.env` is not in the index and has no commits in history (`git rev-list --all -- .env` was empty).
+- Those tracked files contain database and JWT material. They were not deleted and were not removed from Git. History rewrite and credential rotation need approval. Secret values are not copied into this document.
+- Login now counts failures in memory and stops accepting that tenant/email after 8 failures inside 15 minutes. The counter is lost on restart and is not shared across API instances. There is still no refresh token.
+- OTP codes are no longer returned on the public HTTP response. A sandbox notification can still contain the code. `X-Forwarded-For` is still trusted for the OTP rate limit.
 
-### 2. Teacher Dashboard (`/teacher/dashboard`)
-- **Backend**: 🔶 No dedicated endpoint — reuses assignments + homework + diary
-- **Frontend**: 🔶 No today's timetable widget, no quick attendance shortcut
-- **UI/UX**: 🔶
-- **Tests**: ❌
+## Modules touched in this pass
 
-### 3. Student Dashboard (`/student/dashboard`)
-- **Backend**: ✅ Uses /students/me, /fees, /attendance, /homework
-- **Frontend**: ❌ CRITICAL BUG — ReferenceError on load (hoisting)
-- **UI/UX**: 🔶
-- **Tests**: ❌
+- `PUT /api/schools/{schoolId}/students/{id}` and `PUT /api/schools/{schoolId}/employees/{id}` call the existing update services. The student and staff screens do not yet have edit forms, so those workflows are not complete in the UI.
+- Fee structure list and save: `GET/POST /api/schools/{schoolId}/fees/structures`. The fees page still does not calculate an outstanding balance or render a structure editor.
+- Vehicle list and create: `GET/POST /api/schools/{schoolId}/transport/vehicles`, with a form on the transport page for SchoolAdmin, PlatformSuperAdmin, and TransportManager. Drivers, route editing, and student allocation are still absent.
+- School profile save: `PUT /api/schools/{schoolId}` and a form on Settings.
+- Calendar: `CalendarEvents` table migration, `GET/POST /api/schools/{schoolId}/calendar`, and a list plus publish form. The migration runs when the API seeder starts. It has not been applied to the database behind the currently running container.
+- Audit page sends entity type and actor to the existing audit API.
 
-### 4. Parent Dashboard (`/parent/dashboard`)
-- **Backend**: ✅ `GET /api/parents/children` exists in ParentsController.cs
-- **Frontend**: ✅ Calls correct endpoint, child switcher works
-- **UI/UX**: 🔶 Homework not filtered to child's section
-- **Tests**: ❌
+## Not done
 
-### 5. Calendar (`/calendar`)
-- **Backend**: ❌ No CalendarEvent entity, no migration, no controller
-- **Frontend**: ❌ Complete placeholder — year grid only
-- **UI/UX**: ❌
-- **Tests**: ❌
-
-### 6. Enquiry Desk (`/enquiries`)
-- **Backend**: ✅ Full CRUD + OTP flow + SignalR
-- **Frontend**: ✅ Real-time updates, full workflow
-- **UI/UX**: 🔶 List capped at 200, no pagination
-- **Tests**: ❌
-
-### 7. Admissions (`/admissions`)
-- **Backend**: ❌ No dedicated controller
-- **Frontend**: ❌ Navigation hub only, duplicates student list
-- **UI/UX**: ❌
-- **Tests**: ❌
-
-### 8. Registrations (`/registrations`)
-- **Backend**: ✅ Full workflow including document upload + CSV import
-- **Frontend**: ✅ 3 tabs, camera, document upload, CSV import, admission form print
-- **UI/UX**: ✅
-- **Deployment risk**: ❌ No Docker volume for private-uploads
-- **Tests**: ❌
-
-### 9. Student Management (`/students`)
-- **Backend**: 🔶 No PUT edit endpoint
-- **Frontend**: 🔶 No edit form. Base64 photos in DB
-- **UI/UX**: 🔶
-- **Gaps**: Cannot edit student after creation
-- **Tests**: ❌
-
-### 10. Staff & HR (`/staff`)
-- **Backend**: 🔶 No PUT edit, no salary endpoint
-- **Frontend**: 🔶 Uses raw HttpClient in load(). No salary field in create form
-- **UI/UX**: 🔶
-- **Gaps**: All employees created with BasicSalary=0
-- **Tests**: ❌
-
-### 11. Classes, Sections & Subjects (`/academics`)
-- **Backend**: 🔶 Read-only. No POST/PUT/DELETE for classes/sections/subjects
-- **Frontend**: 🔶 Teacher assignment works, no structure management
-- **Tests**: ❌
-
-### 12. Teacher Allocation (`/academics`)
-- **Backend**: ✅ GET list, POST create, DELETE deactivate
-- **Frontend**: ✅ Works
-- **Gaps**: No conflict detection
-- **Tests**: ❌
-
-### 13. Attendance (`/attendance`)
-- **Backend**: 🔶 No correction workflow (returns 409 if already marked)
-- **Frontend**: 🔶 Loads 100 students, filters client-side
-- **Tests**: ❌
-
-### 14. Timetable (`/timetable`)
-- **Backend**: ✅ Full CRUD
-- **Frontend**: ✅ Works. Auto-saves without confirm
-- **Tests**: ❌
-
-### 15. Substitutions (`/substitutions`)
-- **Backend**: ✅ Full workflow, triggered on leave approval
-- **Frontend**: ✅ Works
-- **Tests**: ❌
-
-### 16. Lesson Plans (`/lesson-plans`)
-- **Backend**: ✅ GET + POST
-- **Frontend**: ✅ Works. No Monday validation on weekStart
-- **Tests**: ❌
-
-### 17. Class Diary (`/diary`)
-- **Backend**: ✅ Digital + scan + compliance + remind
-- **Frontend**: ✅ Rich text + scan upload
-- **Deployment risk**: ❌ No Docker volume for private-uploads
-- **Tests**: ❌
-
-### 18. Homework (`/homework`)
-- **Backend**: 🔶 No feedback/grading endpoint
-- **Frontend**: 🔶 No submission list for teachers, no feedback
-- **Tests**: ❌
-
-### 19. Examinations & Results (`/examinations`)
-- **Backend**: 🔶 No exam schedule, no grade calculation
-- **Frontend**: 🔶 visibleExams() is a method not a signal
-- **Tests**: ❌
-
-### 20. Fee Management (`/fees`)
-- **Backend**: 🔶 No fee structure management, no outstanding balance
-- **Frontend**: 🔶 No outstanding balance, no receipt PDF
-- **Tests**: ❌
-
-### 21. Payroll (`/payroll`)
-- **Backend**: 🔶 Hardcoded statutory rates, no salary input
-- **Frontend**: 🔶 No month selector, no payslip PDF
-- **Critical**: All payslips show wrong amounts (BasicSalary=0 fallback)
-- **Tests**: ❌
-
-### 22. Leave Management (`/leave`)
-- **Backend**: ✅ Full workflow + substitution trigger
-- **Frontend**: 🔶 Sends Guid.Empty for non-admin, calls ngOnInit() in callback
-- **Gaps**: No leave balance tracking
-- **Tests**: ❌
-
-### 23. Transport (`/transport`)
-- **Backend**: 🔶 Routes + active trips only. No vehicle/driver/student management
-- **Frontend**: ❌ Read-only, no management UI
-- **Tests**: ❌
-
-### 24. Announcements (`/announcements`)
-- **Backend**: ✅ Audience-filtered GET + POST
-- **Frontend**: 🔶 No pagination, no mark-as-read
-- **Tests**: ❌
-
-### 25. Messages & Communications (`/communications`)
-- **Backend**: ✅ Outbox + announcement composer
-- **Frontend**: ✅ Works
-- **Gaps**: No direct messaging
-- **Tests**: ❌
-
-### 26. Analytics & Reports (`/analytics`)
-- **Backend**: ❌ No dedicated analytics endpoints
-- **Frontend**: ❌ Reuses dashboard data, decorative report cards
-- **Tests**: ❌
-
-### 27. Audit Logs (`/audit`)
-- **Backend**: ✅ Full filters + pagination
-- **Frontend**: ❌ No filter controls rendered
-- **Tests**: ❌
-
-### 28. School Settings (`/settings`)
-- **Backend**: ❌ No PUT endpoint
-- **Frontend**: ❌ Read-only display
-- **Tests**: ❌
-
-### 29. Integrations (`/integrations`)
-- **Backend**: ✅ GET + PUT + POST test
-- **Frontend**: ✅ Works. Raw JSON textarea is unfriendly
-- **Tests**: ❌
-
----
-
-## IMPLEMENTATION ORDER (approved items only)
-
-### Batch 1 — Critical fixes (no approval needed, bugs)
-- [ ] S1: Fix student dashboard hoisting bug
-- [ ] S2: Add Docker volume for private-uploads
-- [ ] S7: Add salary field to staff creation
-
-### Batch 2 — Security (awaiting approval)
-- [ ] S3/S4/S5/S6: Remove committed secrets from git history
-- [ ] S8: Add refresh token
-- [ ] S9: Fix leave ngOnInit anti-pattern
-- [ ] S10: Add regression tests
-
-### Batch 3 — Core missing functionality (awaiting approval)
-- [ ] PUT /employees/{id} + edit form
-- [ ] PUT /students/{id} + edit form
-- [ ] Fee structure management
-- [ ] Outstanding balance calculation
-- [ ] PUT /schools/{id} + settings edit
-- [ ] Payroll month selector + payslip PDF
-- [ ] Transport vehicle/driver/student management
-- [ ] Leave balance tracking
-
-### Batch 4 — New modules (awaiting approval)
-- [ ] Calendar events
-- [ ] Analytics dashboards
-- [ ] Attendance correction workflow
-- [ ] Homework feedback
-- [ ] Exam schedule + report card
-
-### Batch 5 — UI/UX polish (after functionality complete)
-- [ ] Global toast service
-- [ ] Loading skeletons
-- [ ] Audit filter controls
-- [ ] Announcements pagination + mark-as-read
-- [ ] Receipt PDF
+Attendance correction, homework grading and attachments, payslip PDF, statutory settings that a school can change, leave balances, student transport allocation, analytics beyond the office dashboard, academic structure create/update, and a full UI pass for spacing and typography. Browser end-to-end checks for each role were not run. The API image was rebuilt and recreated. The frontend container was not rebuilt, so the portal image does not yet contain the calendar, settings, audit, or vehicle screen changes.

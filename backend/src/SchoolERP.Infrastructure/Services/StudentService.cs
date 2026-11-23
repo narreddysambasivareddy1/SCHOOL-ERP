@@ -113,6 +113,20 @@ public class StudentService(AppDbContext db) : IStudentService
         return (await GetStudentAsync(student.Id, schoolId, ct))!;
     }
 
+    public async Task<StudentDetailDto> UpdateStudentAsync(Guid id, Guid schoolId, UpdateStudentRequest request, string updatedBy, CancellationToken ct = default)
+    {
+        var student = await db.Students.FirstOrDefaultAsync(s => s.Id == id && s.SchoolId == schoolId, ct)
+            ?? throw new InvalidOperationException("Student not found.");
+        student.FirstName = request.FirstName;
+        student.LastName = request.LastName;
+        student.DateOfBirth = request.DateOfBirth;
+        if (request.PhotoUrl is not null)
+            student.PhotoUrl = CleanPhoto(request.PhotoUrl);
+        student.UpdatedBy = updatedBy;
+        await db.SaveChangesAsync(ct);
+        return (await GetStudentAsync(id, schoolId, ct))!;
+    }
+
     public async Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default)
     {
         if (!Enum.TryParse<StudentStatus>(status, true, out var next) || next is StudentStatus.Enquiry)

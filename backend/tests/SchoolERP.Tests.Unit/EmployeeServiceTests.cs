@@ -63,11 +63,8 @@ public class EmployeeServiceTests
         saved.BasicSalary.Should().Be(52_000m);
     }
 
-    // ── Zero salary is allowed at creation (employee may not be on payroll) ─
-    // ── but payroll controller blocks runs when salary is zero ──────────────
-
     [Fact]
-    public async Task CreateEmployee_AllowsZeroSalary()
+    public async Task CreateEmployee_RejectsZeroSalary()
     {
         var (db, tenantId, schoolId) = await SeedSchoolAsync();
         var svc = new EmployeeService(db);
@@ -75,11 +72,10 @@ public class EmployeeServiceTests
             "Temp", "Staff", null, null, null, null,
             new DateOnly(2024, 6, 1), BasicSalary: 0m);
 
-        // Zero salary is permitted at the service layer; the payroll controller
-        // is responsible for blocking runs that include zero-salary employees.
-        var result = await svc.CreateEmployeeAsync(req, schoolId, tenantId, "admin@school.edu");
-        var saved = await db.Employees.FirstAsync(e => e.Id == result.Id);
-        saved.BasicSalary.Should().Be(0m);
+        var act = async () => await svc.CreateEmployeeAsync(req, schoolId, tenantId, "admin@school.edu");
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*greater than zero*");
+        (await db.Employees.CountAsync()).Should().Be(0);
     }
 
     // ── Negative salary is rejected ─────────────────────────────────────────
@@ -95,7 +91,7 @@ public class EmployeeServiceTests
 
         var act = async () => await svc.CreateEmployeeAsync(req, schoolId, tenantId, "admin@school.edu");
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*negative*");
+            .WithMessage("*greater than zero*");
     }
 
     // ── Empty list when no employees ────────────────────────────────────────

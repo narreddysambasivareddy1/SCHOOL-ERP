@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
@@ -8,7 +9,7 @@ import { ThemeService } from '../../core/services/theme.service';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="page-header">
       <div class="eyebrow">ADMINISTRATION</div>
@@ -17,6 +18,7 @@ import { ThemeService } from '../../core/services/theme.service';
     </div>
 
     @if (error()) { <div class="alert">{{ error() }}</div> }
+    @if (saved()) { <div class="ok">School profile saved.</div> }
     @if (loading()) { <p class="text-muted">Loading…</p> }
     @else if (school()) {
       <div class="grid">
@@ -46,6 +48,16 @@ import { ThemeService } from '../../core/services/theme.service';
         <button type="button" class="reset" (click)="theme.resetToSchool(school().primaryColor)">Use school colour</button>
       </div>
       <p class="text-muted">Email, SMS, WhatsApp, Google and payment keys live under Integrations. Dummy values are already seeded; swap them when the school provides live credentials.</p>
+      <form class="theme-panel" (ngSubmit)="save()">
+        <h2>School profile</h2>
+        <label>Name <input [(ngModel)]="draft.name" name="name" required /></label>
+        <label>Locale <input [(ngModel)]="draft.locale" name="locale" /></label>
+        <label>Currency <input [(ngModel)]="draft.currency" name="currency" /></label>
+        <label>Time zone <input [(ngModel)]="draft.timeZone" name="timeZone" /></label>
+        <label>Language <input [(ngModel)]="draft.defaultLanguage" name="defaultLanguage" /></label>
+        <label>School colour <input [(ngModel)]="draft.primaryColor" name="primaryColor" /></label>
+        <button type="submit" [disabled]="saving()">Save profile</button>
+      </form>
       <p><a routerLink="/integrations">Open integrations</a></p>
     }
   `,
@@ -67,12 +79,19 @@ import { ThemeService } from '../../core/services/theme.service';
     .custom { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 13px; font-weight: 650; color: var(--ink); }
     .custom input { width: 48px; height: 36px; border: 0; background: transparent; cursor: pointer; }
     .reset { margin-top: 12px; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--primary-soft); color: var(--navy); cursor: pointer; font-weight: 700; }
+    form label { text-transform: none; font-size: 13px; font-weight: 650; }
+    form input { display: block; width: 100%; margin: 4px 0 10px; font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 8px; }
+    form button { min-height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; }
+    .ok { background: var(--primary-soft); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
   `]
 })
 export class SettingsComponent implements OnInit {
   school = signal<any>(null);
   loading = signal(true);
+  saving = signal(false);
+  saved = signal(false);
   error = signal<string | null>(null);
+  draft = { name: '', locale: '', currency: '', timeZone: '', defaultLanguage: '', primaryColor: '' };
 
   constructor(private api: ApiService, public ctx: SchoolContextService, public theme: ThemeService) {}
 
@@ -83,8 +102,26 @@ export class SettingsComponent implements OnInit {
   ngOnInit() {
     if (!this.ctx.schoolId) { this.loading.set(false); return; }
     this.api.getSchool(this.ctx.schoolId).subscribe({
-      next: s => { this.school.set(s); this.loading.set(false); },
+      next: s => { this.school.set(s); this.fill(s); this.loading.set(false); },
       error: () => { this.error.set('Could not load school profile.'); this.loading.set(false); }
+    });
+  }
+
+  fill(s: any) {
+    this.draft = {
+      name: s.name ?? '', locale: s.locale ?? '', currency: s.currency ?? '',
+      timeZone: s.timeZone ?? '', defaultLanguage: s.defaultLanguage ?? '', primaryColor: s.primaryColor ?? ''
+    };
+  }
+
+  save() {
+    if (!this.draft.name) return;
+    this.saving.set(true);
+    this.saved.set(false);
+    this.error.set(null);
+    this.api.updateSchool(this.ctx.schoolId, this.draft).subscribe({
+      next: s => { this.school.set({ ...this.school(), ...s }); this.fill(this.school()); this.saving.set(false); this.saved.set(true); },
+      error: (err) => { this.saving.set(false); this.error.set(err?.error?.error || 'Could not save the school profile.'); }
     });
   }
 }

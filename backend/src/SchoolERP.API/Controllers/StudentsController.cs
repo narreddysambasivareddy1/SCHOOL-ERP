@@ -48,6 +48,22 @@ public class StudentsController(IStudentService studentService, IAuditService au
         return student is null ? NotFound() : Ok(student);
     }
 
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = RoleNames.AdmissionsWrite)]
+    public async Task<IActionResult> Update(Guid schoolId, Guid id, [FromBody] UpdateStudentRequest request, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
+        try
+        {
+            var student = await studentService.UpdateStudentAsync(id, schoolId, request, actor, ct);
+            await auditService.LogAsync(tenantId, actor, "StudentUpdated", "Student", student.Id.ToString(),
+                newValues: new { student.FirstName, student.LastName });
+            return Ok(student);
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
     [HttpPost]
     [Authorize(Roles = RoleNames.AdmissionsWrite)]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] CreateStudentRequest request, CancellationToken ct)
