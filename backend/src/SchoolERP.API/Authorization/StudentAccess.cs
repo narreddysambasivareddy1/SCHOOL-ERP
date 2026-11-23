@@ -25,11 +25,38 @@ public static class StudentAccess
     public static bool IsFeesStaff(ClaimsPrincipal user) =>
         IsLeadership(user) || InRole(user, "Accountant");
 
+    public static bool CanViewOfficeDashboard(ClaimsPrincipal user) =>
+        IsLeadership(user) || InRole(user, "Accountant") || InRole(user, "HRManager")
+        || InRole(user, "AdmissionOfficer") || InRole(user, "TransportManager") || InRole(user, "FrontOffice");
+
     public static bool IsAttendanceStaff(ClaimsPrincipal user) =>
         IsLeadership(user) || InRole(user, "Teacher") || InRole(user, "AttendanceOfficer");
 
     public static bool IsResultsStaff(ClaimsPrincipal user) =>
         IsLeadership(user) || InRole(user, "Teacher");
+
+    public static async Task<bool> CanReadFees(AppDbContext db, ClaimsPrincipal user, Guid schoolId, Guid tenantId, Guid studentId, CancellationToken ct)
+    {
+        var linked = await db.Students.AnyAsync(s =>
+            s.Id == studentId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct);
+        if (!linked) return false;
+        if (IsFeesStaff(user)) return true;
+
+        var userId = UserId(user);
+        if (userId is null) return false;
+
+        if (InRole(user, "Student"))
+            return await db.Students.AnyAsync(s =>
+                s.Id == studentId && s.UserId == userId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct);
+
+        if (InRole(user, "Parent"))
+            return await db.StudentGuardians.AnyAsync(sg =>
+                sg.TenantId == tenantId && sg.StudentId == studentId
+                && sg.Student!.SchoolId == schoolId && sg.Student.TenantId == tenantId && !sg.Student.IsDeleted
+                && sg.Guardian!.UserId == userId && sg.Guardian.TenantId == tenantId && !sg.Guardian.IsDeleted, ct);
+
+        return false;
+    }
 
     public static Task<bool> CanReadStudent(AppDbContext db, ClaimsPrincipal user, Guid schoolId, Guid tenantId, Guid studentId, CancellationToken ct) =>
         CanReadStudent(db, user, schoolId, tenantId, studentId, null, ct);

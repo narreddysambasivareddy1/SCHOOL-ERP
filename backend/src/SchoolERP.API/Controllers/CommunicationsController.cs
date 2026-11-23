@@ -20,23 +20,29 @@ public class CommunicationsController(AppDbContext db, INotificationService noti
     [HttpGet("announcements")]
     public async Task<IActionResult> Announcements(Guid schoolId, CancellationToken ct)
     {
+        if (!CanReadAnnouncements(User)) return Forbid();
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var items = await db.SchoolAnnouncements
             .Where(a => a.SchoolId == schoolId && a.TenantId == tenantId)
             .OrderByDescending(a => a.PublishedAt)
             .Select(a => new { a.Id, a.Title, a.Body, a.Audience, a.Channels, a.PublishedAt, a.PublishedBy })
             .ToListAsync(ct);
+        if (!SeesEveryAnnouncement(User))
+            items = items.Where(a => AnnouncementVisible(User, a.Audience)).ToList();
         return Ok(items);
     }
 
     [HttpGet("outbox")]
-    [Authorize(Roles = RoleNames.Teaching)]
+    [Authorize(Roles = RoleNames.Communications)]
     public async Task<IActionResult> Outbox(Guid schoolId, [FromQuery] int take = 50, CancellationToken ct = default)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         take = Math.Clamp(take, 1, 200);
-        var items = await db.NotificationMessages
-            .Where(n => n.SchoolId == schoolId && n.TenantId == tenantId)
+        var messages = db.NotificationMessages
+            .Where(n => n.SchoolId == schoolId && n.TenantId == tenantId);
+        if (!StudentAccess.IsLeadership(User))
+            messages = messages.Where(n => n.TemplateKey != "enquiry.otp");
+        var items = await messages
             .OrderByDescending(n => n.CreatedAt)
             .Take(take)
             .Select(n => new
@@ -49,7 +55,7 @@ public class CommunicationsController(AppDbContext db, INotificationService noti
     }
 
     [HttpPost("announcements")]
-    [Authorize(Roles = RoleNames.Teaching)]
+    [Authorize(Roles = RoleNames.Communications)]
     public async Task<IActionResult> Send(Guid schoolId, [FromBody] SendAnnouncementRequest req, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(req.Title) || string.IsNullOrWhiteSpace(req.Body))
@@ -77,6 +83,25 @@ public class CommunicationsController(AppDbContext db, INotificationService noti
             newValues: new { announcement.Audience, dispatched });
 
         return Ok(new { announcement.Id, recipients = recipients.Count, dispatched, sandbox = true });
+    }
+
+    private static bool CanReadAnnouncements(ClaimsPrincipal user) =>
+        SeesEveryAnnouncement(user) || StudentAccess.InRole(user, "Parent") || StudentAccess.InRole(user, "Student");
+
+    private static bool SeesEveryAnnouncement(ClaimsPrincipal user) =>
+        StudentAccess.IsLeadership(user) || StudentAccess.InRole(user, "HRManager")
+        || StudentAccess.InRole(user, "Teacher") || StudentAccess.InRole(user, "AttendanceOfficer");
+
+    private static bool AnnouncementVisible(ClaimsPrincipal user, string? audience)
+    {
+        var key = (audience ?? "").Trim().ToLowerInvariant();
+        var staffOnly = key.Contains("staff") || key.Contains("teacher");
+        if (staffOnly) return false;
+        if (StudentAccess.InRole(user, "Parent"))
+            return key.Contains("parent") || key.Contains("student") || key == "all";
+        if (StudentAccess.InRole(user, "Student"))
+            return key.Contains("student") || key == "all";
+        return false;
     }
 
     private static List<NotificationChannel> ParseChannels(IEnumerable<string> raw)

@@ -68,8 +68,18 @@ public class StudentService(AppDbContext db) : IStudentService
     public async Task<StudentDetailDto> CreateStudentAsync(
         CreateStudentRequest request, Guid schoolId, Guid tenantId, string createdBy, CancellationToken ct = default)
     {
-        var school = await db.Schools.FirstAsync(s => s.Id == schoolId, ct);
-        var count = await db.Students.CountAsync(s => s.SchoolId == schoolId, ct);
+        if (!await db.Schools.AnyAsync(s => s.Id == schoolId && s.TenantId == tenantId && !s.IsDeleted, ct))
+            throw new InvalidOperationException("School was not found in this tenant.");
+        var yearOk = await db.AcademicYears.AnyAsync(y =>
+            y.Id == request.AcademicYearId && y.SchoolId == schoolId && y.TenantId == tenantId, ct);
+        var classOk = await db.Classes.AnyAsync(c =>
+            c.Id == request.ClassId && c.SchoolId == schoolId && c.TenantId == tenantId, ct);
+        var sectionOk = await db.Sections.AnyAsync(s =>
+            s.Id == request.SectionId && s.ClassId == request.ClassId && s.TenantId == tenantId
+            && s.Class!.SchoolId == schoolId && s.Class.TenantId == tenantId, ct);
+        if (!yearOk || !classOk || !sectionOk)
+            throw new InvalidOperationException("Class, section, or academic year does not belong to this school.");
+        var count = await db.Students.CountAsync(s => s.SchoolId == schoolId && s.TenantId == tenantId, ct);
         var code = $"STU-{DateTime.UtcNow.Year}-{count + 1:D4}";
 
         var student = new Student

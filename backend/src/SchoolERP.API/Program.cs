@@ -46,7 +46,7 @@ try
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-                RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                RoleClaimType = "role",
                 NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub
             };
             opts.Events = new JwtBearerEvents
@@ -99,14 +99,7 @@ try
     }
 
     app.UseSerilogRequestLogging();
-    var uploadRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
-    Directory.CreateDirectory(uploadRoot);
     app.UseStaticFiles();
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadRoot),
-        RequestPath = "/uploads"
-    });
     app.UseCors("Frontend");
     app.UseAuthentication();
     app.UseAuthorization();

@@ -21,7 +21,7 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
     public async Task<IActionResult> GetStudentPayments(Guid schoolId, Guid studentId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
-        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+        if (!await StudentAccess.CanReadFees(db, User, schoolId, tenantId, studentId, ct))
             return Forbid();
 
         var payments = await db.Payments
@@ -39,7 +39,7 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
     public async Task<IActionResult> Schedule(Guid schoolId, Guid studentId, [FromQuery] Guid academicYearId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
-        if (!await StudentAccess.CanReadStudent(db, User, schoolId, tenantId, studentId, ct))
+        if (!await StudentAccess.CanReadFees(db, User, schoolId, tenantId, studentId, ct))
             return Forbid();
 
         var classId = await db.StudentEnrollments

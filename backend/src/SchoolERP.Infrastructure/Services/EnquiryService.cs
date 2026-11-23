@@ -56,8 +56,7 @@ public class EnquiryService(AppDbContext db, INotificationService notifications,
             [new NotificationRecipient(phone, null, phone, request.ParentName)],
             "enquiry.otp"), ct);
 
-        var sandbox = string.Equals(config["Integrations:Mode"], "Sandbox", StringComparison.OrdinalIgnoreCase);
-        return new EnquiryOtpRequestResult(challenge.Id, challenge.ExpiresAt, sandbox ? otp : null);
+        return new EnquiryOtpRequestResult(challenge.Id, challenge.ExpiresAt, null);
     }
 
     public async Task<EnquiryListItem> VerifyOtpAsync(EnquiryVerifyRequest request, string ipAddress, CancellationToken ct = default)

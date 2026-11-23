@@ -83,7 +83,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
             new("tid", tenantId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+        claims.AddRange(roles.Select(r => new Claim("role", r)));
 
         var token = new JwtSecurityToken(
             issuer: config["Jwt:Issuer"],

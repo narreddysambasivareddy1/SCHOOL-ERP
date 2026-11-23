@@ -45,6 +45,37 @@ public class StudentServiceTests
     }
 
     [Fact]
+    public async Task CreateStudent_RejectsClassFromAnotherSchoolOrTenant()
+    {
+        var db = CreateDb();
+        var tenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        var schoolId = Guid.NewGuid();
+        var otherSchoolId = Guid.NewGuid();
+        db.Tenants.AddRange(
+            new Tenant { Id = tenantId, Name = "T1", Slug = "t1" },
+            new Tenant { Id = otherTenantId, Name = "T2", Slug = "t2" });
+        db.Schools.AddRange(
+            new School { Id = schoolId, TenantId = tenantId, Name = "School1" },
+            new School { Id = otherSchoolId, TenantId = otherTenantId, Name = "Other" });
+        var ay = new AcademicYear { Id = Guid.NewGuid(), TenantId = otherTenantId, SchoolId = otherSchoolId, Name = "2026-27", StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2027, 3, 31) };
+        var cls = new Class { Id = Guid.NewGuid(), TenantId = otherTenantId, SchoolId = otherSchoolId, Name = "Grade 1" };
+        var sec = new Section { Id = Guid.NewGuid(), TenantId = otherTenantId, ClassId = cls.Id, Name = "A" };
+        db.AcademicYears.Add(ay);
+        db.Classes.Add(cls);
+        db.Sections.Add(sec);
+        await db.SaveChangesAsync();
+
+        var svc = new StudentService(db);
+        var req = new Application.DTOs.CreateStudentRequest("Aarav", "Sharma", new DateOnly(2012, 5, 10), ay.Id, cls.Id, sec.Id, "01");
+
+        var act = () => svc.CreateStudentAsync(req, schoolId, tenantId, "admin@school.edu");
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        (await db.Students.CountAsync()).Should().Be(0);
+    }
+
+    [Fact]
     public async Task GetStudent_ReturnsNull_WhenNotFound()
     {
         var db = CreateDb();

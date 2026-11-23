@@ -428,7 +428,7 @@ public class AcademicAccessSecurityTests
             .GetStudentResults(g.SchoolId, exam.Id, g.OtherStudentId, CancellationToken.None);
 
         teacherAttendance.Should().BeOfType<OkObjectResult>();
-        teacherFees.Should().BeOfType<OkObjectResult>();
+        teacherFees.Should().BeOfType<ForbidResult>();
         teacherResults.Should().BeOfType<OkObjectResult>();
         adminResults.Should().BeOfType<OkObjectResult>();
     }
@@ -557,6 +557,177 @@ public class AcademicAccessSecurityTests
             g.SchoolId, g.OtherStudentId, new DateOnly(2026, 11, 1), new DateOnly(2026, 11, 30), CancellationToken.None);
 
         result.Should().BeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public async Task Fees_AreVisibleToFamilyAndAccountant_NotToTeacherOrFrontOffice()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        db.Payments.Add(new Payment
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, StudentId = g.StudentId,
+            Amount = 250, Status = PaymentStatus.Successful, Method = "Cash"
+        });
+        await db.SaveChangesAsync();
+
+        var parent = await Fees(db, g.TenantId, g.ParentUserId, "Parent")
+            .GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+        var student = await Fees(db, g.TenantId, g.StudentUserId, "Student")
+            .GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+        var accountant = await Fees(db, g.TenantId, Guid.NewGuid(), "Accountant")
+            .GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+        var teacher = await Fees(db, g.TenantId, g.TeacherUserId, "Teacher")
+            .GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+        var frontOffice = await Fees(db, g.TenantId, Guid.NewGuid(), "FrontOffice")
+            .GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+        var otherParent = await Fees(db, g.TenantId, Guid.NewGuid(), "Parent")
+            .GetStudentPayments(g.SchoolId, g.StudentId, CancellationToken.None);
+
+        parent.Should().BeOfType<OkObjectResult>();
+        student.Should().BeOfType<OkObjectResult>();
+        accountant.Should().BeOfType<OkObjectResult>();
+        teacher.Should().BeOfType<ForbidResult>();
+        frontOffice.Should().BeOfType<ForbidResult>();
+        otherParent.Should().BeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public async Task OfficeDashboard_IsHiddenFromTeacherStudentAndParent()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        var dashboard = new DashboardController(db);
+
+        Attach(dashboard, Principal(g.TenantId, g.AdminUserId, "SchoolAdmin"));
+        var admin = await dashboard.Get(g.SchoolId, g.YearId, CancellationToken.None);
+        Attach(dashboard, Principal(g.TenantId, Guid.NewGuid(), "FrontOffice"));
+        var desk = await dashboard.Get(g.SchoolId, g.YearId, CancellationToken.None);
+        Attach(dashboard, Principal(g.TenantId, g.TeacherUserId, "Teacher"));
+        var teacher = await dashboard.Get(g.SchoolId, g.YearId, CancellationToken.None);
+        Attach(dashboard, Principal(g.TenantId, g.StudentUserId, "Student"));
+        var student = await dashboard.Get(g.SchoolId, g.YearId, CancellationToken.None);
+        Attach(dashboard, Principal(g.TenantId, g.ParentUserId, "Parent"));
+        var parent = await dashboard.Get(g.SchoolId, g.YearId, CancellationToken.None);
+
+        admin.Should().BeOfType<OkObjectResult>();
+        desk.Should().BeOfType<OkObjectResult>();
+        teacher.Should().BeOfType<ForbidResult>();
+        student.Should().BeOfType<ForbidResult>();
+        parent.Should().BeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public async Task Announcements_HideStaffCircularsFromParentsAndStudents()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        db.SchoolAnnouncements.AddRange(
+            new SchoolAnnouncement { TenantId = g.TenantId, SchoolId = g.SchoolId, Title = "Parents evening", Body = "Friday", Audience = "All parents", PublishedBy = "admin" },
+            new SchoolAnnouncement { TenantId = g.TenantId, SchoolId = g.SchoolId, Title = "Staff meeting", Body = "Monday", Audience = "Teaching staff", PublishedBy = "admin" },
+            new SchoolAnnouncement { TenantId = g.TenantId, SchoolId = g.SchoolId, Title = "Exam week", Body = "Bring pens", Audience = "All students", PublishedBy = "admin" });
+        await db.SaveChangesAsync();
+
+        var parent = JsonSerializer.Serialize(((OkObjectResult)await Communications(db, g.TenantId, g.ParentUserId, "Parent")
+            .Announcements(g.SchoolId, CancellationToken.None)).Value);
+        var student = JsonSerializer.Serialize(((OkObjectResult)await Communications(db, g.TenantId, g.StudentUserId, "Student")
+            .Announcements(g.SchoolId, CancellationToken.None)).Value);
+        var teacher = JsonSerializer.Serialize(((OkObjectResult)await Communications(db, g.TenantId, g.TeacherUserId, "Teacher")
+            .Announcements(g.SchoolId, CancellationToken.None)).Value);
+        var stranger = await Communications(db, g.TenantId, Guid.NewGuid(), "Accountant")
+            .Announcements(g.SchoolId, CancellationToken.None);
+
+        parent.Should().Contain("Parents evening").And.Contain("Exam week").And.NotContain("Staff meeting");
+        student.Should().Contain("Exam week").And.NotContain("Staff meeting").And.NotContain("Parents evening");
+        teacher.Should().Contain("Staff meeting").And.Contain("Parents evening");
+        stranger.Should().BeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public async Task Teacher_SeesOnlyOwnHomework_AndNotAnotherTeachersSection()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        db.Homeworks.AddRange(
+            PublishedHomework(g, g.AssignmentId, "Maya worksheet"),
+            PublishedHomework(g, g.OtherSectionAssignmentId, "Ravi worksheet"));
+        await db.SaveChangesAsync();
+
+        var teacher = JsonSerializer.Serialize(((OkObjectResult)await Homework(db, g.TenantId, g.TeacherUserId, "Teacher")
+            .GetAll(g.SchoolId, null, CancellationToken.None)).Value);
+        var admin = JsonSerializer.Serialize(((OkObjectResult)await Homework(db, g.TenantId, g.AdminUserId, "SchoolAdmin")
+            .GetAll(g.SchoolId, null, CancellationToken.None)).Value);
+
+        teacher.Should().Contain("Maya worksheet").And.NotContain("Ravi worksheet");
+        admin.Should().Contain("Maya worksheet").And.Contain("Ravi worksheet");
+    }
+
+    [Fact]
+    public async Task NotificationOutbox_HidesEnquiryOtpFromTeachers()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        db.NotificationMessages.AddRange(
+            new NotificationMessage
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, Title = "Enquiry verification OTP",
+                Body = "code 123456", Channel = NotificationChannel.Sms, RecipientRef = "phone",
+                TemplateKey = "enquiry.otp", Status = "SandboxSent"
+            },
+            new NotificationMessage
+            {
+                TenantId = g.TenantId, SchoolId = g.SchoolId, Title = "Fee receipt",
+                Body = "paid", Channel = NotificationChannel.Email, RecipientRef = "parent",
+                TemplateKey = "fees.receipt", Status = "SandboxSent"
+            });
+        await db.SaveChangesAsync();
+
+        var teacher = JsonSerializer.Serialize(((OkObjectResult)await Communications(db, g.TenantId, g.TeacherUserId, "Teacher")
+            .Outbox(g.SchoolId, 50, CancellationToken.None)).Value);
+        var admin = JsonSerializer.Serialize(((OkObjectResult)await Communications(db, g.TenantId, g.AdminUserId, "SchoolAdmin")
+            .Outbox(g.SchoolId, 50, CancellationToken.None)).Value);
+
+        teacher.Should().Contain("fees.receipt").And.NotContain("enquiry.otp");
+        admin.Should().Contain("enquiry.otp").And.Contain("fees.receipt");
+    }
+
+    [Fact]
+    public async Task Payslips_DoNotCrossSchoolsInsideTheSameTenant()
+    {
+        await using var db = CreateDb();
+        var g = await SeedSchool(db);
+        var otherSchoolId = Guid.NewGuid();
+        db.Schools.Add(new School { Id = otherSchoolId, TenantId = g.TenantId, Name = "Second campus" });
+        var run = new PayrollRun
+        {
+            TenantId = g.TenantId, SchoolId = g.SchoolId, PeriodYear = 2026, PeriodMonth = 11, PeriodLabel = "November 2026",
+            Payslips = [new Payslip { TenantId = g.TenantId, EmployeeId = g.TeacherId, Basic = 1000, Net = 800 }]
+        };
+        db.PayrollRuns.Add(run);
+        await db.SaveChangesAsync();
+
+        var payroll = new PayrollController(db, _audit.Object);
+        Attach(payroll, Principal(g.TenantId, g.AdminUserId, "SchoolAdmin"));
+        var own = await payroll.Payslips(g.SchoolId, run.Id, CancellationToken.None);
+        var other = await payroll.Payslips(otherSchoolId, run.Id, CancellationToken.None);
+
+        own.Should().BeOfType<OkObjectResult>();
+        JsonSerializer.Serialize(((OkObjectResult)own).Value).Should().Contain("800");
+        other.Should().BeOfType<NotFoundResult>();
+    }
+
+    private FeesController Fees(AppDbContext db, Guid tenantId, Guid userId, string role)
+    {
+        var controller = new FeesController(db, _audit.Object, _notifications.Object);
+        Attach(controller, Principal(tenantId, userId, role));
+        return controller;
+    }
+
+    private CommunicationsController Communications(AppDbContext db, Guid tenantId, Guid userId, string role)
+    {
+        var controller = new CommunicationsController(db, _notifications.Object, _audit.Object);
+        Attach(controller, Principal(tenantId, userId, role));
+        return controller;
     }
 
     private HomeworkController Homework(AppDbContext db, Guid tenantId, Guid userId, string role)

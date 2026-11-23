@@ -38,18 +38,22 @@ public class HomeworkController(AppDbContext db, INotificationService notificati
             query = query.Where(h => h.TeacherAssignment!.SectionId == sectionId.Value);
         }
 
-        var staff = StudentAccess.IsLeadership(User) || StudentAccess.InRole(User, "Teacher") || StudentAccess.InRole(User, "AttendanceOfficer");
+        var leadership = StudentAccess.IsLeadership(User);
         Guid? myStudentId = null;
-        if (!staff)
+        if (!leadership)
         {
             var userId = StudentAccess.UserId(User);
             if (userId is null) return Unauthorized();
-            List<Guid> sectionIds;
-            if (StudentAccess.InRole(User, "Student"))
+            if (StudentAccess.InRole(User, "Teacher") || StudentAccess.InRole(User, "AttendanceOfficer"))
+            {
+                query = query.Where(h => h.TeacherAssignment!.Employee!.UserId == userId
+                    && h.TeacherAssignment.IsActive);
+            }
+            else if (StudentAccess.InRole(User, "Student"))
             {
                 myStudentId = await db.Students.Where(s => s.UserId == userId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted)
                     .Select(s => (Guid?)s.Id).FirstOrDefaultAsync(ct);
-                sectionIds = await db.StudentEnrollments
+                var sectionIds = await db.StudentEnrollments
                     .Where(e => e.TenantId == tenantId && e.EffectiveTo == null
                         && e.Student!.UserId == userId && e.Student.SchoolId == schoolId && e.Student.TenantId == tenantId
                         && e.Class!.SchoolId == schoolId && e.Class.TenantId == tenantId
@@ -57,10 +61,11 @@ public class HomeworkController(AppDbContext db, INotificationService notificati
                     .Select(e => e.SectionId)
                     .Distinct()
                     .ToListAsync(ct);
+                query = query.Where(h => sectionIds.Contains(h.TeacherAssignment!.SectionId));
             }
             else if (StudentAccess.InRole(User, "Parent"))
             {
-                sectionIds = await db.StudentEnrollments
+                var sectionIds = await db.StudentEnrollments
                     .Where(e => e.TenantId == tenantId && e.EffectiveTo == null
                         && e.Student!.SchoolId == schoolId && e.Student.TenantId == tenantId
                         && e.Class!.SchoolId == schoolId && e.Class.TenantId == tenantId
@@ -68,17 +73,9 @@ public class HomeworkController(AppDbContext db, INotificationService notificati
                     .Select(e => e.SectionId)
                     .Distinct()
                     .ToListAsync(ct);
+                query = query.Where(h => sectionIds.Contains(h.TeacherAssignment!.SectionId));
             }
             else return Forbid();
-
-            query = query.Where(h => sectionIds.Contains(h.TeacherAssignment!.SectionId));
-        }
-        else if (StudentAccess.InRole(User, "Student"))
-        {
-            var userId = StudentAccess.UserId(User);
-            if (userId is not null)
-                myStudentId = await db.Students.Where(s => s.UserId == userId && s.SchoolId == schoolId && s.TenantId == tenantId && !s.IsDeleted)
-                    .Select(s => (Guid?)s.Id).FirstOrDefaultAsync(ct);
         }
 
         var rows = await query.OrderByDescending(h => h.DueDate)

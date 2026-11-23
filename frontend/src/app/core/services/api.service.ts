@@ -194,6 +194,9 @@ export class ApiService {
   registrationDocuments(schoolId: string, id: string) {
     return this.http.get<any[]>(`${this.base}/schools/${schoolId}/registrations/${id}/documents`);
   }
+  registrationDocumentFile(schoolId: string, documentId: string) {
+    return this.http.get(`${this.base}/schools/${schoolId}/registrations/documents/${documentId}/file`, { responseType: 'blob' });
+  }
   uploadRegistrationDocument(schoolId: string, id: string, file: File, kind: string) {
     const data = new FormData();
     data.append('file', file);

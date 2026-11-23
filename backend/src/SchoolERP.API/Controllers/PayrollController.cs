@@ -40,7 +40,8 @@ public class PayrollController(AppDbContext db, IAuditService audit) : Controlle
         if (req.Month is < 1 or > 12) return BadRequest(new { error = "Month must be 1-12." });
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? "unknown";
-        var exists = await db.PayrollRuns.AnyAsync(r => r.SchoolId == schoolId && r.PeriodYear == req.Year && r.PeriodMonth == req.Month, ct);
+        var exists = await db.PayrollRuns.AnyAsync(r =>
+            r.SchoolId == schoolId && r.TenantId == tenantId && r.PeriodYear == req.Year && r.PeriodMonth == req.Month, ct);
         if (exists) return Conflict(new { error = "A payroll run already exists for that period." });
 
         var staff = await db.Employees
@@ -90,8 +91,12 @@ public class PayrollController(AppDbContext db, IAuditService audit) : Controlle
     public async Task<IActionResult> Payslips(Guid schoolId, Guid runId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var runInSchool = await db.PayrollRuns.AnyAsync(r =>
+            r.Id == runId && r.SchoolId == schoolId && r.TenantId == tenantId, ct);
+        if (!runInSchool) return NotFound();
         var list = await db.Payslips
-            .Where(p => p.PayrollRunId == runId && p.TenantId == tenantId)
+            .Where(p => p.PayrollRunId == runId && p.TenantId == tenantId
+                && p.Employee!.SchoolId == schoolId && p.Employee.TenantId == tenantId)
             .Include(p => p.Employee)
             .OrderBy(p => p.Employee!.EmployeeCode)
             .Select(p => new

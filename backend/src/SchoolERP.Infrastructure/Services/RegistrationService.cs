@@ -186,7 +186,7 @@ public class RegistrationService(AppDbContext db)
             Kind = kind, FileName = fileName, ContentType = contentType, RelativePath = relativePath
         };
         db.StudentDocuments.Add(doc);
-        var url = "/uploads/" + relativePath.Replace('\\', '/');
+        var url = "/api/schools/" + schoolId + "/registrations/documents/" + doc.Id + "/file";
         if (kind == StudentDocumentKind.Photo)
             reg.PhotoUrl = url;
         await db.SaveChangesAsync(ct);
@@ -205,7 +205,7 @@ public class RegistrationService(AppDbContext db)
 
     public async Task<IReadOnlyList<object>> DocumentsAsync(Guid schoolId, Guid tenantId, Guid registrationId, CancellationToken ct) =>
         await db.StudentDocuments.Where(d => d.SchoolId == schoolId && d.TenantId == tenantId && d.RegistrationId == registrationId)
-            .Select(d => new { d.Id, kind = d.Kind.ToString(), d.FileName, url = "/uploads/" + d.RelativePath.Replace("\\", "/"), d.Verified, d.VerifiedBy })
+            .Select(d => new { d.Id, kind = d.Kind.ToString(), d.FileName, url = "/api/schools/" + schoolId + "/registrations/documents/" + d.Id + "/file", d.Verified, d.VerifiedBy })
             .ToListAsync(ct);
 
     public async Task<object> PreviewImportAsync(Guid schoolId, Guid academicYearId, string csv, CancellationToken ct)

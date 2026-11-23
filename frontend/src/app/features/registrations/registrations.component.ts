@@ -105,7 +105,7 @@ import { SchoolContextService } from '../../core/services/school-context.service
             <input type="file" accept="image/*,.pdf" (change)="upload($event)" />
             @for (d of docs(); track d.id) {
               <div class="doc">
-                <a [href]="d.url" target="_blank">{{ d.kind }} · {{ d.fileName }}</a>
+                <button type="button" (click)="openDocument(d)">{{ d.kind }} · {{ d.fileName }}</button>
                 @if (d.verified) { <span>Verified</span> }
                 @else { <button type="button" (click)="verify(d.id)">Verify</button> }
               </div>
@@ -263,6 +263,21 @@ export class RegistrationsComponent implements OnInit {
       const file = new File([blob], 'live-photo.jpg', { type: 'image/jpeg' });
       this.sendFile(file, 'Photo');
     }, 'image/jpeg', 0.9);
+  }
+
+  openDocument(doc: { id: string; fileName?: string }) {
+    this.api.registrationDocumentFile(this.ctx.schoolId, doc.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.download = doc.fileName || 'admission-document';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      },
+      error: () => this.error.set('Could not open the document.')
+    });
   }
 
   upload(ev: Event) {
