@@ -47,12 +47,17 @@ public class EmployeesController(IEmployeeService employeeService, IAuditService
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
         try
         {
-            var employee = await employeeService.UpdateEmployeeAsync(id, schoolId, request, actor, ct);
+            var employee = await employeeService.UpdateEmployeeAsync(id, schoolId, tenantId, request, actor, ct);
             await auditService.LogAsync(tenantId, actor, "EmployeeUpdated", "Employee", employee.Id.ToString(),
                 newValues: new { employee.EmployeeCode, employee.BasicSalary });
             return Ok(employee);
         }
-        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = ex.Message });
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpPost("{id:guid}/status")]

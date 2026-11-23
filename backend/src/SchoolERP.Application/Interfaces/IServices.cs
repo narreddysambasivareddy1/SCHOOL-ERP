@@ -13,7 +13,7 @@ public interface IStudentService
     Task<PagedResult<StudentListDto>> GetStudentsAsync(Guid schoolId, Guid academicYearId, int page, int pageSize, string? search, CancellationToken ct = default);
     Task<StudentDetailDto?> GetStudentAsync(Guid id, Guid schoolId, CancellationToken ct = default);
     Task<StudentDetailDto> CreateStudentAsync(CreateStudentRequest request, Guid schoolId, Guid tenantId, string createdBy, CancellationToken ct = default);
-    Task<StudentDetailDto> UpdateStudentAsync(Guid id, Guid schoolId, UpdateStudentRequest request, string updatedBy, CancellationToken ct = default);
+    Task<StudentDetailDto> UpdateStudentAsync(Guid id, Guid schoolId, Guid tenantId, UpdateStudentRequest request, string updatedBy, CancellationToken ct = default);
     Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default);
     Task SetPhotoAsync(Guid id, Guid schoolId, string photoUrl, CancellationToken ct = default);
 }
@@ -23,7 +23,7 @@ public interface IEmployeeService
     Task<PagedResult<EmployeeListDto>> GetEmployeesAsync(Guid schoolId, int page, int pageSize, string? search, CancellationToken ct = default);
     Task<EmployeeListDto?> GetEmployeeAsync(Guid id, Guid schoolId, CancellationToken ct = default);
     Task<EmployeeListDto> CreateEmployeeAsync(CreateEmployeeRequest request, Guid schoolId, Guid tenantId, string createdBy, CancellationToken ct = default);
-    Task<EmployeeListDto> UpdateEmployeeAsync(Guid id, Guid schoolId, UpdateEmployeeRequest request, string updatedBy, CancellationToken ct = default);
+    Task<EmployeeListDto> UpdateEmployeeAsync(Guid id, Guid schoolId, Guid tenantId, UpdateEmployeeRequest request, string updatedBy, CancellationToken ct = default);
     Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default);
     Task SetPhotoAsync(Guid id, Guid schoolId, string photoUrl, CancellationToken ct = default);
 }

@@ -23,6 +23,36 @@ interface Assignment {
 
     @if (isAdmin) {
     <div class="card map-card">
+      <div class="card-header"><div class="card-title">Academic setup</div></div>
+      <form class="map-form" (ngSubmit)="saveYear()">
+        <label>Year name<input [(ngModel)]="year.name" name="yearName" required /></label>
+        <label>Start<input type="date" [(ngModel)]="year.startDate" name="yearStart" required /></label>
+        <label>End<input type="date" [(ngModel)]="year.endDate" name="yearEnd" required /></label>
+        <label>Current<input type="checkbox" [(ngModel)]="year.isCurrent" name="yearCurrent" /></label>
+        <button type="submit">Save year</button>
+      </form>
+      <form class="map-form" (ngSubmit)="saveClass()">
+        <label>Class<input [(ngModel)]="klass.name" name="className" required /></label>
+        <label>Sort<input type="number" [(ngModel)]="klass.sortOrder" name="classSort" /></label>
+        <button type="submit">Save class</button>
+      </form>
+      <form class="map-form" (ngSubmit)="saveSection()">
+        <label>Class
+          <select [(ngModel)]="section.classId" name="sectionClass">
+            @for (c of classes(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+          </select>
+        </label>
+        <label>Section<input [(ngModel)]="section.name" name="sectionName" required /></label>
+        <label>Capacity<input type="number" [(ngModel)]="section.capacity" name="sectionCapacity" min="1" /></label>
+        <button type="submit">Save section</button>
+      </form>
+      <form class="map-form" (ngSubmit)="saveSubject()">
+        <label>Subject<input [(ngModel)]="subject.name" name="subjectName" required /></label>
+        <label>Code<input [(ngModel)]="subject.code" name="subjectCode" required /></label>
+        <button type="submit">Save subject</button>
+      </form>
+    </div>
+    <div class="card map-card">
       <div class="card-header">
         <div>
           <div class="card-title">Map teacher to class / section / subject</div>
@@ -190,6 +220,10 @@ export class AcademicsComponent implements OnInit {
   mapError = signal<string | null>(null);
   notice = signal<string | null>(null);
   form = { employeeId: '', subjectId: '', classId: '', sectionId: '', periodSlot: '', electiveGroup: '' };
+  year = { name: '', startDate: '', endDate: '', isCurrent: false };
+  klass = { name: '', sortOrder: 0 };
+  section = { classId: '', name: '', capacity: 40 };
+  subject = { name: '', code: '' };
 
   constructor(private api: ApiService, public ctx: SchoolContextService, auth: AuthService) {
     this.isAdmin = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin');
@@ -207,6 +241,38 @@ export class AcademicsComponent implements OnInit {
     const cls = this.classes().find(c => c.id === this.form.classId);
     this.sections.set(cls?.sections || []);
     this.form.sectionId = '';
+  }
+
+  saveYear() {
+    if (!this.year.name || !this.year.startDate || !this.year.endDate) return;
+    this.api.saveAcademicYear(this.ctx.schoolId, this.year).subscribe({
+      next: () => this.notice.set('Academic year saved.'),
+      error: (e) => this.mapError.set(e?.error?.error || 'Could not save the academic year.')
+    });
+  }
+
+  saveClass() {
+    if (!this.klass.name) return;
+    this.api.saveClass(this.ctx.schoolId, this.klass).subscribe({
+      next: () => { this.notice.set('Class saved.'); this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c)); },
+      error: (e) => this.mapError.set(e?.error?.error || 'Could not save the class.')
+    });
+  }
+
+  saveSection() {
+    if (!this.section.classId || !this.section.name || this.section.capacity <= 0) return;
+    this.api.saveSection(this.ctx.schoolId, this.section.classId, { name: this.section.name, capacity: this.section.capacity }).subscribe({
+      next: () => { this.notice.set('Section saved.'); this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c)); },
+      error: (e) => this.mapError.set(e?.error?.error || 'Could not save the section.')
+    });
+  }
+
+  saveSubject() {
+    if (!this.subject.name || !this.subject.code) return;
+    this.api.saveSubject(this.ctx.schoolId, { ...this.subject, isLanguage: false }).subscribe({
+      next: () => { this.notice.set('Subject saved.'); this.api.getSubjects(this.ctx.schoolId).subscribe(s => this.subjects.set(s)); },
+      error: (e) => this.mapError.set(e?.error?.error || 'Could not save the subject.')
+    });
   }
 
   load() {

@@ -27,13 +27,18 @@ public record CreateStudentRequest(
     string FirstName, string LastName, DateOnly DateOfBirth,
     Guid AcademicYearId, Guid ClassId, Guid SectionId, string? RollNumber, string? PhotoUrl = null);
 
-public record UpdateStudentRequest(string FirstName, string LastName, DateOnly DateOfBirth, string? PhotoUrl);
+public record UpdateStudentRequest(
+    string FirstName, string LastName, DateOnly DateOfBirth, string? PhotoUrl,
+    string Status, Guid AcademicYearId, Guid ClassId, Guid SectionId, string? RollNumber,
+    string? ContactName, string? ContactPhone, string? ContactEmail);
 
-public record GuardianDto(Guid Id, string FirstName, string LastName, string Relationship, string Phone, bool IsPrimary);
-public record EnrollmentDto(Guid Id, string AcademicYear, string ClassName, string SectionName, DateOnly EffectiveFrom, string? RollNumber);
+public record GuardianDto(Guid Id, string FirstName, string LastName, string Relationship, string Phone, string? Email, bool IsPrimary);
+public record EnrollmentDto(
+    Guid Id, string AcademicYear, string ClassName, string SectionName, DateOnly EffectiveFrom, string? RollNumber,
+    Guid AcademicYearId, Guid ClassId, Guid SectionId);
 
 // Employees
-public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status, string? Email, string? Phone, DateOnly JoiningDate, string? PhotoUrl, decimal BasicSalary);
+public record EmployeeListDto(Guid Id, string EmployeeCode, string FirstName, string LastName, string? Department, string? Designation, string Status, string? Email, string? Phone, DateOnly JoiningDate, string? PhotoUrl, decimal BasicSalary, Guid? DepartmentId);
 public record CreateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, decimal BasicSalary, string? PhotoUrl = null);
 public record UpdateEmployeeRequest(string FirstName, string LastName, string? Email, string? Phone, Guid? DepartmentId, Guid? DesignationId, DateOnly JoiningDate, decimal BasicSalary);
 public record SetPhotoRequest(string PhotoUrl);

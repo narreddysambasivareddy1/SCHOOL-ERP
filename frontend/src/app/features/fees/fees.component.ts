@@ -23,7 +23,7 @@ interface StudentOption { id: string; firstName: string; lastName: string; stude
       <div>
         <div class="eyebrow">FEES & PAYMENTS</div>
         <h1>Fee collection</h1>
-        <p>Receipts come from recorded payments. Fee structures are not yet allocated to individual students, so this page does not show an outstanding balance.</p>
+        <p>Outstanding is the class fee schedule minus successful receipts already stored for this student.</p>
       </div>
     </div>
 
@@ -65,9 +65,33 @@ interface StudentOption { id: string; firstName: string; lastName: string; stude
           @for (row of schedule()!.items; track row.category) {
             <div class="line"><span>{{ row.category }}</span><span>{{ row.amount | money }}</span></div>
           }
-          <p>Scheduled {{ schedule()!.total | money }}. Recorded receipts {{ recorded() | money }}.</p>
+          <p>Scheduled {{ schedule()!.total | money }}. Paid {{ schedule()!.paid | money }}. Outstanding {{ schedule()!.outstanding | money }}.</p>
         }
       </div>
+    }
+
+    @if (canCollect) {
+      <form class="toolbar" (ngSubmit)="saveStructure()">
+        <select [(ngModel)]="structure.classId" name="feeClass">
+          <option value="">Class</option>
+          @for (c of classes(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+        </select>
+        <select [(ngModel)]="structure.categoryId" name="feeCategory">
+          <option value="">Category</option>
+          @for (c of categories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+        </select>
+        <input type="number" min="1" step="0.01" [(ngModel)]="structure.amount" name="feeAmount" placeholder="Amount" />
+        <button class="btn-primary" type="submit" [disabled]="savingStructure()">Save fee structure</button>
+        <input [(ngModel)]="newCategory" name="newCategory" placeholder="New category" />
+        <button type="button" (click)="addCategory()" [disabled]="savingStructure()">Add category</button>
+      </form>
+      @if (structures().length) {
+        <div class="schedule">
+          @for (row of structures(); track row.id) {
+            <div class="line"><span>{{ row.className }} · {{ row.category }}</span><span>{{ row.amount | money }}</span></div>
+          }
+        </div>
+      }
     }
 
     @if (notice()) { <p class="ok">{{ notice() }}</p> }
@@ -117,7 +141,13 @@ export class FeesComponent implements OnInit {
   method = 'Cash';
   reference = '';
   notice = signal<string | null>(null);
-  schedule = signal<{ items: { category: string; amount: number }[]; total: number } | null>(null);
+  schedule = signal<{ items: { category: string; amount: number }[]; total: number; paid: number; outstanding: number } | null>(null);
+  classes = signal<any[]>([]);
+  categories = signal<any[]>([]);
+  structures = signal<any[]>([]);
+  savingStructure = signal(false);
+  newCategory = '';
+  structure = { classId: '', categoryId: '', amount: 0 };
   error = signal<string | null>(null);
   canCollect = false;
   recorded = computed(() => this.payments()
@@ -137,6 +167,8 @@ export class FeesComponent implements OnInit {
     if (!this.ctx.schoolId) return;
     if (this.canCollect) {
       this.findStudents();
+      this.api.getClasses(this.ctx.schoolId).subscribe(rows => this.classes.set(rows ?? []));
+      this.loadStructures();
       return;
     }
     if (this.self) {
@@ -182,6 +214,37 @@ export class FeesComponent implements OnInit {
         next: s => this.schedule.set(s)
       });
     }
+  }
+
+  loadStructures() {
+    this.api.getFeeCategories(this.ctx.schoolId).subscribe({ next: rows => this.categories.set(rows ?? []) });
+    if (!this.ctx.academicYearId) return;
+    this.api.getFeeStructures(this.ctx.schoolId, this.ctx.academicYearId).subscribe({ next: rows => this.structures.set(rows ?? []) });
+  }
+
+  addCategory() {
+    if (!this.newCategory.trim()) return;
+    this.savingStructure.set(true);
+    this.api.saveFeeCategory(this.ctx.schoolId, this.newCategory.trim()).subscribe({
+      next: () => { this.savingStructure.set(false); this.newCategory = ''; this.notice.set('Fee category saved.'); this.loadStructures(); },
+      error: (e) => { this.savingStructure.set(false); this.error.set(e?.error?.error || 'Could not save the category.'); }
+    });
+  }
+
+  saveStructure() {
+    const amount = Number(this.structure.amount);
+    if (!this.structure.classId || !this.structure.categoryId || amount <= 0 || !this.ctx.academicYearId) return;
+    this.savingStructure.set(true);
+    this.error.set(null);
+    this.api.saveFeeStructure(this.ctx.schoolId, {
+      academicYearId: this.ctx.academicYearId,
+      classId: this.structure.classId,
+      feeCategoryId: this.structure.categoryId,
+      amount
+    }).subscribe({
+      next: () => { this.savingStructure.set(false); this.notice.set('Fee structure saved.'); this.structure.amount = 0; this.loadStructures(); },
+      error: (e) => { this.savingStructure.set(false); this.error.set(e?.error?.error || 'Could not save the fee structure.'); }
+    });
   }
 
   record() {

@@ -1,5 +1,32 @@
 # ERP Development Status
 
+Last updated: 23 November 2026, after the six essential modules were implemented on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
+
+## Essential modules implemented
+
+| Module | What now works | Still open |
+|---|---|---|
+| Students | Profile edit saves name, date of birth, status, class, section, roll number, and primary contact through `PUT /api/schools/{schoolId}/students/{id}`. Another tenant is not found. A class from another school is rejected. | Guardian relationship is stored as Guardian when a new contact is created |
+| Staff | Profile edit saves name, email, phone, department, joining date, and basic salary. Salary must be greater than zero. HR and leadership only. A department from another school is rejected | Designation is not edited on the form |
+| Fees | Accountant can add a category and save a class fee amount. The schedule response now returns scheduled total, successful payments, and outstanding as scheduled minus paid | Payments are not limited to the academic year. A student with payments from another year can reduce this year's outstanding |
+| Attendance | A marked row can request a correction with a reason. The original code stays until a school admin or attendance officer approves. Rejection leaves the original row unchanged. Requests and decisions are audited | The correction queue is not filtered to the teacher's own sections |
+| Classes | School admin can create an academic year, class, section, and subject. Existing teacher allocation is unchanged | The screen creates new rows. The PUT endpoints for editing an existing year, class, section, or subject are not wired to a picker |
+| Payroll | The screen chooses year and month and creates a draft from saved salaries. Payslips are the stored rows. Print opens those amounts | Statutory percentages are still the existing calculator. They were not changed |
+
+## Commands run for this implementation
+
+| Command | Result |
+|---|---|
+| `dotnet test tests/SchoolERP.Tests.Unit/SchoolERP.Tests.Unit.csproj` | Passed 58, failed 0 |
+| `dotnet test tests/SchoolERP.Tests.Integration/SchoolERP.Tests.Integration.csproj` | Passed 12, failed 0 |
+| `dotnet build src/SchoolERP.API/SchoolERP.API.csproj -c Release` | Succeeded, 0 warnings, 0 errors |
+| `npm run build` in `frontend` | Succeeded. Existing shell CSS budget warning remains: 17.50 kB against 16.00 kB |
+| `npm test` | Not run. The frontend test target is Karma and there is no existing component test for these screens |
+
+Migration `20261123020128_AddAttendanceCorrections` creates only `AttendanceCorrections`. It is applied when the API seeder runs. It was not applied to the running school database in this pass.
+
+---
+
 Last updated: 23 November 2026, after code changes on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
 
 This file records what was verified by running commands. It does not treat the product as deployment-ready.

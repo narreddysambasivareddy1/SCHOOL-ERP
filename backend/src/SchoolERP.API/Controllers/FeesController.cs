@@ -10,6 +10,7 @@ using SchoolERP.Infrastructure.Data;
 namespace SchoolERP.API.Controllers;
 
 public record RecordPaymentRequest(Guid StudentId, decimal Amount, string Method, string? Reference);
+public record FeeCategoryRequest(string Name);
 public record UpsertFeeStructureRequest(Guid AcademicYearId, Guid ClassId, Guid FeeCategoryId, decimal Amount);
 public record OnlineOrderRequest(Guid StudentId, decimal Amount);
 
@@ -56,7 +57,39 @@ public class FeesController(AppDbContext db, Application.Interfaces.IAuditServic
             .Where(f => f.SchoolId == schoolId && f.TenantId == tenantId && f.AcademicYearId == academicYearId && f.ClassId == classId)
             .Select(f => new { category = f.FeeCategory!.Name, f.Amount })
             .ToListAsync(ct);
-        return Ok(new { items, total = items.Sum(i => i.Amount) });
+        var scheduled = items.Sum(i => i.Amount);
+        var paid = await db.Payments
+            .Where(p => p.SchoolId == schoolId && p.TenantId == tenantId && p.StudentId == studentId && p.Status == PaymentStatus.Successful)
+            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
+        return Ok(new { items, total = scheduled, paid, outstanding = scheduled - paid });
+    }
+
+    [HttpGet("categories")]
+    [Authorize(Roles = RoleNames.FeesStaff)]
+    public async Task<IActionResult> Categories(Guid schoolId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var items = await db.FeeCategories
+            .Where(c => c.SchoolId == schoolId && c.TenantId == tenantId && !c.IsDeleted)
+            .OrderBy(c => c.Name)
+            .Select(c => new { c.Id, c.Name })
+            .ToListAsync(ct);
+        return Ok(items);
+    }
+
+    [HttpPost("categories")]
+    [Authorize(Roles = RoleNames.FeesStaff)]
+    public async Task<IActionResult> SaveCategory(Guid schoolId, [FromBody] FeeCategoryRequest req, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(req.Name)) return BadRequest(new { error = "Fee category name is required." });
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var name = req.Name.Trim();
+        var exists = await db.FeeCategories.AnyAsync(c => c.SchoolId == schoolId && c.TenantId == tenantId && c.Name == name, ct);
+        if (exists) return Conflict(new { error = "That fee category already exists." });
+        var row = new FeeCategory { TenantId = tenantId, SchoolId = schoolId, Name = name };
+        db.FeeCategories.Add(row);
+        await db.SaveChangesAsync(ct);
+        return Ok(new { row.Id, row.Name });
     }
 
     [HttpGet("structures")]

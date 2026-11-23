@@ -13,6 +13,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-student-list',
@@ -145,8 +146,15 @@ import { SchoolContextService } from '../../core/services/school-context.service
             <div><dt>Class</dt><dd>{{ enrollment(profile())?.className || '—' }}</dd></div>
             <div><dt>Section</dt><dd>{{ enrollment(profile())?.sectionName || '—' }}</dd></div>
             <div><dt>Roll number</dt><dd>{{ enrollment(profile())?.rollNumber || '—' }}</dd></div>
+            <div><dt>Contact</dt><dd>{{ primaryContact(profile())?.phone || '—' }}</dd></div>
+            <div><dt>Contact email</dt><dd>{{ primaryContact(profile())?.email || '—' }}</dd></div>
           </dl>
         </div>
+        @if (canEdit) {
+          <div class="dialog-footer">
+            <p-button label="Edit student" type="button" (onClick)="openEdit()" />
+          </div>
+        }
         @if (!profile().photoUrl) {
           <div class="photo-actions">
             <button type="button" (click)="startCamera()">Open camera</button>
@@ -164,6 +172,33 @@ import { SchoolContextService } from '../../core/services/school-context.service
           </div>
         </div>
       }
+    </p-dialog>
+
+    <p-dialog header="Edit student" [(visible)]="showEdit" [modal]="true" appendTo="body" [style]="{width:'560px'}" [draggable]="false">
+      <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <div class="form-grid">
+          <div class="field"><label>First name *</label><input pInputText formControlName="firstName" /></div>
+          <div class="field"><label>Last name *</label><input pInputText formControlName="lastName" /></div>
+          <div class="field"><label>Date of birth *</label><p-calendar formControlName="dateOfBirth" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" /></div>
+          <div class="field"><label>Status *</label>
+            <p-dropdown [options]="statuses" formControlName="status" styleClass="w-full" />
+          </div>
+          <div class="field"><label>Class *</label>
+            <p-dropdown [options]="classes()" optionLabel="name" optionValue="id" formControlName="classId" (onChange)="onEditClass($event.value)" styleClass="w-full" />
+          </div>
+          <div class="field"><label>Section *</label>
+            <p-dropdown [options]="editSections()" optionLabel="name" optionValue="id" formControlName="sectionId" styleClass="w-full" />
+          </div>
+          <div class="field"><label>Roll number</label><input pInputText formControlName="rollNumber" /></div>
+          <div class="field"><label>Contact name</label><input pInputText formControlName="contactName" /></div>
+          <div class="field"><label>Contact phone</label><input pInputText formControlName="contactPhone" /></div>
+          <div class="field"><label>Contact email</label><input pInputText formControlName="contactEmail" /></div>
+        </div>
+        <div class="dialog-footer">
+          <p-button label="Cancel" [outlined]="true" (onClick)="showEdit = false" type="button" />
+          <p-button label="Save changes" type="submit" [loading]="saving()" [disabled]="editForm.invalid" />
+        </div>
+      </form>
     </p-dialog>
   `,
   styles: [`
@@ -226,6 +261,10 @@ export class StudentListComponent implements OnInit, OnDestroy {
   sections = signal<any[]>([]);
   showDialog = false;
   showProfile = false;
+  showEdit = false;
+  canEdit = false;
+  statuses = ['Active', 'Inactive', 'AdmissionPending', 'OnLeave', 'TransferredOut', 'Withdrawn'];
+  editSections = signal<any[]>([]);
   profile = signal<any>(null);
   profileLoading = signal(false);
   photo = signal<string | null>(null);
@@ -237,6 +276,19 @@ export class StudentListComponent implements OnInit, OnDestroy {
   private page = 1;
   private pageSize = 25;
   private searchTimer: any;
+
+  editForm = this.fb.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    dateOfBirth: [null as Date | null, Validators.required],
+    status: ['Active', Validators.required],
+    rollNumber: [''],
+    classId: ['', Validators.required],
+    sectionId: ['', Validators.required],
+    contactName: [''],
+    contactPhone: [''],
+    contactEmail: [''],
+  });
 
   form = this.fb.group({
     firstName: ['', Validators.required],
@@ -251,8 +303,11 @@ export class StudentListComponent implements OnInit, OnDestroy {
     private api: ApiService,
     public ctx: SchoolContextService,
     private fb: FormBuilder,
-    private msg: MessageService
-  ) {}
+    private msg: MessageService,
+    private auth: AuthService
+  ) {
+    this.canEdit = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin') || auth.hasRole('AdmissionOfficer');
+  }
 
   ngOnDestroy() { this.stopCamera(); }
 
@@ -375,6 +430,86 @@ export class StudentListComponent implements OnInit, OnDestroy {
     const rows = student?.enrollments || [];
     const year = this.ctx.context()?.academicYearName;
     return rows.find((row: any) => row.academicYear === year) || rows[0];
+  }
+
+  primaryContact(student: any) {
+    const rows = student?.guardians || [];
+    return rows.find((row: any) => row.isPrimary) || rows[0];
+  }
+
+  openEdit() {
+    const student = this.profile();
+    const row = this.enrollment(student);
+    const contact = this.primaryContact(student);
+    if (!student || !row) return;
+    const cls = this.classes().find(c => c.id === row.classId);
+    this.editSections.set(cls?.sections ?? []);
+    this.editForm.reset({
+      firstName: student.firstName,
+      lastName: student.lastName,
+      dateOfBirth: this.parseDate(student.dateOfBirth),
+      status: student.status,
+      rollNumber: row.rollNumber || '',
+      classId: row.classId,
+      sectionId: row.sectionId,
+      contactName: contact ? `${contact.firstName} ${contact.lastName}`.trim() : '',
+      contactPhone: contact?.phone || '',
+      contactEmail: contact?.email || '',
+    });
+    this.showEdit = true;
+  }
+
+  onEditClass(classId: string) {
+    const cls = this.classes().find(c => c.id === classId);
+    this.editSections.set(cls?.sections ?? []);
+    this.editForm.patchValue({ sectionId: '' });
+  }
+
+  saveEdit() {
+    if (this.editForm.invalid || !this.profile()) return;
+    const phone = (this.editForm.value.contactPhone || '').trim();
+    if (phone && phone.length < 8) {
+      this.msg.add({ severity: 'error', summary: 'Contact', detail: 'Contact phone must be at least 8 characters.' });
+      return;
+    }
+    this.saving.set(true);
+    const v = this.editForm.value;
+    const dob = v.dateOfBirth as Date;
+    this.api.updateStudent(this.ctx.schoolId, this.profile().id, {
+      firstName: v.firstName,
+      lastName: v.lastName,
+      dateOfBirth: this.iso(dob),
+      photoUrl: null,
+      status: v.status,
+      academicYearId: this.ctx.academicYearId,
+      classId: v.classId,
+      sectionId: v.sectionId,
+      rollNumber: v.rollNumber || null,
+      contactName: v.contactName || null,
+      contactPhone: phone || null,
+      contactEmail: v.contactEmail || null,
+    }).subscribe({
+      next: student => {
+        this.saving.set(false);
+        this.showEdit = false;
+        this.profile.set(student);
+        this.msg.add({ severity: 'success', summary: 'Student updated', detail: 'Changes were saved.' });
+        this.load();
+      },
+      error: (e) => {
+        this.saving.set(false);
+        this.msg.add({ severity: 'error', summary: 'Student', detail: e?.error?.error || 'Could not save this student.' });
+      }
+    });
+  }
+
+  private parseDate(value: string) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private iso(dob: Date) {
+    return `${dob.getFullYear()}-${String(dob.getMonth() + 1).padStart(2, '0')}-${String(dob.getDate()).padStart(2, '0')}`;
   }
 
   onClassChange(classId: string) {

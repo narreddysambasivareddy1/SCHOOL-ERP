@@ -67,6 +67,34 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
     }
 
     [Fact]
+    public async Task TeacherCannotEditStaffOrCreateClasses_AdminCanCreateClass()
+    {
+        var admin = await Login("admin@school.edu");
+        var teacher = await Login("teacher@school.edu");
+        var student = await Login("student@school.edu");
+        Guid employeeId;
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            employeeId = await db.Employees.Where(e => e.SchoolId == admin.SchoolId).Select(e => e.Id).FirstAsync();
+        }
+
+        var teacherEdit = await Send(teacher.Token, HttpMethod.Put, $"/api/schools/{admin.SchoolId}/employees/{employeeId}",
+            new { firstName = "No", lastName = "Access", joiningDate = "2024-06-01", basicSalary = 1000 });
+        var studentClass = await Send(student.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/classes",
+            new { name = "Blocked", sortOrder = 9 });
+        var adminClass = await Send(admin.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/classes",
+            new { name = "Roadmap " + Guid.NewGuid().ToString("N")[..8], sortOrder = 9 });
+        var otherTenant = await Send(admin.Token, HttpMethod.Put, $"/api/schools/{Guid.NewGuid()}/employees/{employeeId}",
+            new { firstName = "No", lastName = "Access", joiningDate = "2024-06-01", basicSalary = 1000 });
+
+        teacherEdit.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        studentClass.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        adminClass.StatusCode.Should().Be(HttpStatusCode.OK);
+        otherTenant.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task PublicEnquiryResponse_DoesNotContainTheOutboxCode()
     {
         var client = factory.CreateClient();
@@ -277,10 +305,14 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
                 : root.GetProperty("school").GetProperty("academicYearId").GetGuid());
     }
 
-    private async Task<HttpResponseMessage> Send(string token, HttpMethod method, string url)
+    private Task<HttpResponseMessage> Send(string token, HttpMethod method, string url) =>
+        Send(token, method, url, null);
+
+    private async Task<HttpResponseMessage> Send(string token, HttpMethod method, string url, object? body)
     {
         var client = factory.CreateClient();
         var request = new HttpRequestMessage(method, url);
+        if (body is not null) request.Content = JsonContent.Create(body);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return await client.SendAsync(request);
     }

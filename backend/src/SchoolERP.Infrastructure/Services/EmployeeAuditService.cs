@@ -36,7 +36,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
                 e.Department != null ? e.Department.Name : null,
                 e.Designation != null ? e.Designation.Name : null,
-                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary))
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId))
             .ToListAsync(ct);
 
         return new PagedResult<EmployeeListDto>(items, total, page, pageSize);
@@ -52,7 +52,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
                 e.Department != null ? e.Department.Name : null,
                 e.Designation != null ? e.Designation.Name : null,
-                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary))
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId))
             .FirstOrDefaultAsync(ct);
     }
 
@@ -87,16 +87,22 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
 
         return new EmployeeListDto(employee.Id, employee.EmployeeCode,
             employee.FirstName, employee.LastName, null, null, employee.Status.ToString(),
-            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl, employee.BasicSalary);
+            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl, employee.BasicSalary, employee.DepartmentId);
     }
 
     public async Task<EmployeeListDto> UpdateEmployeeAsync(
-        Guid id, Guid schoolId, UpdateEmployeeRequest request, string updatedBy, CancellationToken ct = default)
+        Guid id, Guid schoolId, Guid tenantId, UpdateEmployeeRequest request, string updatedBy, CancellationToken ct = default)
     {
+        if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
+            throw new InvalidOperationException("First and last name are required.");
         if (request.BasicSalary <= 0)
             throw new InvalidOperationException("Basic salary must be greater than zero.");
-        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id && e.SchoolId == schoolId, ct)
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id && e.SchoolId == schoolId && e.TenantId == tenantId, ct)
             ?? throw new InvalidOperationException("Employee not found.");
+        if (request.DepartmentId is Guid departmentId && !await db.Departments.AnyAsync(d => d.Id == departmentId && d.SchoolId == schoolId && d.TenantId == tenantId, ct))
+            throw new InvalidOperationException("Department does not belong to this school.");
+        if (request.DesignationId is Guid designationId && !await db.Designations.AnyAsync(d => d.Id == designationId && d.SchoolId == schoolId && d.TenantId == tenantId, ct))
+            throw new InvalidOperationException("Designation does not belong to this school.");
         employee.FirstName = request.FirstName;
         employee.LastName = request.LastName;
         employee.Email = request.Email;

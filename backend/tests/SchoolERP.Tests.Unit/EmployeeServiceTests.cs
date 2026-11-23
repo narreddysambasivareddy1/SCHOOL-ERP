@@ -104,6 +104,52 @@ public class EmployeeServiceTests
         var result = await svc.GetEmployeesAsync(Guid.NewGuid(), 1, 25, null);
         result.TotalCount.Should().Be(0);
     }
+
+    [Fact]
+    public async Task UpdateEmployee_ChangesSalaryDepartmentAndContact()
+    {
+        var (db, tenantId, schoolId) = await SeedSchoolAsync();
+        var department = new Department { TenantId = tenantId, SchoolId = schoolId, Name = "Science" };
+        db.Departments.Add(department);
+        await db.SaveChangesAsync();
+        var svc = new EmployeeService(db);
+        var created = await svc.CreateEmployeeAsync(new CreateEmployeeRequest(
+            "Sita", "Lakshmi", "sita@school.edu", "9000000000", null, null, new DateOnly(2024, 6, 1), 20000m),
+            schoolId, tenantId, "hr@school.edu");
+
+        var updated = await svc.UpdateEmployeeAsync(created.Id, schoolId, tenantId, new UpdateEmployeeRequest(
+            "Sita", "Rao", "sita.rao@school.edu", "9111111111", department.Id, null, new DateOnly(2024, 6, 1), 32000m),
+            "hr@school.edu");
+
+        updated.LastName.Should().Be("Rao");
+        updated.BasicSalary.Should().Be(32000m);
+        updated.DepartmentId.Should().Be(department.Id);
+        updated.Phone.Should().Be("9111111111");
+    }
+
+    [Fact]
+    public async Task UpdateEmployee_RejectsZeroSalaryOtherTenantAndForeignDepartment()
+    {
+        var (db, tenantId, schoolId) = await SeedSchoolAsync();
+        var otherDepartment = new Department { TenantId = Guid.NewGuid(), SchoolId = Guid.NewGuid(), Name = "Other" };
+        db.Departments.Add(otherDepartment);
+        await db.SaveChangesAsync();
+        var svc = new EmployeeService(db);
+        var created = await svc.CreateEmployeeAsync(new CreateEmployeeRequest(
+            "Sita", "Lakshmi", null, null, null, null, new DateOnly(2024, 6, 1), 20000m),
+            schoolId, tenantId, "hr@school.edu");
+        var zero = new UpdateEmployeeRequest("Sita", "Lakshmi", null, null, null, null, new DateOnly(2024, 6, 1), 0m);
+
+        var badSalary = () => svc.UpdateEmployeeAsync(created.Id, schoolId, tenantId, zero, "hr@school.edu");
+        await badSalary.Should().ThrowAsync<InvalidOperationException>().WithMessage("*greater than zero*");
+
+        var otherTenant = () => svc.UpdateEmployeeAsync(created.Id, schoolId, Guid.NewGuid(), zero with { BasicSalary = 20000m }, "hr@school.edu");
+        await otherTenant.Should().ThrowAsync<InvalidOperationException>().WithMessage("*not found*");
+
+        var foreign = () => svc.UpdateEmployeeAsync(created.Id, schoolId, tenantId,
+            zero with { BasicSalary = 20000m, DepartmentId = otherDepartment.Id }, "hr@school.edu");
+        await foreign.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Department*");
+    }
 }
 
 public class PayrollCalculatorTests

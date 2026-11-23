@@ -14,7 +14,7 @@ import { ApiService } from '../../core/services/api.service';
 interface EmployeeListDto {
   id: string; employeeCode: string; firstName: string; lastName: string;
   department?: string; designation?: string; status: string;
-  email?: string; phone?: string; joiningDate?: string; photoUrl?: string;
+  email?: string; phone?: string; joiningDate?: string; photoUrl?: string; basicSalary?: number; departmentId?: string;
 }
 
 @Component({
@@ -125,8 +125,12 @@ interface EmployeeListDto {
             <div><dt>Department</dt><dd>{{ selected()!.department || '—' }}</dd></div>
             <div><dt>Designation</dt><dd>{{ selected()!.designation || '—' }}</dd></div>
             <div><dt>Joining date</dt><dd>{{ selected()!.joiningDate || '—' }}</dd></div>
+            <div><dt>Basic salary</dt><dd>{{ selected()!.basicSalary }}</dd></div>
             <div><dt>Status</dt><dd>{{ selected()!.status }}</dd></div>
           </dl>
+        </div>
+        <div class="dialog-footer">
+          <p-button label="Edit staff" type="button" (onClick)="openEdit()" />
         </div>
         @if (!selected()!.photoUrl) {
           <div class="photo-actions">
@@ -145,6 +149,29 @@ interface EmployeeListDto {
           </div>
         }
       }
+    </p-dialog>
+
+    <p-dialog header="Edit staff" [(visible)]="showEdit" [modal]="true" appendTo="body" [style]="{width:'520px'}" [draggable]="false">
+      <form class="form-grid" (ngSubmit)="saveEdit()">
+        <label>First name *<input [(ngModel)]="edit.firstName" name="editFirst" required /></label>
+        <label>Last name *<input [(ngModel)]="edit.lastName" name="editLast" required /></label>
+        <label>Email<input [(ngModel)]="edit.email" name="editEmail" type="email" /></label>
+        <label>Phone<input [(ngModel)]="edit.phone" name="editPhone" /></label>
+        <label>Department
+          <select [(ngModel)]="edit.departmentId" name="editDepartment">
+            <option value="">None</option>
+            @for (dept of departments(); track dept.id) { <option [value]="dept.id">{{ dept.name }}</option> }
+          </select>
+        </label>
+        <label>Joining date *<input [(ngModel)]="edit.joiningDate" name="editJoin" type="date" required /></label>
+        <label>Basic salary *
+          <input [(ngModel)]="edit.basicSalary" name="editSalary" type="number" min="1" step="1" required />
+        </label>
+        <div class="dialog-footer">
+          <p-button label="Cancel" [outlined]="true" type="button" (onClick)="showEdit = false" />
+          <p-button label="Save changes" type="submit" [loading]="saving()" />
+        </div>
+      </form>
     </p-dialog>
   `,
   styles: [`
@@ -182,6 +209,7 @@ export class StaffListComponent implements OnInit, OnDestroy {
   search = '';
   showCreate = false;
   showProfile = false;
+  showEdit = false;
   saving = signal(false);
   error = signal<string | null>(null);
   selected = signal<EmployeeListDto | null>(null);
@@ -191,6 +219,7 @@ export class StaffListComponent implements OnInit, OnDestroy {
   cam = viewChild<ElementRef<HTMLVideoElement>>('cam');
   private stream: MediaStream | null = null;
   draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', basicSalary: 0, photoUrl: '' };
+  edit = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', basicSalary: 0 };
   private page = 1;
   private pageSize = 25;
 
@@ -207,6 +236,52 @@ export class StaffListComponent implements OnInit, OnDestroy {
     this.draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: new Date().toISOString().slice(0, 10), basicSalary: 0, photoUrl: '' };
     this.error.set(null);
     this.showCreate = true;
+  }
+
+  openEdit() {
+    const person = this.selected();
+    if (!person) return;
+    this.edit = {
+      firstName: person.firstName,
+      lastName: person.lastName,
+      email: person.email || '',
+      phone: person.phone || '',
+      departmentId: person.departmentId || '',
+      joiningDate: (person.joiningDate || '').slice(0, 10),
+      basicSalary: Number(person.basicSalary || 0)
+    };
+    this.error.set(null);
+    this.showEdit = true;
+  }
+
+  saveEdit() {
+    const person = this.selected();
+    const salary = Number(this.edit.basicSalary);
+    if (!person || !this.edit.firstName || !this.edit.lastName || !this.edit.joiningDate) return;
+    if (!salary || salary <= 0) {
+      this.error.set('Basic salary must be greater than zero.');
+      return;
+    }
+    this.saving.set(true);
+    this.error.set(null);
+    this.api.updateEmployee(this.ctx.schoolId, person.id, {
+      firstName: this.edit.firstName,
+      lastName: this.edit.lastName,
+      email: this.edit.email || null,
+      phone: this.edit.phone || null,
+      departmentId: this.edit.departmentId || null,
+      designationId: null,
+      joiningDate: this.edit.joiningDate,
+      basicSalary: salary
+    }).subscribe({
+      next: saved => {
+        this.saving.set(false);
+        this.showEdit = false;
+        this.selected.set(saved);
+        this.load();
+      },
+      error: (e) => { this.saving.set(false); this.error.set(e?.error?.error || 'Could not save this staff record.'); }
+    });
   }
 
   openProfile(row: EmployeeListDto) {

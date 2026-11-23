@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { SchoolContextService } from '../../core/services/school-context.service';
 import { MoneyPipe } from '../../shared/money.pipe';
@@ -7,7 +8,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
 @Component({
   selector: 'app-payroll',
   standalone: true,
-  imports: [CommonModule, MoneyPipe],
+  imports: [CommonModule, FormsModule, MoneyPipe],
   template: `
     <div class="page-header">
       <div class="eyebrow">CONFIDENTIAL · PAYROLL</div>
@@ -18,7 +19,9 @@ import { MoneyPipe } from '../../shared/money.pipe';
     @if (notice()) { <div class="ok">{{ notice() }}</div> }
 
     <div class="toolbar">
-      <button type="button" (click)="createCurrent()" [disabled]="busy()">Run current month (draft)</button>
+      <input type="number" [(ngModel)]="year" name="year" min="2000" max="2100" />
+      <input type="number" [(ngModel)]="month" name="month" min="1" max="12" />
+      <button type="button" (click)="createSelected()" [disabled]="busy()">Create draft for selected month</button>
     </div>
 
     @for (r of runs(); track r.id) {
@@ -41,6 +44,9 @@ import { MoneyPipe } from '../../shared/money.pipe';
           <span>Net {{ r.netTotal | money }}</span>
         </div>
         <button type="button" class="ghost" (click)="open(r.id)">View payslips</button>
+        @if (slipRunId === r.id && slips().length) {
+          <button type="button" class="ghost" (click)="printPayslips(r.periodLabel)">Print payslips</button>
+        }
       </article>
     }
 
@@ -86,6 +92,9 @@ export class PayrollComponent implements OnInit {
   error = signal<string | null>(null);
   notice = signal<string | null>(null);
   busy = signal(false);
+  year = new Date().getFullYear();
+  month = new Date().getMonth() + 1;
+  slipRunId = '';
 
   constructor(private api: ApiService, private ctx: SchoolContextService) {}
 
@@ -99,11 +108,12 @@ export class PayrollComponent implements OnInit {
     });
   }
 
-  createCurrent() {
-    const now = new Date();
+  createSelected() {
+    if (this.month < 1 || this.month > 12) { this.error.set('Month must be 1-12.'); return; }
     this.busy.set(true);
-    this.api.createPayrollRun(this.ctx.schoolId, now.getFullYear(), now.getMonth() + 1).subscribe({
-      next: () => { this.notice.set('Draft run created.'); this.busy.set(false); this.reload(); },
+    this.error.set(null);
+    this.api.createPayrollRun(this.ctx.schoolId, Number(this.year), Number(this.month)).subscribe({
+      next: () => { this.notice.set('Draft run created from saved salaries.'); this.busy.set(false); this.reload(); },
       error: (e) => { this.error.set(e?.error?.error || 'Could not create run (period may already exist).'); this.busy.set(false); }
     });
   }
@@ -116,6 +126,20 @@ export class PayrollComponent implements OnInit {
   }
 
   open(id: string) {
-    this.api.getPayslips(this.ctx.schoolId, id).subscribe({ next: rows => this.slips.set(rows) });
+    this.slipRunId = id;
+    this.api.getPayslips(this.ctx.schoolId, id).subscribe({
+      next: rows => this.slips.set(rows),
+      error: () => this.error.set('Could not load stored payslips.')
+    });
+  }
+
+  printPayslips(label: string) {
+    const rows = this.slips().map((p: any) =>
+      `<tr><td>${p.employee} (${p.code})</td><td>${p.basic}</td><td>${p.gross}</td><td>${p.pf}</td><td>${p.esi}</td><td>${p.professionalTax}</td><td>${p.tds}</td><td>${p.net}</td></tr>`).join('');
+    const popup = window.open('', '_blank', 'noopener');
+    if (!popup) { this.error.set('Allow pop-ups to print payslips.'); return; }
+    popup.document.write(`<h1>Payslips · ${label}</h1><table border="1" cellpadding="6"><tr><th>Employee</th><th>Basic</th><th>Gross</th><th>PF</th><th>ESI</th><th>PT</th><th>TDS</th><th>Net</th></tr>${rows}</table>`);
+    popup.document.close();
+    popup.print();
   }
 }

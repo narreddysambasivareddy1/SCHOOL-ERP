@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IEnquiryService, EnquiryService>();
         services.AddScoped<RegistrationService>();
         services.AddScoped<AcademicOpsService>();
+        services.AddScoped<AttendanceCorrectionService>();
 
         return services;
     }

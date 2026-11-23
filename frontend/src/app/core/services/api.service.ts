@@ -45,6 +45,16 @@ export class ApiService {
     return this.http.get<any[]>(`${this.base}/schools/${schoolId}/fees/structures`, { params: { academicYearId } });
   }
   saveFeeStructure(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/structures`, body); }
+  getFeeCategories(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/fees/categories`); }
+  saveFeeCategory(schoolId: string, name: string) { return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/categories`, { name }); }
+  saveAcademicYear(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/academic-years`, body); }
+  saveClass(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/classes`, body); }
+  saveSection(schoolId: string, classId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/classes/${classId}/sections`, body); }
+  saveSubject(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/subjects`, body); }
+  requestAttendanceCorrection(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/attendance/corrections`, body); }
+  getAttendanceCorrections(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/attendance/corrections`, { params: { status: 'Pending' } }); }
+  approveAttendanceCorrection(schoolId: string, id: string) { return this.http.post<any>(`${this.base}/schools/${schoolId}/attendance/corrections/${id}/approve`, {}); }
+  rejectAttendanceCorrection(schoolId: string, id: string) { return this.http.post<any>(`${this.base}/schools/${schoolId}/attendance/corrections/${id}/reject`, {}); }
   getVehicles(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/transport/vehicles`); }
   getCalendar(schoolId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/calendar`); }
   saveCalendarEvent(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/calendar`, body); }
@@ -59,7 +69,7 @@ export class ApiService {
   // Fees
   getStudentPayments(schoolId: string, studentId: string) { return this.http.get<any[]>(`${this.base}/schools/${schoolId}/fees/student/${studentId}`); }
   getFeeSchedule(schoolId: string, studentId: string, academicYearId: string) {
-    return this.http.get<{ items: { category: string; amount: number }[]; total: number }>(
+    return this.http.get<{ items: { category: string; amount: number }[]; total: number; paid: number; outstanding: number }>(
       `${this.base}/schools/${schoolId}/fees/student/${studentId}/schedule`, { params: { academicYearId } });
   }
   recordPayment(schoolId: string, body: any) { return this.http.post<any>(`${this.base}/schools/${schoolId}/fees/record`, body); }

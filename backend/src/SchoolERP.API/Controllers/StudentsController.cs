@@ -56,7 +56,7 @@ public class StudentsController(IStudentService studentService, IAuditService au
         var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
         try
         {
-            var student = await studentService.UpdateStudentAsync(id, schoolId, request, actor, ct);
+            var student = await studentService.UpdateStudentAsync(id, schoolId, tenantId, request, actor, ct);
             await auditService.LogAsync(tenantId, actor, "StudentUpdated", "Student", student.Id.ToString(),
                 newValues: new { student.FirstName, student.LastName });
             return Ok(student);

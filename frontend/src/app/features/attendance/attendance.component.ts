@@ -99,7 +99,18 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
               <tr>
                 <td>{{ r.studentName }}</td>
                 <td><span class="badge" [class]="badgeClass(r.code)">{{ r.code }}</span></td>
-                <td class="muted">{{ r.remarks || '—' }}</td>
+                <td class="muted">
+                  {{ r.remarks || '—' }}
+                  @if (canMark) {
+                    <form (ngSubmit)="requestCorrection(r)">
+                      <select [(ngModel)]="correctionCode[r.studentId]" [name]="'code' + r.studentId">
+                        <option>Present</option><option>Absent</option><option>Late</option><option>Excused</option>
+                      </select>
+                      <input [(ngModel)]="correctionReason[r.studentId]" [name]="'reason' + r.studentId" placeholder="Reason" />
+                      <button type="submit">Request correction</button>
+                    </form>
+                  }
+                </td>
               </tr>
             }
           </tbody>
@@ -172,6 +183,17 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
       <div class="empty-state">
         <div class="empty-icon">🏫</div>
         <p>Select a class, section and date to view or mark attendance.</p>
+      </div>
+    }
+    @if (canApprove && corrections().length) {
+      <div class="session-card">
+        <div class="session-title">Pending corrections</div>
+        @for (c of corrections(); track c.id) {
+          <div class="session-meta">{{ c.originalCode }} → {{ c.requestedCode }} · {{ c.reason }} · {{ c.requestedBy }}
+            <button class="btn-primary" type="button" (click)="decide(c.id, true)">Approve</button>
+            <button class="btn-ghost" type="button" (click)="decide(c.id, false)">Reject</button>
+          </div>
+        }
       </div>
     }
     }
@@ -248,6 +270,10 @@ export class AttendanceComponent implements OnInit {
   sessionSection = '';
 
   codes = ['Present', 'Absent', 'Late', 'Excused'];
+  corrections = signal<any[]>([]);
+  correctionCode: Record<string, string> = {};
+  correctionReason: Record<string, string> = {};
+  get canApprove() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('AttendanceOfficer'); }
 
   get canLoad() { return this.selectedClassId && this.selectedSectionId && this.selectedDate; }
   get canMark() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('Teacher') || this.auth.hasRole('AttendanceOfficer'); }
@@ -257,8 +283,36 @@ export class AttendanceComponent implements OnInit {
 
   constructor(private api: ApiService, public ctx: SchoolContextService, private auth: AuthService) {}
 
+  requestCorrection(row: any) {
+    const reason = (this.correctionReason[row.studentId] || '').trim();
+    const requestedCode = this.correctionCode[row.studentId] || 'Present';
+    if (reason.length < 5) { this.apiError.set('A correction reason of at least 5 characters is required.'); return; }
+    this.api.requestAttendanceCorrection(this.ctx.schoolId, {
+      sessionId: this.session().id, studentId: row.studentId, requestedCode, reason
+    }).subscribe({
+      next: () => { this.apiError.set(null); this.loadCorrections(); },
+      error: (e) => this.apiError.set(e?.error?.error || 'Could not request the correction.')
+    });
+  }
+
+  decide(id: string, approve: boolean) {
+    const call = approve
+      ? this.api.approveAttendanceCorrection(this.ctx.schoolId, id)
+      : this.api.rejectAttendanceCorrection(this.ctx.schoolId, id);
+    call.subscribe({
+      next: () => { this.loadCorrections(); this.loadAttendance(); },
+      error: (e) => this.apiError.set(e?.error?.error || 'Could not decide this correction.')
+    });
+  }
+
+  loadCorrections() {
+    if (!this.canApprove || !this.ctx.schoolId) return;
+    this.api.getAttendanceCorrections(this.ctx.schoolId).subscribe({ next: rows => this.corrections.set(rows ?? []) });
+  }
+
   ngOnInit() {
     if (!this.ctx.schoolId) return;
+    this.loadCorrections();
     const familyOnly = (this.auth.hasRole('Student') || this.auth.hasRole('Parent')) && !this.canMark;
     this.personal.set(familyOnly);
     if (familyOnly) {

@@ -12,6 +12,7 @@ using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
+using SchoolERP.Infrastructure.Services;
 using Xunit;
 
 namespace SchoolERP.Tests.Unit;
@@ -746,7 +747,7 @@ public class AcademicAccessSecurityTests
 
     private AttendanceController Attendance(AppDbContext db, Guid tenantId, Guid userId, string role)
     {
-        var controller = new AttendanceController(db, _audit.Object, _notifications.Object);
+        var controller = new AttendanceController(db, _audit.Object, _notifications.Object, new AttendanceCorrectionService(db));
         Attach(controller, Principal(tenantId, userId, role));
         return controller;
     }

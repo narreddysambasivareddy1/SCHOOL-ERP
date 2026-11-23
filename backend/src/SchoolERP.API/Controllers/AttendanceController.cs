@@ -6,17 +6,19 @@ using SchoolERP.API.Authorization;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
+using SchoolERP.Infrastructure.Services;
 
 namespace SchoolERP.API.Controllers;
 
 public record MarkAttendanceRequest(Guid AcademicYearId, Guid ClassId, Guid SectionId, DateOnly Date,
     IEnumerable<StudentAttendanceEntry> Entries);
 public record StudentAttendanceEntry(Guid StudentId, AttendanceCode Code, string? Remarks);
+public record AttendanceCorrectionRequest(Guid SessionId, Guid StudentId, string RequestedCode, string Reason);
 
 [ApiController]
 [Route("api/schools/{schoolId}/attendance")]
 [Authorize]
-public class AttendanceController(AppDbContext db, Application.Interfaces.IAuditService audit, Application.Interfaces.INotificationService notifications) : ControllerBase
+public class AttendanceController(AppDbContext db, Application.Interfaces.IAuditService audit, Application.Interfaces.INotificationService notifications, AttendanceCorrectionService corrections) : ControllerBase
 {
     [HttpPost]
     [Authorize(Roles = RoleNames.AttendanceStaff)]
@@ -165,6 +167,62 @@ public class AttendanceController(AppDbContext db, Application.Interfaces.IAudit
             return Forbid();
         var records = await inRange.Select(r => new AttendanceDay(r.Session!.Date, r.Code)).ToListAsync(ct);
         return AttendanceSummary(records);
+    }
+
+    [HttpGet("corrections")]
+    [Authorize(Roles = RoleNames.AttendanceStaff)]
+    public async Task<IActionResult> Corrections(Guid schoolId, [FromQuery] string? status, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var query = db.AttendanceCorrections.Where(c => c.SchoolId == schoolId && c.TenantId == tenantId);
+        if (!string.IsNullOrWhiteSpace(status)) query = query.Where(c => c.Status == status);
+        var items = await query.OrderByDescending(c => c.CreatedAt)
+            .Select(c => new { c.Id, c.StudentId, c.SessionId, c.OriginalCode, c.RequestedCode, c.Reason, c.Status, c.RequestedBy, c.DecidedBy })
+            .ToListAsync(ct);
+        return Ok(items);
+    }
+
+    [HttpPost("corrections")]
+    [Authorize(Roles = RoleNames.AttendanceStaff)]
+    public async Task<IActionResult> RequestCorrection(Guid schoolId, [FromBody] AttendanceCorrectionRequest req, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
+        var session = await db.AttendanceSessions.FirstOrDefaultAsync(s => s.Id == req.SessionId && s.SchoolId == schoolId && s.TenantId == tenantId, ct);
+        if (session is null) return NotFound();
+        if (!await CanAccessSection(schoolId, tenantId, session.AcademicYearId, session.ClassId, session.SectionId, ct))
+            return Forbid();
+        try
+        {
+            var saved = await corrections.RequestAsync(schoolId, tenantId, req.SessionId, req.StudentId, req.RequestedCode, req.Reason, actor, ct);
+            await audit.LogAsync(tenantId, actor, "AttendanceCorrectionRequested", "AttendanceCorrection", saved.Id.ToString(),
+                newValues: new { saved.OriginalCode, saved.RequestedCode, saved.Reason });
+            return Ok(new { saved.Id, saved.Status, saved.OriginalCode, saved.RequestedCode });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpPost("corrections/{id:guid}/approve")]
+    [Authorize(Roles = RoleNames.Leadership + ",AttendanceOfficer")]
+    public Task<IActionResult> ApproveCorrection(Guid schoolId, Guid id, CancellationToken ct) => Decide(schoolId, id, true, ct);
+
+    [HttpPost("corrections/{id:guid}/reject")]
+    [Authorize(Roles = RoleNames.Leadership + ",AttendanceOfficer")]
+    public Task<IActionResult> RejectCorrection(Guid schoolId, Guid id, CancellationToken ct) => Decide(schoolId, id, false, ct);
+
+    private async Task<IActionResult> Decide(Guid schoolId, Guid id, bool approve, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
+        try
+        {
+            var saved = await corrections.DecideAsync(schoolId, tenantId, id, approve, actor, ct);
+            await audit.LogAsync(tenantId, actor, approve ? "AttendanceCorrectionApproved" : "AttendanceCorrectionRejected",
+                "AttendanceCorrection", saved.Id.ToString(),
+                oldValues: new { saved.OriginalCode }, newValues: new { saved.RequestedCode, saved.Status });
+            return Ok(new { saved.Id, saved.Status, saved.OriginalCode, saved.RequestedCode });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
 
     private readonly record struct AttendanceDay(DateOnly Date, AttendanceCode Code);
