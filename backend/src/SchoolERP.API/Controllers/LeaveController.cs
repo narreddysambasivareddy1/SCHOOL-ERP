@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.Interfaces;
 using SchoolERP.Domain.Entities;
 using SchoolERP.Domain.Enums;
@@ -21,6 +22,14 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     public async Task<IActionResult> GetTypes(Guid schoolId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        if (!await db.LeaveTypes.AnyAsync(l => l.SchoolId == schoolId && l.TenantId == tenantId, ct))
+        {
+            db.LeaveTypes.AddRange(
+                new LeaveType { TenantId = tenantId, SchoolId = schoolId, Name = "Casual Leave", MaxDaysPerYear = 12 },
+                new LeaveType { TenantId = tenantId, SchoolId = schoolId, Name = "Sick Leave", MaxDaysPerYear = 10 },
+                new LeaveType { TenantId = tenantId, SchoolId = schoolId, Name = "Earned Leave", MaxDaysPerYear = 15, IsCarryForward = true });
+            await db.SaveChangesAsync(ct);
+        }
         var types = await db.LeaveTypes
             .Where(l => l.SchoolId == schoolId && l.TenantId == tenantId)
             .Select(l => new { l.Id, l.Name, l.MaxDaysPerYear, l.IsCarryForward })
@@ -29,7 +38,7 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     }
 
     [HttpPost("apply")]
-    [Authorize(Roles = "SchoolAdmin,HRManager,Teacher")]
+    [Authorize(Roles = RoleNames.LeaveApply)]
     public async Task<IActionResult> Apply(Guid schoolId, [FromBody] ApplyLeaveRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -38,7 +47,10 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
             return BadRequest(new { error = "Leave dates must be valid and cannot span more than 91 days." });
 
         var employeeId = req.EmployeeId;
-        if (User.IsInRole("Teacher"))
+        var canApplyForOthers = User.IsInRole("SchoolAdmin") || User.IsInRole("PlatformSuperAdmin") || User.IsInRole("HRManager");
+        if (canApplyForOthers && employeeId == Guid.Empty)
+            return BadRequest(new { error = "Select the staff member this leave is for." });
+        if (!canApplyForOthers)
         {
             if (!Guid.TryParse(User.FindFirstValue("sub"), out var userId)) return Forbid();
             var ownEmployeeId = await db.Employees.Where(e => e.UserId == userId &&
@@ -70,7 +82,7 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     }
 
     [HttpPost("{leaveId}/approve")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.LeaveDecide)]
     public async Task<IActionResult> Approve(Guid schoolId, Guid leaveId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -93,7 +105,7 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     }
 
     [HttpPost("{leaveId}/reject")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.LeaveDecide)]
     public async Task<IActionResult> Reject(Guid schoolId, Guid leaveId, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -113,7 +125,7 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
     }
 
     [HttpGet("requests")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.LeaveApply)]
     public async Task<IActionResult> GetRequests(Guid schoolId, [FromQuery] string? status, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -123,6 +135,13 @@ public class LeaveController(AppDbContext db, IAuditService audit, INotification
             .Include(l => l.Employee)
             .Include(l => l.LeaveType)
             .AsQueryable();
+        var canReviewAll = User.IsInRole("SchoolAdmin") || User.IsInRole("PlatformSuperAdmin") || User.IsInRole("HRManager");
+        if (!canReviewAll)
+        {
+            var userId = StudentAccess.UserId(User);
+            if (userId is null) return Forbid();
+            query = query.Where(l => l.Employee!.UserId == userId);
+        }
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(l => l.Status == status);
         var list = await query.OrderByDescending(l => l.CreatedAt)
             .Select(l => new

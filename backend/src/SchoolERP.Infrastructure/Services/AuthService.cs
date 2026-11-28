@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -12,6 +13,7 @@ namespace SchoolERP.Infrastructure.Services;
 
 public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
 {
+    private static readonly ConcurrentDictionary<string, AttemptWindow> FailedLogins = new();
     public async Task<LoginResponse?> LoginAsync(LoginRequest request, Guid? tenantId = null, CancellationToken ct = default)
     {
         var resolvedTenantId = tenantId ?? Guid.Empty;
@@ -26,12 +28,19 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
 
         if (resolvedTenantId == Guid.Empty) return null;
 
+        var attemptKey = resolvedTenantId + ":" + (request.Email ?? "").Trim().ToLowerInvariant();
+        if (IsLocked(attemptKey)) return null;
+
         var user = await db.Users
             .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.TenantId == resolvedTenantId && u.Email == request.Email && u.IsActive, ct);
 
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            RegisterFailure(attemptKey);
             return null;
+        }
+        FailedLogins.TryRemove(attemptKey, out _);
 
         user.LastLoginAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
@@ -70,6 +79,28 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
             school.Locale, school.Currency, school.TimeZone);
     }
 
+    private static bool IsLocked(string key)
+    {
+        if (!FailedLogins.TryGetValue(key, out var window)) return false;
+        if (DateTime.UtcNow - window.StartedAt > TimeSpan.FromMinutes(15))
+        {
+            FailedLogins.TryRemove(key, out _);
+            return false;
+        }
+        return window.Count >= 8;
+    }
+
+    private static void RegisterFailure(string key)
+    {
+        FailedLogins.AddOrUpdate(key,
+            _ => new AttemptWindow(1, DateTime.UtcNow),
+            (_, current) => DateTime.UtcNow - current.StartedAt > TimeSpan.FromMinutes(15)
+                ? new AttemptWindow(1, DateTime.UtcNow)
+                : current with { Count = current.Count + 1 });
+    }
+
+    private sealed record AttemptWindow(int Count, DateTime StartedAt);
+
     private string GenerateToken(Guid userId, string email, Guid tenantId, IEnumerable<string> roles)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Secret"]!));
@@ -83,7 +114,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
             new("tid", tenantId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+        claims.AddRange(roles.Select(r => new Claim("role", r)));
 
         var token = new JwtSecurityToken(
             issuer: config["Jwt:Issuer"],

@@ -14,7 +14,7 @@ import { ApiService } from '../../core/services/api.service';
 interface EmployeeListDto {
   id: string; employeeCode: string; firstName: string; lastName: string;
   department?: string; designation?: string; status: string;
-  email?: string; phone?: string; joiningDate?: string; photoUrl?: string;
+  email?: string; phone?: string; joiningDate?: string; photoUrl?: string; basicSalary?: number; departmentId?: string; designationId?: string;
 }
 
 @Component({
@@ -79,6 +79,11 @@ interface EmployeeListDto {
           </select>
         </label>
         <label>Joining date *<input [(ngModel)]="draft.joiningDate" name="joiningDate" type="date" required /></label>
+        <label>Basic salary (₹) *
+          <input [(ngModel)]="draft.basicSalary" name="basicSalary" type="number" min="1" step="1" required
+            placeholder="e.g. 35000" />
+          <small class="field-hint">Monthly basic salary. Required for payroll.</small>
+        </label>
         <div class="photo-field">Photo
           <div class="photo-actions">
             <button type="button" (click)="startCamera()">Open camera</button>
@@ -98,7 +103,7 @@ interface EmployeeListDto {
         </div>
         <div class="dialog-footer">
           <p-button label="Cancel" [outlined]="true" type="button" (onClick)="showCreate = false" />
-          <p-button label="Create staff" type="submit" [loading]="saving()" [disabled]="!draft.firstName || !draft.lastName || !draft.joiningDate" />
+          <p-button label="Create staff" type="submit" [loading]="saving()" [disabled]="!draft.firstName || !draft.lastName || !draft.joiningDate || !draft.basicSalary || draft.basicSalary <= 0" />
         </div>
       </form>
     </p-dialog>
@@ -120,8 +125,12 @@ interface EmployeeListDto {
             <div><dt>Department</dt><dd>{{ selected()!.department || '—' }}</dd></div>
             <div><dt>Designation</dt><dd>{{ selected()!.designation || '—' }}</dd></div>
             <div><dt>Joining date</dt><dd>{{ selected()!.joiningDate || '—' }}</dd></div>
+            <div><dt>Basic salary</dt><dd>{{ selected()!.basicSalary }}</dd></div>
             <div><dt>Status</dt><dd>{{ selected()!.status }}</dd></div>
           </dl>
+        </div>
+        <div class="dialog-footer">
+          <p-button label="Edit staff" type="button" (onClick)="openEdit()" />
         </div>
         @if (!selected()!.photoUrl) {
           <div class="photo-actions">
@@ -140,6 +149,35 @@ interface EmployeeListDto {
           </div>
         }
       }
+    </p-dialog>
+
+    <p-dialog header="Edit staff" [(visible)]="showEdit" [modal]="true" appendTo="body" [style]="{width:'520px'}" [draggable]="false">
+      <form class="form-grid" (ngSubmit)="saveEdit()">
+        <label>First name *<input [(ngModel)]="edit.firstName" name="editFirst" required /></label>
+        <label>Last name *<input [(ngModel)]="edit.lastName" name="editLast" required /></label>
+        <label>Email<input [(ngModel)]="edit.email" name="editEmail" type="email" /></label>
+        <label>Phone<input [(ngModel)]="edit.phone" name="editPhone" /></label>
+        <label>Department
+          <select [(ngModel)]="edit.departmentId" name="editDepartment">
+            <option value="">None</option>
+            @for (dept of departments(); track dept.id) { <option [value]="dept.id">{{ dept.name }}</option> }
+          </select>
+        </label>
+        <label>Designation
+          <select [(ngModel)]="edit.designationId" name="editDesignation">
+            <option value="">None</option>
+            @for (row of designations(); track row.id) { <option [value]="row.id">{{ row.name }}</option> }
+          </select>
+        </label>
+        <label>Joining date *<input [(ngModel)]="edit.joiningDate" name="editJoin" type="date" required /></label>
+        <label>Basic salary *
+          <input [(ngModel)]="edit.basicSalary" name="editSalary" type="number" min="1" step="1" required />
+        </label>
+        <div class="dialog-footer">
+          <p-button label="Cancel" [outlined]="true" type="button" (onClick)="showEdit = false" />
+          <p-button label="Save changes" type="submit" [loading]="saving()" />
+        </div>
+      </form>
     </p-dialog>
   `,
   styles: [`
@@ -167,6 +205,7 @@ interface EmployeeListDto {
     .form-error { color: var(--danger); }
     strong { font-size: 12px; }
     small { color: var(--muted); font-size: 10px; }
+    .field-hint { display: block; color: var(--muted); font-size: 10px; font-weight: 400; margin-top: 2px; }
   `]
 })
 export class StaffListComponent implements OnInit, OnDestroy {
@@ -176,15 +215,18 @@ export class StaffListComponent implements OnInit, OnDestroy {
   search = '';
   showCreate = false;
   showProfile = false;
+  showEdit = false;
   saving = signal(false);
   error = signal<string | null>(null);
   selected = signal<EmployeeListDto | null>(null);
   departments = signal<{ id: string; name: string }[]>([]);
+  designations = signal<{ id: string; name: string }[]>([]);
   cameraOn = signal(false);
   photoSaving = signal(false);
   cam = viewChild<ElementRef<HTMLVideoElement>>('cam');
   private stream: MediaStream | null = null;
-  draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', photoUrl: '' };
+  draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: '', basicSalary: 0, photoUrl: '' };
+  edit = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', designationId: '', joiningDate: '', basicSalary: 0 };
   private page = 1;
   private pageSize = 25;
 
@@ -194,13 +236,63 @@ export class StaffListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.load();
-    if (this.ctx.schoolId) this.api.getDepartments(this.ctx.schoolId).subscribe(rows => this.departments.set(rows));
+    if (this.ctx.schoolId) {
+      this.api.getDepartments(this.ctx.schoolId).subscribe(rows => this.departments.set(rows));
+      this.api.getDesignations(this.ctx.schoolId).subscribe(rows => this.designations.set(rows ?? []));
+    }
   }
 
   openCreate() {
-    this.draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: new Date().toISOString().slice(0, 10), photoUrl: '' };
+    this.draft = { firstName: '', lastName: '', email: '', phone: '', departmentId: '', joiningDate: new Date().toISOString().slice(0, 10), basicSalary: 0, photoUrl: '' };
     this.error.set(null);
     this.showCreate = true;
+  }
+
+  openEdit() {
+    const person = this.selected();
+    if (!person) return;
+    this.edit = {
+      firstName: person.firstName,
+      lastName: person.lastName,
+      email: person.email || '',
+      phone: person.phone || '',
+      departmentId: person.departmentId || '',
+      designationId: person.designationId || '',
+      joiningDate: (person.joiningDate || '').slice(0, 10),
+      basicSalary: Number(person.basicSalary || 0)
+    };
+    this.error.set(null);
+    this.showEdit = true;
+  }
+
+  saveEdit() {
+    const person = this.selected();
+    const salary = Number(this.edit.basicSalary);
+    if (!person || !this.edit.firstName || !this.edit.lastName || !this.edit.joiningDate) return;
+    if (!salary || salary <= 0) {
+      this.error.set('Basic salary must be greater than zero.');
+      return;
+    }
+    this.saving.set(true);
+    this.error.set(null);
+    this.api.updateEmployee(this.ctx.schoolId, person.id, {
+      firstName: this.edit.firstName,
+      lastName: this.edit.lastName,
+      email: this.edit.email || null,
+      phone: this.edit.phone || null,
+      departmentId: this.edit.departmentId || null,
+      designationId: this.edit.designationId || null,
+      joiningDate: this.edit.joiningDate,
+      basicSalary: salary
+    }).subscribe({
+      next: saved => {
+        this.saving.set(false);
+        this.showEdit = false;
+        this.selected.set(saved);
+        this.load();
+      },
+      error: (e) => { this.saving.set(false); this.error.set(e?.error?.error || 'Could not save this staff record.'); }
+    });
   }
 
   openProfile(row: EmployeeListDto) {
@@ -301,6 +393,11 @@ export class StaffListComponent implements OnInit, OnDestroy {
 
   create() {
     if (!this.draft.firstName || !this.draft.lastName || !this.draft.joiningDate) return;
+    const salary = Number(this.draft.basicSalary);
+    if (!salary || salary <= 0) {
+      this.error.set('Basic salary must be greater than zero.');
+      return;
+    }
     this.saving.set(true);
     this.error.set(null);
     this.api.createEmployee(this.ctx.schoolId, {
@@ -311,10 +408,11 @@ export class StaffListComponent implements OnInit, OnDestroy {
       departmentId: this.draft.departmentId || null,
       designationId: null,
       joiningDate: this.draft.joiningDate,
+      basicSalary: salary,
       photoUrl: this.draft.photoUrl || null
     }).subscribe({
       next: () => { this.saving.set(false); this.showCreate = false; this.load(); },
-      error: () => { this.saving.set(false); this.error.set('Could not create this staff record.'); }
+      error: (e) => { this.saving.set(false); this.error.set(e?.error?.error ?? 'Could not create this staff record.'); }
     });
   }
 

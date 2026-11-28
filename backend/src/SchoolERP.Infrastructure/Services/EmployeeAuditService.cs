@@ -36,15 +36,32 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
                 e.Id, e.EmployeeCode, e.FirstName, e.LastName,
                 e.Department != null ? e.Department.Name : null,
                 e.Designation != null ? e.Designation.Name : null,
-                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl))
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId, e.DesignationId))
             .ToListAsync(ct);
 
         return new PagedResult<EmployeeListDto>(items, total, page, pageSize);
     }
 
+    public async Task<EmployeeListDto?> GetEmployeeAsync(Guid id, Guid schoolId, CancellationToken ct = default)
+    {
+        return await db.Employees
+            .Where(e => e.Id == id && e.SchoolId == schoolId)
+            .Include(e => e.Department)
+            .Include(e => e.Designation)
+            .Select(e => new EmployeeListDto(
+                e.Id, e.EmployeeCode, e.FirstName, e.LastName,
+                e.Department != null ? e.Department.Name : null,
+                e.Designation != null ? e.Designation.Name : null,
+                e.Status.ToString(), e.Email, e.Phone, e.JoiningDate, e.PhotoUrl, e.BasicSalary, e.DepartmentId, e.DesignationId))
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<EmployeeListDto> CreateEmployeeAsync(
         CreateEmployeeRequest request, Guid schoolId, Guid tenantId, string createdBy, CancellationToken ct = default)
     {
+        if (request.BasicSalary <= 0)
+            throw new InvalidOperationException("Basic salary must be greater than zero.");
+
         var count = await db.Employees.CountAsync(e => e.SchoolId == schoolId, ct);
         var code = $"EMP-{count + 1:D4}";
 
@@ -61,7 +78,7 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
             DepartmentId = request.DepartmentId,
             DesignationId = request.DesignationId,
             JoiningDate = request.JoiningDate,
-            BasicSalary = 35_000m,
+            BasicSalary = request.BasicSalary,
             CreatedBy = createdBy
         };
 
@@ -70,7 +87,33 @@ public class EmployeeService(AppDbContext db) : IEmployeeService
 
         return new EmployeeListDto(employee.Id, employee.EmployeeCode,
             employee.FirstName, employee.LastName, null, null, employee.Status.ToString(),
-            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl);
+            employee.Email, employee.Phone, employee.JoiningDate, employee.PhotoUrl, employee.BasicSalary, employee.DepartmentId, employee.DesignationId);
+    }
+
+    public async Task<EmployeeListDto> UpdateEmployeeAsync(
+        Guid id, Guid schoolId, Guid tenantId, UpdateEmployeeRequest request, string updatedBy, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
+            throw new InvalidOperationException("First and last name are required.");
+        if (request.BasicSalary <= 0)
+            throw new InvalidOperationException("Basic salary must be greater than zero.");
+        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id && e.SchoolId == schoolId && e.TenantId == tenantId, ct)
+            ?? throw new InvalidOperationException("Employee not found.");
+        if (request.DepartmentId is Guid departmentId && !await db.Departments.AnyAsync(d => d.Id == departmentId && d.SchoolId == schoolId && d.TenantId == tenantId, ct))
+            throw new InvalidOperationException("Department does not belong to this school.");
+        if (request.DesignationId is Guid designationId && !await db.Designations.AnyAsync(d => d.Id == designationId && d.SchoolId == schoolId && d.TenantId == tenantId, ct))
+            throw new InvalidOperationException("Designation does not belong to this school.");
+        employee.FirstName = request.FirstName;
+        employee.LastName = request.LastName;
+        employee.Email = request.Email;
+        employee.Phone = request.Phone;
+        employee.DepartmentId = request.DepartmentId;
+        employee.DesignationId = request.DesignationId;
+        employee.JoiningDate = request.JoiningDate;
+        employee.BasicSalary = request.BasicSalary;
+        employee.UpdatedBy = updatedBy;
+        await db.SaveChangesAsync(ct);
+        return (await GetEmployeeAsync(id, schoolId, ct))!;
     }
 
     public async Task SetStatusAsync(Guid id, Guid schoolId, string status, CancellationToken ct = default)

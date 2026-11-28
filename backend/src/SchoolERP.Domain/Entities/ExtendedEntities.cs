@@ -15,6 +15,21 @@ public class AttendanceSession : TenantEntity
     public ICollection<StudentAttendance> Records { get; set; } = [];
 }
 
+public class AttendanceCorrection : TenantEntity
+{
+    public Guid SchoolId { get; set; }
+    public Guid SessionId { get; set; }
+    public Guid StudentAttendanceId { get; set; }
+    public Guid StudentId { get; set; }
+    public AttendanceCode OriginalCode { get; set; }
+    public AttendanceCode RequestedCode { get; set; }
+    public string Reason { get; set; } = string.Empty;
+    public string Status { get; set; } = "Pending";
+    public string RequestedBy { get; set; } = string.Empty;
+    public string? DecidedBy { get; set; }
+    public DateTime? DecidedAt { get; set; }
+}
+
 public class StudentAttendance : TenantEntity
 {
     public Guid SessionId { get; set; }
@@ -107,6 +122,7 @@ public class Payment : TenantEntity
 {
     public Guid SchoolId { get; set; }
     public Guid StudentId { get; set; }
+    public Guid? AcademicYearId { get; set; }
     public Student? Student { get; set; }
     public decimal Amount { get; set; }
     public PaymentStatus Status { get; set; }
@@ -344,6 +360,7 @@ public class StudentDocument : TenantEntity
     public bool Verified { get; set; }
     public string? VerifiedBy { get; set; }
     public DateTime? VerifiedAt { get; set; }
+    public string? ReviewNote { get; set; }
 }
 
 public class SchoolAcademicSetting : TenantEntity

@@ -1,0 +1,16 @@
+export const Roles = {
+  leadership: ['SchoolAdmin', 'PlatformSuperAdmin'],
+  teach: ['Teacher', 'AttendanceOfficer'],
+  officeDashboard: ['SchoolAdmin', 'PlatformSuperAdmin', 'Accountant', 'HRManager', 'AdmissionOfficer', 'TransportManager', 'FrontOffice'],
+  admissions: ['SchoolAdmin', 'PlatformSuperAdmin', 'AdmissionOfficer', 'FrontOffice'],
+  students: ['SchoolAdmin', 'PlatformSuperAdmin', 'AdmissionOfficer', 'Teacher', 'AttendanceOfficer'],
+  staff: ['SchoolAdmin', 'PlatformSuperAdmin', 'HRManager'],
+  leave: ['SchoolAdmin', 'PlatformSuperAdmin', 'HRManager', 'Teacher', 'AttendanceOfficer'],
+  academics: ['SchoolAdmin', 'PlatformSuperAdmin', 'Teacher', 'AttendanceOfficer', 'Parent', 'Student'],
+  substitutions: ['SchoolAdmin', 'PlatformSuperAdmin', 'HRManager'],
+  fees: ['SchoolAdmin', 'PlatformSuperAdmin', 'Accountant', 'Student', 'Parent'],
+  payroll: ['SchoolAdmin', 'PlatformSuperAdmin', 'HRManager', 'PayrollOfficer'],
+  transport: ['SchoolAdmin', 'PlatformSuperAdmin', 'TransportManager', 'Student', 'Parent'],
+  messages: ['SchoolAdmin', 'PlatformSuperAdmin', 'Teacher', 'AttendanceOfficer'],
+  announcements: ['SchoolAdmin', 'PlatformSuperAdmin', 'Teacher', 'AttendanceOfficer', 'Parent', 'Student'],
+};

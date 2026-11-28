@@ -1,3 +1,4 @@
+using SchoolERP.API.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ public record SaveDiaryRequest(Guid AcademicYearId, DateOnly Date, Guid ClassId,
 public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWebHostEnvironment env) : ControllerBase
 {
     [HttpGet("api/schools/{schoolId}/ops-today")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Substitutions)]
     public async Task<IActionResult> OpsToday(Guid schoolId, [FromQuery] Guid academicYearId, CancellationToken ct)
     {
         try
@@ -31,12 +32,12 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpGet("api/schools/{schoolId}/substitutions")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Substitutions)]
     public async Task<IActionResult> Substitutions(Guid schoolId, [FromQuery] DateOnly? date, CancellationToken ct)
         => Ok(await ops.SubstitutionsAsync(schoolId, Tenant(), date ?? DateOnly.FromDateTime(DateTime.UtcNow.AddHours(5.5)), ct));
 
     [HttpGet("api/schools/{schoolId}/substitutions/available")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Substitutions)]
     public async Task<IActionResult> Available(Guid schoolId, [FromQuery] Guid academicYearId, [FromQuery] DateOnly date, [FromQuery] Guid periodId, CancellationToken ct)
     {
         try { return Ok(await ops.AvailableTeachersAsync(schoolId, Tenant(), academicYearId, date, periodId, ct)); }
@@ -44,7 +45,7 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpPost("api/schools/{schoolId}/substitutions/{id:guid}/assign")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Substitutions)]
     public async Task<IActionResult> Assign(Guid schoolId, Guid id, [FromBody] AssignSubstituteRequest body, CancellationToken ct)
     {
         try { await ops.AssignSubstituteAsync(schoolId, Tenant(), id, body.SubstituteEmployeeId, ct); return Ok(new { assigned = true }); }
@@ -62,7 +63,7 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpPost("api/schools/{schoolId}/lesson-plans")]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> SavePlan(Guid schoolId, [FromBody] SaveLessonPlanRequest body, CancellationToken ct)
     {
         if (body.Days is null || body.Days.Count > 6)
@@ -91,7 +92,7 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpPost("api/schools/{schoolId}/diaries")]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     public async Task<IActionResult> SaveDiary(Guid schoolId, [FromBody] SaveDiaryRequest body, CancellationToken ct)
     {
         var employeeId = User.IsInRole("Teacher")
@@ -107,7 +108,7 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpPost("api/schools/{schoolId}/diaries/scan")]
-    [Authorize(Roles = "SchoolAdmin,Teacher")]
+    [Authorize(Roles = RoleNames.Teaching)]
     [RequestSizeLimit(8_000_000)]
     public async Task<IActionResult> ScanDiary(Guid schoolId, [FromForm] Guid academicYearId, [FromForm] DateOnly date,
         [FromForm] Guid classId, [FromForm] Guid sectionId, [FromForm] Guid? subjectId,
@@ -171,7 +172,7 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpGet("api/schools/{schoolId}/diaries/compliance")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Compliance(Guid schoolId, [FromQuery] Guid academicYearId, [FromQuery] DateOnly? date, CancellationToken ct)
     {
         try { return Ok(await ops.ComplianceAsync(schoolId, Tenant(), academicYearId, date ?? DateOnly.FromDateTime(DateTime.UtcNow.AddHours(5.5)), ct)); }
@@ -179,7 +180,7 @@ public class AcademicDeskController(AcademicOpsService ops, AppDbContext db, IWe
     }
 
     [HttpPost("api/schools/{schoolId}/diaries/remind")]
-    [Authorize(Roles = "SchoolAdmin")]
+    [Authorize(Roles = RoleNames.Leadership)]
     public async Task<IActionResult> Remind(Guid schoolId, [FromQuery] Guid academicYearId, [FromQuery] DateOnly? date, CancellationToken ct)
     {
         try

@@ -15,11 +15,40 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
     <div class="page-header">
       <div class="eyebrow">ATTENDANCE CENTRE</div>
       <h1>Attendance</h1>
-      @if (isViewer) {
+      @if (personal()) {
+        <p class="text-muted">Your own attendance for the last 30 days. Class registers stay with teachers and attendance staff.</p>
+      } @else if (isViewer) {
         <p class="text-muted">View-only for your role. Marking is limited to assigned teachers and attendance officers.</p>
       }
     </div>
 
+    @if (personal()) {
+      @if (children().length > 1) {
+        <div class="filter-bar">
+          <label>Student
+            <select [ngModel]="selectedChild" (ngModelChange)="loadOwn($event)">
+              @for (c of children(); track c.studentId) {
+                <option [value]="c.studentId">{{ c.firstName }} {{ c.lastName }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      }
+      @if (apiError()) { <div class="alert-error">{{ apiError() }}</div> }
+      @if (own()) {
+        <div class="session-card">
+          <div class="session-meta">{{ own().present }} present of {{ own().total }} marked days · {{ own().percentage }}%</div>
+          <table class="att-table">
+            <thead><tr><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              @for (r of own().records; track r.date) {
+                <tr><td>{{ r.date | date:'mediumDate' }}</td><td>{{ r.code }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    } @else {
     <!-- Filters -->
     <div class="filter-bar">
       <div class="filter-group">
@@ -70,7 +99,18 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
               <tr>
                 <td>{{ r.studentName }}</td>
                 <td><span class="badge" [class]="badgeClass(r.code)">{{ r.code }}</span></td>
-                <td class="muted">{{ r.remarks || '—' }}</td>
+                <td class="muted">
+                  {{ r.remarks || '—' }}
+                  @if (canMark) {
+                    <form (ngSubmit)="requestCorrection(r)">
+                      <select [(ngModel)]="correctionCode[r.studentId]" [name]="'code' + r.studentId">
+                        <option>Present</option><option>Absent</option><option>Late</option><option>Excused</option>
+                      </select>
+                      <input [(ngModel)]="correctionReason[r.studentId]" [name]="'reason' + r.studentId" placeholder="Reason" />
+                      <button type="submit">Request correction</button>
+                    </form>
+                  }
+                </td>
               </tr>
             }
           </tbody>
@@ -145,6 +185,18 @@ interface AttendanceRow { studentId: string; studentName: string; code: string; 
         <p>Select a class, section and date to view or mark attendance.</p>
       </div>
     }
+    @if (canApprove && corrections().length) {
+      <div class="session-card">
+        <div class="session-title">Pending corrections</div>
+        @for (c of corrections(); track c.id) {
+          <div class="session-meta">{{ c.originalCode }} → {{ c.requestedCode }} · {{ c.reason }} · {{ c.requestedBy }}
+            <button class="btn-primary" type="button" (click)="decide(c.id, true)">Approve</button>
+            <button class="btn-ghost" type="button" (click)="decide(c.id, false)">Reject</button>
+          </div>
+        }
+      </div>
+    }
+    }
   `,
   styles: [`
     .page-header { margin-bottom: 24px; }
@@ -205,6 +257,10 @@ export class AttendanceComponent implements OnInit {
   loadingStudents = signal(false);
   saving = signal(false);
   apiError = signal<string | null>(null);
+  personal = signal(false);
+  own = signal<any>(null);
+  children = signal<any[]>([]);
+  selectedChild = '';
 
   selectedClassId = '';
   selectedSectionId = '';
@@ -214,19 +270,81 @@ export class AttendanceComponent implements OnInit {
   sessionSection = '';
 
   codes = ['Present', 'Absent', 'Late', 'Excused'];
+  corrections = signal<any[]>([]);
+  correctionCode: Record<string, string> = {};
+  correctionReason: Record<string, string> = {};
+  get canApprove() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('AttendanceOfficer'); }
 
   get canLoad() { return this.selectedClassId && this.selectedSectionId && this.selectedDate; }
-  get canMark() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('Teacher') || this.auth.hasRole('AttendanceOfficer'); }
+  get canMark() { return this.auth.hasRole('SchoolAdmin') || this.auth.hasRole('PlatformSuperAdmin') || this.auth.hasRole('Teacher') || this.auth.hasRole('AttendanceOfficer'); }
   get isViewer() { return this.auth.hasRole('Student') || this.auth.hasRole('Parent'); }
   get presentCount() { return this.markRows().filter(r => r.code === 'Present').length; }
   get absentCount() { return this.markRows().filter(r => r.code === 'Absent').length; }
 
   constructor(private api: ApiService, public ctx: SchoolContextService, private auth: AuthService) {}
 
+  requestCorrection(row: any) {
+    const reason = (this.correctionReason[row.studentId] || '').trim();
+    const requestedCode = this.correctionCode[row.studentId] || 'Present';
+    if (reason.length < 5) { this.apiError.set('A correction reason of at least 5 characters is required.'); return; }
+    this.api.requestAttendanceCorrection(this.ctx.schoolId, {
+      sessionId: this.session().id, studentId: row.studentId, requestedCode, reason
+    }).subscribe({
+      next: () => { this.apiError.set(null); this.loadCorrections(); },
+      error: (e) => this.apiError.set(e?.error?.error || 'Could not request the correction.')
+    });
+  }
+
+  decide(id: string, approve: boolean) {
+    const call = approve
+      ? this.api.approveAttendanceCorrection(this.ctx.schoolId, id)
+      : this.api.rejectAttendanceCorrection(this.ctx.schoolId, id);
+    call.subscribe({
+      next: () => { this.loadCorrections(); this.loadAttendance(); },
+      error: (e) => this.apiError.set(e?.error?.error || 'Could not decide this correction.')
+    });
+  }
+
+  loadCorrections() {
+    if (!this.canApprove || !this.ctx.schoolId) return;
+    this.api.getAttendanceCorrections(this.ctx.schoolId).subscribe({ next: rows => this.corrections.set(rows ?? []) });
+  }
+
   ngOnInit() {
-    if (this.ctx.schoolId) {
-      this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c));
+    if (!this.ctx.schoolId) return;
+    this.loadCorrections();
+    const familyOnly = (this.auth.hasRole('Student') || this.auth.hasRole('Parent')) && !this.canMark;
+    this.personal.set(familyOnly);
+    if (familyOnly) {
+      if (this.auth.hasRole('Student')) {
+        this.api.getMyStudent(this.ctx.schoolId).subscribe({
+          next: me => this.loadOwn(me.id),
+          error: () => this.apiError.set('Your student record is not linked to this login.')
+        });
+      } else {
+        this.api.getParentChildren().subscribe({
+          next: rows => {
+            this.children.set(rows ?? []);
+            if (rows?.[0]) this.loadOwn(rows[0].studentId);
+          },
+          error: () => this.apiError.set('Could not load linked students.')
+        });
+      }
+      return;
     }
+    this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c));
+  }
+
+  loadOwn(studentId: string) {
+    this.selectedChild = studentId;
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 30);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    this.api.getStudentAttendance(this.ctx.schoolId, studentId, iso(from), iso(to)).subscribe({
+      next: res => this.own.set(res),
+      error: () => this.apiError.set('Could not load attendance.')
+    });
   }
 
   onClassChange(classId: string) {

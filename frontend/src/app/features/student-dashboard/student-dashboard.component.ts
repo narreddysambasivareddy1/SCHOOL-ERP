@@ -124,21 +124,32 @@ export class StudentDashboardComponent implements OnInit {
       return;
     }
 
-    this.api.getStudentPayments(this.ctx.schoolId, userId).subscribe({
-      next: p => { this.payments.set(p); this.loadingFees.set(false); },
-      error: () => this.loadingFees.set(false)
+    // Declare date helpers before any use
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 30);
+    const iso = (d: Date) => {
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${d.getFullYear()}-${month}-${day}`;
+    };
+
+    this.api.getMyStudent(this.ctx.schoolId).subscribe({
+      next: me => {
+        this.api.getStudentPayments(this.ctx.schoolId, me.id).subscribe({
+          next: p => { this.payments.set(p); this.loadingFees.set(false); },
+          error: () => this.loadingFees.set(false)
+        });
+        this.api.getStudentAttendance(this.ctx.schoolId, me.id, iso(from), iso(to)).subscribe({
+          next: res => { this.attendancePct.set(Math.round(res?.percentage ?? 0)); this.loadingAtt.set(false); },
+          error: () => this.loadingAtt.set(false)
+        });
+      },
+      error: () => { this.loadingFees.set(false); this.loadingAtt.set(false); }
     });
     this.api.getHomework(this.ctx.schoolId).subscribe({
       next: h => { this.homework.set(h); this.loadingHw.set(false); },
       error: () => this.loadingHw.set(false)
-    });
-    const to = new Date();
-    const from = new Date();
-    from.setDate(to.getDate() - 30);
-    const iso = (d: Date) => d.toISOString().slice(0, 10);
-    this.api.getStudentAttendance(this.ctx.schoolId, userId, iso(from), iso(to)).subscribe({
-      next: res => { this.attendancePct.set(Math.round(res?.percentage ?? 0)); this.loadingAtt.set(false); },
-      error: () => this.loadingAtt.set(false)
     });
   }
 }

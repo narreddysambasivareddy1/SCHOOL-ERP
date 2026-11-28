@@ -18,9 +18,58 @@ interface Assignment {
   template: `
     <div class="page-header">
       <div class="eyebrow">ACADEMIC OPERATIONS</div>
-      <h1>Academics & Timetable</h1>
+      <h1>Classes & allocation</h1>
     </div>
 
+    @if (isAdmin) {
+    <div class="card map-card">
+      <div class="card-header"><div class="card-title">Academic setup</div></div>
+      <form class="map-form" (ngSubmit)="saveYear()">
+        <label>Year name<input [(ngModel)]="year.name" name="yearName" required /></label>
+        <label>Start<input type="date" [(ngModel)]="year.startDate" name="yearStart" required /></label>
+        <label>End<input type="date" [(ngModel)]="year.endDate" name="yearEnd" required /></label>
+        <label>Current<input type="checkbox" [(ngModel)]="year.isCurrent" name="yearCurrent" /></label>
+        <button type="submit" [disabled]="busy()">{{ editingYearId ? 'Update year' : 'Save year' }}</button>
+        @if (editingYearId) { <button type="button" (click)="clearYear()">Cancel</button> }
+      </form>
+      @for (row of years(); track row.id) {
+        <button type="button" class="edit-row" (click)="editYear(row)">Edit {{ row.name }}</button>
+      }
+      <form class="map-form" (ngSubmit)="saveClass()">
+        <label>Class<input [(ngModel)]="klass.name" name="className" required /></label>
+        <label>Sort<input type="number" [(ngModel)]="klass.sortOrder" name="classSort" /></label>
+        <button type="submit" [disabled]="busy()">{{ editingClassId ? 'Update class' : 'Save class' }}</button>
+        @if (editingClassId) { <button type="button" (click)="clearClass()">Cancel</button> }
+      </form>
+      @for (row of classes(); track row.id) {
+        <button type="button" class="edit-row" (click)="editClass(row)">Edit {{ row.name }}</button>
+      }
+      <form class="map-form" (ngSubmit)="saveSection()">
+        <label>Class
+          <select [(ngModel)]="section.classId" name="sectionClass">
+            @for (c of classes(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+          </select>
+        </label>
+        <label>Section<input [(ngModel)]="section.name" name="sectionName" required /></label>
+        <label>Capacity<input type="number" [(ngModel)]="section.capacity" name="sectionCapacity" min="1" /></label>
+        <button type="submit" [disabled]="busy()">{{ editingSectionId ? 'Update section' : 'Save section' }}</button>
+        @if (editingSectionId) { <button type="button" (click)="clearSection()">Cancel</button> }
+      </form>
+      @for (row of classes(); track row.id) {
+        @for (sec of row.sections || []; track sec.id) {
+          <button type="button" class="edit-row" (click)="editSection(row.id, sec)">Edit {{ row.name }} · {{ sec.name }}</button>
+        }
+      }
+      <form class="map-form" (ngSubmit)="saveSubject()">
+        <label>Subject<input [(ngModel)]="subject.name" name="subjectName" required /></label>
+        <label>Code<input [(ngModel)]="subject.code" name="subjectCode" required /></label>
+        <button type="submit" [disabled]="busy()">{{ editingSubjectId ? 'Update subject' : 'Save subject' }}</button>
+        @if (editingSubjectId) { <button type="button" (click)="clearSubject()">Cancel</button> }
+      </form>
+      @for (row of subjects(); track row.id) {
+        <button type="button" class="edit-row" (click)="editSubject(row)">Edit {{ row.name }}</button>
+      }
+    </div>
     <div class="card map-card">
       <div class="card-header">
         <div>
@@ -66,6 +115,7 @@ interface Assignment {
         <button type="submit" [disabled]="busy()">Save mapping</button>
       </form>
     </div>
+    }
 
     <div class="card">
       <div class="card-header">
@@ -173,6 +223,7 @@ interface Assignment {
     .map-form label { font-size: 11px; font-weight: 700; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
     .map-form select, .map-form input, .map-form button { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); }
     .map-form button { background: var(--primary); color: white; border: 0; align-self: end; cursor: pointer; font-weight: 700; }
+    .edit-row { margin: 0 20px 8px 0; border: 1px solid var(--line); background: var(--surface); color: var(--navy); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 12px; }
   `]
 })
 export class AcademicsComponent implements OnInit {
@@ -188,6 +239,15 @@ export class AcademicsComponent implements OnInit {
   mapError = signal<string | null>(null);
   notice = signal<string | null>(null);
   form = { employeeId: '', subjectId: '', classId: '', sectionId: '', periodSlot: '', electiveGroup: '' };
+  years = signal<any[]>([]);
+  editingYearId = '';
+  editingClassId = '';
+  editingSectionId = '';
+  editingSubjectId = '';
+  year = { name: '', startDate: '', endDate: '', isCurrent: false };
+  klass = { name: '', sortOrder: 0 };
+  section = { classId: '', name: '', capacity: 40 };
+  subject = { name: '', code: '', isLanguage: false };
 
   constructor(private api: ApiService, public ctx: SchoolContextService, auth: AuthService) {
     this.isAdmin = auth.hasRole('SchoolAdmin') || auth.hasRole('PlatformSuperAdmin');
@@ -196,7 +256,10 @@ export class AcademicsComponent implements OnInit {
   ngOnInit() {
     if (!this.ctx.schoolId || !this.ctx.academicYearId) { this.loading.set(false); return; }
     this.load();
-    this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({ next: r => this.employees.set(r.items || []) });
+    if (this.isAdmin) {
+      this.api.getEmployees(this.ctx.schoolId, 1, 100).subscribe({ next: r => this.employees.set(r.items || []) });
+      this.api.getAcademicYears(this.ctx.schoolId).subscribe({ next: rows => this.years.set(rows ?? []) });
+    }
     this.api.getSubjects(this.ctx.schoolId).subscribe({ next: s => this.subjects.set(s) });
     this.api.getClasses(this.ctx.schoolId).subscribe({ next: c => this.classes.set(c) });
   }
@@ -205,6 +268,71 @@ export class AcademicsComponent implements OnInit {
     const cls = this.classes().find(c => c.id === this.form.classId);
     this.sections.set(cls?.sections || []);
     this.form.sectionId = '';
+  }
+
+  editYear(row: any) {
+    this.editingYearId = row.id;
+    this.year = { name: row.name, startDate: String(row.startDate).slice(0, 10), endDate: String(row.endDate).slice(0, 10), isCurrent: !!row.isCurrent };
+  }
+  clearYear() { this.editingYearId = ''; this.year = { name: '', startDate: '', endDate: '', isCurrent: false }; }
+  editClass(row: any) { this.editingClassId = row.id; this.klass = { name: row.name, sortOrder: row.sortOrder }; }
+  clearClass() { this.editingClassId = ''; this.klass = { name: '', sortOrder: 0 }; }
+  editSection(classId: string, row: any) {
+    this.editingSectionId = row.id;
+    this.section = { classId, name: row.name, capacity: row.capacity };
+  }
+  clearSection() { this.editingSectionId = ''; this.section = { classId: '', name: '', capacity: 40 }; }
+  editSubject(row: any) { this.editingSubjectId = row.id; this.subject = { name: row.name, code: row.code, isLanguage: !!row.isLanguage }; }
+  clearSubject() { this.editingSubjectId = ''; this.subject = { name: '', code: '', isLanguage: false }; }
+
+  saveYear() {
+    if (!this.year.name || !this.year.startDate || !this.year.endDate) return;
+    this.busy.set(true);
+    const call = this.editingYearId
+      ? this.api.updateAcademicYear(this.ctx.schoolId, this.editingYearId, this.year)
+      : this.api.saveAcademicYear(this.ctx.schoolId, this.year);
+    call.subscribe({
+      next: () => { this.busy.set(false); this.notice.set('Academic year saved.'); this.clearYear(); this.api.getAcademicYears(this.ctx.schoolId).subscribe(rows => this.years.set(rows ?? [])); },
+      error: (e) => { this.busy.set(false); this.mapError.set(e?.error?.error || 'Could not save the academic year.'); }
+    });
+  }
+
+  saveClass() {
+    if (!this.klass.name) return;
+    this.busy.set(true);
+    const call = this.editingClassId
+      ? this.api.updateClass(this.ctx.schoolId, this.editingClassId, this.klass)
+      : this.api.saveClass(this.ctx.schoolId, this.klass);
+    call.subscribe({
+      next: () => { this.busy.set(false); this.notice.set('Class saved.'); this.clearClass(); this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c)); },
+      error: (e) => { this.busy.set(false); this.mapError.set(e?.error?.error || 'Could not save the class.'); }
+    });
+  }
+
+  saveSection() {
+    if (!this.section.classId || !this.section.name || this.section.capacity <= 0) return;
+    this.busy.set(true);
+    const body = { name: this.section.name, capacity: this.section.capacity };
+    const call = this.editingSectionId
+      ? this.api.updateSection(this.ctx.schoolId, this.editingSectionId, body)
+      : this.api.saveSection(this.ctx.schoolId, this.section.classId, body);
+    call.subscribe({
+      next: () => { this.busy.set(false); this.notice.set('Section saved.'); this.clearSection(); this.api.getClasses(this.ctx.schoolId).subscribe(c => this.classes.set(c)); },
+      error: (e) => { this.busy.set(false); this.mapError.set(e?.error?.error || 'Could not save the section.'); }
+    });
+  }
+
+  saveSubject() {
+    if (!this.subject.name || !this.subject.code) return;
+    this.busy.set(true);
+    const body = { name: this.subject.name, code: this.subject.code, isLanguage: this.subject.isLanguage };
+    const call = this.editingSubjectId
+      ? this.api.updateSubject(this.ctx.schoolId, this.editingSubjectId, body)
+      : this.api.saveSubject(this.ctx.schoolId, body);
+    call.subscribe({
+      next: () => { this.busy.set(false); this.notice.set('Subject saved.'); this.clearSubject(); this.api.getSubjects(this.ctx.schoolId).subscribe(s => this.subjects.set(s)); },
+      error: (e) => { this.busy.set(false); this.mapError.set(e?.error?.error || 'Could not save the subject.'); }
+    });
   }
 
   load() {

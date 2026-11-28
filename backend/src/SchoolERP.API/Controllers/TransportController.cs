@@ -1,3 +1,4 @@
+using SchoolERP.API.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using SchoolERP.Infrastructure.Integrations;
 namespace SchoolERP.API.Controllers;
 
 public record CreateRouteRequest(string Name, IEnumerable<RouteStopRequest> Stops);
+public record SaveVehicleRequest(string RegistrationNumber, int Capacity, DateOnly? InsuranceExpiry, DateOnly? FitnessExpiry);
 public record RouteStopRequest(string Name, int StopOrder, TimeOnly? PickupTime, double? Latitude, double? Longitude);
 
 [ApiController]
@@ -16,6 +18,39 @@ public record RouteStopRequest(string Name, int StopOrder, TimeOnly? PickupTime,
 [Authorize]
 public class TransportController(AppDbContext db) : ControllerBase
 {
+    [HttpGet("vehicles")]
+    public async Task<IActionResult> Vehicles(Guid schoolId, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var rows = await db.Vehicles
+            .Where(v => v.TenantId == tenantId && v.SchoolId == schoolId && v.IsActive)
+            .OrderBy(v => v.RegistrationNumber)
+            .Select(v => new { v.Id, v.RegistrationNumber, v.Capacity, v.InsuranceExpiry, v.FitnessExpiry })
+            .ToListAsync(ct);
+        return Ok(rows);
+    }
+
+    [HttpPost("vehicles")]
+    [Authorize(Roles = RoleNames.TransportWrite)]
+    public async Task<IActionResult> SaveVehicle(Guid schoolId, [FromBody] SaveVehicleRequest req, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(req.RegistrationNumber) || req.Capacity <= 0)
+            return BadRequest(new { error = "A registration number and a capacity above zero are required." });
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var number = req.RegistrationNumber.Trim();
+        var exists = await db.Vehicles.AnyAsync(v =>
+            v.TenantId == tenantId && v.SchoolId == schoolId && v.RegistrationNumber == number, ct);
+        if (exists) return Conflict(new { error = "That vehicle is already registered for this school." });
+        var vehicle = new Vehicle
+        {
+            TenantId = tenantId, SchoolId = schoolId, RegistrationNumber = number,
+            Capacity = req.Capacity, InsuranceExpiry = req.InsuranceExpiry, FitnessExpiry = req.FitnessExpiry, IsActive = true
+        };
+        db.Vehicles.Add(vehicle);
+        await db.SaveChangesAsync(ct);
+        return Ok(new { vehicle.Id, vehicle.RegistrationNumber, vehicle.Capacity });
+    }
+
     [HttpGet("routes")]
     public async Task<IActionResult> GetRoutes(Guid schoolId, CancellationToken ct)
     {
@@ -30,7 +65,7 @@ public class TransportController(AppDbContext db) : ControllerBase
     }
 
     [HttpPost("routes")]
-    [Authorize(Roles = "SchoolAdmin,TransportManager")]
+    [Authorize(Roles = RoleNames.TransportWrite)]
     public async Task<IActionResult> CreateRoute(Guid schoolId, [FromBody] CreateRouteRequest req, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);

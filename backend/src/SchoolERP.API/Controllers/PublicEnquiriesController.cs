@@ -21,10 +21,7 @@ public class PublicEnquiriesController(IEnquiryService enquiries, IHubContext<En
             {
                 result.ChallengeId,
                 result.ExpiresAt,
-                sandboxOtp = result.SandboxOtp,
-                message = result.SandboxOtp is null
-                    ? "OTP sent to the mobile number."
-                    : "Sandbox OTP issued (SMS/WhatsApp adapters are in sandbox)."
+                message = "Verification code sent."
             });
         }
         catch (InvalidOperationException ex)

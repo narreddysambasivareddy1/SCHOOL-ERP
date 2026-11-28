@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolERP.API.Authorization;
 using SchoolERP.Domain.Enums;
 using SchoolERP.Infrastructure.Data;
 
@@ -9,12 +10,13 @@ namespace SchoolERP.API.Controllers;
 
 [ApiController]
 [Route("api/schools/{schoolId}/dashboard")]
-[Authorize]
+[Authorize(Roles = RoleNames.OfficeDashboard)]
 public class DashboardController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(Guid schoolId, [FromQuery] Guid academicYearId, CancellationToken ct)
     {
+        if (!StudentAccess.CanViewOfficeDashboard(User)) return Forbid();
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var now = DateTime.UtcNow;

@@ -90,6 +90,27 @@ public static class IntegrationCatalog
         }
     }
 
+    public static string MergeConfig(string existingJson, string incomingJson)
+    {
+        using var existing = JsonDocument.Parse(string.IsNullOrWhiteSpace(existingJson) ? "{}" : existingJson);
+        using var incoming = JsonDocument.Parse(string.IsNullOrWhiteSpace(incomingJson) ? "{}" : incomingJson);
+        if (existing.RootElement.ValueKind != JsonValueKind.Object || incoming.RootElement.ValueKind != JsonValueKind.Object)
+            return incomingJson;
+
+        var merged = new Dictionary<string, JsonElement>();
+        foreach (var prop in existing.RootElement.EnumerateObject())
+            merged[prop.Name] = prop.Value.Clone();
+        foreach (var prop in incoming.RootElement.EnumerateObject())
+        {
+            if (IsSecret(prop.Name) && prop.Value.ValueKind == JsonValueKind.String &&
+                (prop.Value.GetString() ?? "").Contains('•'))
+                continue;
+            merged[prop.Name] = prop.Value.Clone();
+        }
+
+        return JsonSerializer.Serialize(merged.ToDictionary(p => p.Key, p => Unwrap(p.Value)));
+    }
+
     public static object MaskConfig(string configJson)
     {
         try

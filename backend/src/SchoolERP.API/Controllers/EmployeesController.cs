@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SchoolERP.API.Authorization;
 using SchoolERP.Application.DTOs;
 using SchoolERP.Application.Interfaces;
 
@@ -12,6 +13,7 @@ namespace SchoolERP.API.Controllers;
 public class EmployeesController(IEmployeeService employeeService, IAuditService auditService) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = RoleNames.EmployeeDirectory)]
     public async Task<IActionResult> GetAll(Guid schoolId,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? search = null, CancellationToken ct = default)
     {
@@ -21,7 +23,7 @@ public class EmployeesController(IEmployeeService employeeService, IAuditService
     }
 
     [HttpPost]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Hr)]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] CreateEmployeeRequest request, CancellationToken ct)
     {
         var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
@@ -37,8 +39,29 @@ public class EmployeesController(IEmployeeService employeeService, IAuditService
         return CreatedAtAction(nameof(GetAll), new { schoolId }, employee);
     }
 
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = RoleNames.Hr)]
+    public async Task<IActionResult> Update(Guid schoolId, Guid id, [FromBody] UpdateEmployeeRequest request, CancellationToken ct)
+    {
+        var tenantId = Guid.Parse(User.FindFirstValue("tid")!);
+        var actor = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? "unknown";
+        try
+        {
+            var employee = await employeeService.UpdateEmployeeAsync(id, schoolId, tenantId, request, actor, ct);
+            await auditService.LogAsync(tenantId, actor, "EmployeeUpdated", "Employee", employee.Id.ToString(),
+                newValues: new { employee.EmployeeCode, employee.BasicSalary });
+            return Ok(employee);
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return NotFound(new { error = ex.Message });
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     [HttpPost("{id:guid}/status")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Hr)]
     public async Task<IActionResult> Status(Guid schoolId, Guid id, [FromBody] StatusToggleRequest body, CancellationToken ct)
     {
         try
@@ -50,7 +73,7 @@ public class EmployeesController(IEmployeeService employeeService, IAuditService
     }
 
     [HttpPost("{id:guid}/photo")]
-    [Authorize(Roles = "SchoolAdmin,HRManager")]
+    [Authorize(Roles = RoleNames.Hr)]
     public async Task<IActionResult> Photo(Guid schoolId, Guid id, [FromBody] SetPhotoRequest body, CancellationToken ct)
     {
         try
