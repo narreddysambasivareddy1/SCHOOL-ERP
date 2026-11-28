@@ -199,14 +199,36 @@ export class ApiService {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/enquiries/${id}/notes`, { note, action });
   }
 
-  getRegistrations(schoolId: string) {
-    return this.http.get<any[]>(`${this.base}/schools/${schoolId}/registrations`);
+  getRegistrationSummary(schoolId: string) {
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/registrations/summary`);
+  }
+  getRegistrations(schoolId: string, filters: Record<string, string | number | undefined> = {}) {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && `${value}` !== '') params = params.set(key, `${value}`);
+    });
+    return this.http.get<{ items: any[]; total: number; page: number; pageSize: number }>(`${this.base}/schools/${schoolId}/registrations`, { params });
+  }
+  getRegistration(schoolId: string, id: string) {
+    return this.http.get<any>(`${this.base}/schools/${schoolId}/registrations/${id}`);
   }
   createRegistration(schoolId: string, body: any) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations`, body);
   }
-  payRegistrationFee(schoolId: string, id: string, amount: number) {
-    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/fee`, { amount, method: 'Cash' });
+  updateRegistration(schoolId: string, id: string, body: any) {
+    return this.http.put<any>(`${this.base}/schools/${schoolId}/registrations/${id}`, body);
+  }
+  cancelRegistration(schoolId: string, id: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/cancel`, {});
+  }
+  payRegistrationFee(schoolId: string, id: string, amount: number, method = 'Cash') {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/fee`, { amount, method });
+  }
+  registrationAcknowledgement(schoolId: string, id: string) {
+    return this.http.get(`${this.base}/schools/${schoolId}/registrations/${id}/acknowledgement`, { responseType: 'text' });
+  }
+  rejectRegistrationDocument(schoolId: string, documentId: string, reason: string) {
+    return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/documents/${documentId}/reject`, { reason });
   }
   confirmRegistration(schoolId: string, id: string) {
     return this.http.post<any>(`${this.base}/schools/${schoolId}/registrations/${id}/confirm`, {});

@@ -354,12 +354,23 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
                 .Where(e => e.AcademicYearId == assignment.AcademicYearId && e.ClassId == assignment.ClassId && e.SectionId == assignment.SectionId && e.EffectiveTo == null)
                 .Select(e => e.StudentId)
                 .FirstAsync();
-            var otherEnrollment = await db.StudentEnrollments
-                .Where(e => e.AcademicYearId == admin.YearId && e.EffectiveTo == null && e.SectionId != assignment.SectionId
-                    && e.Student!.SchoolId == admin.SchoolId && e.Class!.SchoolId == admin.SchoolId)
-                .Select(e => new { e.StudentId, e.ClassId, SectionId = e.SectionId })
-                .FirstAsync();
-            var otherStudent = otherEnrollment.StudentId;
+            var otherClass = new Class { TenantId = admin.TenantId, SchoolId = admin.SchoolId, Name = "Outside " + Guid.NewGuid().ToString("N")[..4] };
+            var otherSection = new Section { TenantId = admin.TenantId, ClassId = otherClass.Id, Name = "Z", Capacity = 20 };
+            var otherStudentEntity = new Student
+            {
+                TenantId = admin.TenantId, SchoolId = admin.SchoolId, StudentCode = "OUT-" + Guid.NewGuid().ToString("N")[..6],
+                FirstName = "Out", LastName = "Side", DateOfBirth = new DateOnly(2014, 2, 2)
+            };
+            db.Classes.Add(otherClass);
+            db.Sections.Add(otherSection);
+            db.Students.Add(otherStudentEntity);
+            db.StudentEnrollments.Add(new StudentEnrollment
+            {
+                TenantId = admin.TenantId, StudentId = otherStudentEntity.Id, AcademicYearId = admin.YearId,
+                ClassId = otherClass.Id, SectionId = otherSection.Id, EffectiveFrom = new DateOnly(2026, 6, 1)
+            });
+            await db.SaveChangesAsync();
+            var otherStudent = otherStudentEntity.Id;
             var marked = await Send(teacher.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/attendance", new
             {
                 academicYearId = assignment.AcademicYearId, classId = assignment.ClassId, sectionId = assignment.SectionId, date,
@@ -369,7 +380,7 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
             sessionId = (await marked.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("sessionId").GetGuid();
             var otherMarked = await Send(admin.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/attendance", new
             {
-                academicYearId = admin.YearId, classId = otherEnrollment.ClassId, sectionId = otherEnrollment.SectionId, date,
+                academicYearId = admin.YearId, classId = otherClass.Id, sectionId = otherSection.Id, date,
                 entries = new[] { new { studentId = otherStudent, code = "Present" } }
             });
             otherMarked.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -451,6 +462,37 @@ public class SecurityRemediationApiTests(SecurityApiFactory factory) : IClassFix
         zeroSalary.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         renamed.StatusCode.Should().Be(HttpStatusCode.OK);
         parentEdit.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task RegistrationFee_UsesTheSavedAmount_AndTeacherCannotOpenTheDesk()
+    {
+        var admin = await Login("admin@school.edu");
+        var teacher = await Login("teacher@school.edu");
+        Guid classId;
+        Guid sectionId;
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            classId = await db.Classes.Where(c => c.SchoolId == admin.SchoolId).Select(c => c.Id).FirstAsync();
+            sectionId = await db.Sections.Where(s => s.ClassId == classId).Select(s => s.Id).FirstAsync();
+        }
+        var denied = await Send(teacher.Token, HttpMethod.Get, $"/api/schools/{admin.SchoolId}/registrations/summary");
+        var created = await Send(admin.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/registrations", new
+        {
+            academicYearId = admin.YearId, firstName = "Walk", lastName = Guid.NewGuid().ToString("N")[..6],
+            dateOfBirth = "2015-04-04", gender = "Female", preferredClassId = classId, preferredSectionId = sectionId,
+            guardianName = "Walk Guardian", guardianPhone = "9123456789", relationship = "Mother", registrationFeeAmount = 800
+        });
+        created.StatusCode.Should().Be(HttpStatusCode.OK);
+        var id = (await created.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        var wrong = await Send(admin.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/registrations/{id}/fee", new { amount = 1, method = "Cash" });
+        var paid = await Send(admin.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/registrations/{id}/fee", new { amount = 800, method = "Cash" });
+        var duplicate = await Send(admin.Token, HttpMethod.Post, $"/api/schools/{admin.SchoolId}/registrations/{id}/fee", new { amount = 800, method = "Cash" });
+        denied.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        wrong.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        paid.StatusCode.Should().Be(HttpStatusCode.OK);
+        duplicate.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     private async Task<SignedIn> OtherTenantAdmin()

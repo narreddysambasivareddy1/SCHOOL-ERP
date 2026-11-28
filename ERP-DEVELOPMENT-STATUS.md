@@ -1,6 +1,38 @@
 # ERP Development Status
 
-Last updated: 23 November 2026, after the six-module gap pass on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
+Last updated: 28 November 2026, after the admissions workspace upgrade on `ui/premium-glassmorphism-v2`. Nothing in this pass was committed or pushed.
+
+## Admissions workspace
+
+The walk-in desk is now one workspace: admissions dashboard, six-step registration, registration management, document verification, fee collection, admission confirmation, and reports. Lists search by registration number, student name, and guardian phone, and filter by year, class, date, fee, documents, and status. Columns sort by number, name, fee, and status. Each registration profile shows the saved fee, document checklist (missing, pending, verified, rejected), reviewer and time, fee history, status timeline, and audit events. The form saves the registration before photographs and documents, then prints the acknowledgement. Collection still uses the saved fee, rejects a non-positive amount, a different amount, and a second payment, and records Cash, UPI, Card, or Bank transfer on the fee audit. Seat confirmation posts that method and amount to the student payment ledger. Class conversion on the dashboard and report is counted from stored registrations. Front office can register, upload, collect, and print. Verify, confirm, cancel, bonafide, and import commit stay limited to school admin, platform super admin, and admission officer.
+
+The Docker portal image was not rebuilt, so http://localhost:8380 still serves the previous frontend until that image is rebuilt. The API container was restarted and is healthy, but its image is older than this working tree: `GET .../registrations` returns an array, `GET .../registrations/summary` returns 404, and cancel returns 404. Sorting, the document checklist, class conversion, and cancel are in this working tree. The screen accepts the older list array until that image is replaced. A browser check on the dev server created `REG-2026-0005` and, because that image cannot cancel, the row was then marked Rejected in the school database. No other rows were changed.
+
+Seat confirmation still requires the saved fee, not a verified document. Bonafide still requires a verified identity or transfer certificate. Bulk import still creates students directly and does not create walk-in registrations. There is still no refresh token.
+
+| Command | Result |
+|---|---|
+| `dotnet test tests/SchoolERP.Tests.Unit/SchoolERP.Tests.Unit.csproj` | Passed 62, failed 0 |
+| `dotnet test tests/SchoolERP.Tests.Integration/SchoolERP.Tests.Integration.csproj --filter RegistrationFee_UsesTheSavedAmount` | Failed before the test body. The fixture could not open Postgres on localhost:8432 (`EndOfStreamException` while authenticating). Not a registration assertion failure |
+| `dotnet build src/SchoolERP.API/SchoolERP.API.csproj -c Release` | Succeeded, 0 warnings, 0 errors |
+| `npm run build` in `frontend` | Succeeded. Existing shell CSS budget warning remains: 17.50 kB against 16.00 kB |
+
+## Admissions desk
+
+Walk-in registration now has a dashboard, multi-step form, filtered list, document review, saved-fee collection, confirmation, and a real summary report. Registration fee collection rejects any amount other than the saved fee and a second payment. Confirming a seat writes that receipt onto the student payment ledger. Document rejection stores the reviewer, time, and note. Year, class, and section must belong to the school. Front office can register and collect; only school admin, platform super admin, and admission officer can verify, confirm, or cancel.
+
+Migration `20261123033310_AddRegistrationDocumentReviewNote` adds nullable `StudentDocuments.ReviewNote`. It is applied when the API starts. It has not been applied to the already running school database.
+
+Seat confirmation still requires the saved fee, not a verified document. Bonafide still requires a verified identity or transfer certificate. Bulk import still creates students directly and does not create walk-in registrations.
+
+| Command | Result |
+|---|---|
+| `dotnet test tests/SchoolERP.Tests.Unit/SchoolERP.Tests.Unit.csproj` | Passed 61, failed 0 |
+| `dotnet test tests/SchoolERP.Tests.Integration/SchoolERP.Tests.Integration.csproj --filter RegistrationFee_UsesTheSavedAmount` | Passed 1, failed 0 |
+| `dotnet build src/SchoolERP.API/SchoolERP.API.csproj -c Release` | Succeeded, 0 warnings, 0 errors |
+| `npm run build` in `frontend` | Succeeded. Existing shell CSS budget warning remains: 17.50 kB against 16.00 kB |
+
+The full integration suite then had one existing attendance test fail because the sampled other section was also assigned to the teacher, so the call returned 400 instead of 403. That query now excludes every section assigned to the teacher.
 
 ## Gap pass
 

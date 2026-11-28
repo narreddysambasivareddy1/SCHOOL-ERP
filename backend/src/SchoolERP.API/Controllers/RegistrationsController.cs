@@ -14,9 +14,35 @@ namespace SchoolERP.API.Controllers;
 [Authorize(Roles = "SchoolAdmin,PlatformSuperAdmin,AdmissionOfficer,FrontOffice")]
 public class RegistrationsController(RegistrationService registrations, AppDbContext db, IWebHostEnvironment env) : ControllerBase
 {
+    [HttpGet("summary")]
+    public async Task<IActionResult> Summary(Guid schoolId, CancellationToken ct)
+        => Ok(await registrations.SummaryAsync(schoolId, Tenant(), ct));
+
     [HttpGet]
-    public async Task<IActionResult> List(Guid schoolId, CancellationToken ct)
-        => Ok(await registrations.ListAsync(schoolId, Tenant(), ct));
+    public async Task<IActionResult> List(Guid schoolId, [FromQuery] string? search, [FromQuery] Guid? academicYearId, [FromQuery] Guid? classId, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] string? feeStatus, [FromQuery] string? documentStatus, [FromQuery] string? status, [FromQuery] string? sort, [FromQuery] bool desc = true, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+        => Ok(await registrations.ListAsync(schoolId, Tenant(), search, academicYearId, classId, from, to, feeStatus, documentStatus, status, sort, desc, page, pageSize, ct));
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> Get(Guid schoolId, Guid id, CancellationToken ct)
+    {
+        try { return Ok(await registrations.GetAsync(schoolId, Tenant(), id, ct)); }
+        catch (InvalidOperationException ex) { return NotFound(new { error = ex.Message }); }
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid schoolId, Guid id, [FromBody] CreateRegistrationRequest body, CancellationToken ct)
+    {
+        try { return Ok(await registrations.UpdateAsync(schoolId, Tenant(), id, body, Actor(), ct)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    [Authorize(Roles = "SchoolAdmin,PlatformSuperAdmin,AdmissionOfficer")]
+    public async Task<IActionResult> Cancel(Guid schoolId, Guid id, CancellationToken ct)
+    {
+        try { return Ok(await registrations.CancelAsync(schoolId, Tenant(), id, Actor(), ct)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(Guid schoolId, [FromBody] CreateRegistrationRequest body, CancellationToken ct)
@@ -46,6 +72,14 @@ public class RegistrationsController(RegistrationService registrations, AppDbCon
     {
         try { return Ok(await registrations.IssueBonafideAsync(schoolId, Tenant(), id, Actor(), ct)); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpGet("{id:guid}/acknowledgement")]
+    public async Task<IActionResult> Acknowledgement(Guid schoolId, Guid id, CancellationToken ct)
+    {
+        var reg = await registrations.Require(schoolId, Tenant(), id, ct);
+        var school = await db.Schools.AsNoTracking().FirstAsync(s => s.Id == schoolId && s.TenantId == Tenant(), ct);
+        return Content(registrations.AcknowledgementHtml(reg, school.Name), "text/html");
     }
 
     [HttpGet("{id:guid}/admission-form")]
@@ -105,10 +139,21 @@ public class RegistrationsController(RegistrationService registrations, AppDbCon
         return PhysicalFile(path, string.IsNullOrWhiteSpace(doc.ContentType) ? "application/octet-stream" : doc.ContentType, doc.FileName);
     }
 
+    public record RejectDocumentRequest(string Reason);
+
     [HttpPost("documents/{documentId:guid}/verify")]
+    [Authorize(Roles = "SchoolAdmin,PlatformSuperAdmin,AdmissionOfficer")]
     public async Task<IActionResult> Verify(Guid schoolId, Guid documentId, CancellationToken ct)
     {
         try { await registrations.VerifyDocumentAsync(schoolId, Tenant(), documentId, Actor(), ct); return Ok(new { verified = true }); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [HttpPost("documents/{documentId:guid}/reject")]
+    [Authorize(Roles = "SchoolAdmin,PlatformSuperAdmin,AdmissionOfficer")]
+    public async Task<IActionResult> RejectDocument(Guid schoolId, Guid documentId, [FromBody] RejectDocumentRequest body, CancellationToken ct)
+    {
+        try { await registrations.RejectDocumentAsync(schoolId, Tenant(), documentId, body.Reason, Actor(), ct); return Ok(new { verified = false, status = "Rejected" }); }
         catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
     }
 

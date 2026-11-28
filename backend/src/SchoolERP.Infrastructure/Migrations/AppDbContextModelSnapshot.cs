@@ -2134,6 +2134,9 @@ namespace SchoolERP.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ReviewNote")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
 

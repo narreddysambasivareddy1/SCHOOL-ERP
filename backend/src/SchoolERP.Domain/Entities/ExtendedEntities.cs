@@ -360,6 +360,7 @@ public class StudentDocument : TenantEntity
     public bool Verified { get; set; }
     public string? VerifiedBy { get; set; }
     public DateTime? VerifiedAt { get; set; }
+    public string? ReviewNote { get; set; }
 }
 
 public class SchoolAcademicSetting : TenantEntity
